@@ -1658,9 +1658,11 @@ mod workspace_session_tests {
         assert!(args.windows(2).any(|a| a == ["-i", key.to_str().unwrap()]));
         assert!(args.iter().any(|a| a == "StrictHostKeyChecking=yes"));
         assert!(args.iter().any(|a| a == "BatchMode=yes"));
-        assert!(args
-            .iter()
-            .any(|a| a == &format!("UserKnownHostsFile=\"{}\"", hosts.display())));
+        assert!(args.iter().any(|a| a
+            == &format!(
+                "UserKnownHostsFile=\"{}\"",
+                hosts.display().to_string().replace('\\', "\\\\")
+            )));
         assert!(args.windows(2).any(|a| a == ["-W", "[2001:db8::1]:6380"]));
         assert_eq!(args.last().unwrap(), "owned@127.0.0.1");
         assert!(!args.iter().any(|a| a == "-N" || a == "-L"));

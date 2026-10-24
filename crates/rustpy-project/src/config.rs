@@ -1337,7 +1337,7 @@ mod tests {
             [
                 "discover",
                 "-s",
-                &s(&root.join("pkg/tests")),
+                &s(&root.join("pkg").join("tests")),
                 "-t",
                 &s(root)
             ]

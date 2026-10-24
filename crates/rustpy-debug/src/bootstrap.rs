@@ -385,7 +385,7 @@ mod tests {
             .read_to_string(&mut output)
             .unwrap();
         assert_eq!(
-            output,
+            output.replace("\r\n", "\n"),
             "cli-once ['--listen', '127.0.0.1:0', '--wait-for-client', 'target.py', 'argument']\n"
         );
     }

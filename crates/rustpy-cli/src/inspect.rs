@@ -1441,7 +1441,12 @@ mod tests {
         assert!(
             output.contains(&format!(
                 "Inspecting {}",
-                shared.path().join("helper.py").display()
+                shared
+                    .path()
+                    .join("helper.py")
+                    .display()
+                    .to_string()
+                    .replace('\\', "/")
             )),
             "{output}"
         );

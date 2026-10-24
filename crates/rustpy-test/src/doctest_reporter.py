@@ -67,7 +67,11 @@ def run_doctest(root, args, emit, import_file):
                 # stdlib owns example evaluation, whitespace/ellipsis flags and shared globals.
                 result = runner.run(test, out=output.write)
                 failed = bool(result.failed)
-                skipped = not result.attempted and all(example.options.get(doctest.SKIP, False) for example in test.examples)
+                skips = getattr(result, 'skipped', None)  # Python 3.13+; later versions count skips in `attempted`
+                if skips is None:
+                    skipped = not result.attempted and all(example.options.get(doctest.SKIP, False) for example in test.examples)
+                else:
+                    skipped = not failed and skips > 0 and skips >= result.attempted
                 outcome = 'failed' if failed else ('skipped' if skipped else 'passed')
                 counts[outcome] += 1
                 emit(event='result', id=node, outcome=outcome, duration=time.perf_counter()-begin,

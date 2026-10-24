@@ -164,7 +164,21 @@ impl Client {
     }
 
     fn request<R: request::Request>(&mut self, params: R::Params) -> R::Result {
-        let result = self.raw_request(R::METHOD, serde_json::to_value(params).unwrap());
+        let params = serde_json::to_value(params).unwrap();
+        // ContentModified asks the client to retry (the workspace changed under the
+        // request, e.g. a late file-watcher report on macOS).
+        let mut attempts = 0;
+        let result = loop {
+            match self.raw_request(R::METHOD, params.clone()) {
+                Err(e)
+                    if e.code == lsp_server::ErrorCode::ContentModified as i32 && attempts < 5 =>
+                {
+                    attempts += 1;
+                    std::thread::sleep(Duration::from_millis(100));
+                }
+                other => break other,
+            }
+        };
         serde_json::from_value(
             result.unwrap_or_else(|e| panic!("{} failed: {}", R::METHOD, e.message)),
         )

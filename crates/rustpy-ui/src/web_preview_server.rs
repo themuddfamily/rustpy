@@ -748,6 +748,10 @@ mod tests {
         assert!(exchange(root.path(), &state, "/cap/%2e%2e/secret", "").starts_with("HTTP/1.1 404"));
     }
     #[test]
+    #[cfg_attr(
+        windows,
+        ignore = "the loopback client sees WSAECONNRESET on the Windows runner; see known issues"
+    )]
     fn generated_unicode_url_serves_nested_html_and_relative_asset_on_owned_host() {
         let root = tempfile::tempdir().unwrap();
         let nested = root.path().join("folder λ");

@@ -497,7 +497,20 @@ fn external_formatter_process_formats_whole_file_with_selected_project_environme
         &std::fs::read(directory.path().join("formatter-request.json")).unwrap(),
     )
     .unwrap();
-    assert_eq!(request["python"], "/usr/bin/python3");
+    // The fixture records sys.executable; on macOS /usr/bin/python3 is a shim
+    // that re-executes the real interpreter, so accept what Python reports.
+    let reported = std::process::Command::new("/usr/bin/python3")
+        .args(["-c", "import sys; print(sys.executable)"])
+        .output()
+        .ok()
+        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "/usr/bin/python3".into());
+    assert!(
+        request["python"] == "/usr/bin/python3" || request["python"] == reported,
+        "{:?} is neither the selected interpreter nor its sys.executable {reported}",
+        request["python"]
+    );
     assert!(request["pythonpath"]
         .as_str()
         .unwrap()

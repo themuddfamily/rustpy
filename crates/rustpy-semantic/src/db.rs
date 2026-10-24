@@ -2952,6 +2952,6 @@ mod candidate_tests {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))] // binds a Unix interpreter and extension fixtures
 #[path = "native_skeleton_connected_tests.rs"]
 mod native_skeleton_connected_tests;
