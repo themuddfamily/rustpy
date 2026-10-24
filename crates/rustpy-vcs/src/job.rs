@@ -109,6 +109,7 @@ fn terminate(child: &mut Child, _owner: &rustpy_core::process_tree::ProcessTree)
     }
     #[cfg(windows)]
     {
+        let _ = &child;
         _owner.request_force();
         true
     }

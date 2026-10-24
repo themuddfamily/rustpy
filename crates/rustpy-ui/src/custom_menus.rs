@@ -242,7 +242,9 @@ impl egui::plugin::Plugin for AppearancePlugin {
 }
 
 pub fn defaults(location: &str) -> Vec<Entry> {
-    let actions = match location {
+    // Only the macOS main menu inserts an extra entry below.
+    #[allow(unused_mut)]
+    let mut actions = match location {
         "main.file" => vec![
             Action::NewProject,
             Action::NewFile,

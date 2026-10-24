@@ -2,8 +2,6 @@
 //! IdeShell, authenticated endpoint, workspace token, document graph and process
 //! owners. The hidden root is transport/render infrastructure, not a participant.
 #[cfg(target_os = "macos")]
-use eframe::App as _;
-#[cfg(target_os = "macos")]
 use rustpy_cli::{
     args::{OpenArgs, OpenTarget},
     ipc::Incoming,

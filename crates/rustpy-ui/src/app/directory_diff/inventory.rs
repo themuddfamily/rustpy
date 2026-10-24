@@ -2,7 +2,7 @@
 //! prevents symlink replacement from redirecting a scan outside its captured roots.
 use std::{
     collections::BTreeMap,
-    fs::{self, File, Metadata, OpenOptions},
+    fs::{self, File, Metadata},
     io::{self, Read},
     path::{Path, PathBuf},
     sync::atomic::{AtomicBool, Ordering},
@@ -122,6 +122,7 @@ impl Budget<'_> {
 }
 #[cfg(target_os = "linux")]
 fn open(path: &Path, directory: bool) -> io::Result<File> {
+    use std::fs::OpenOptions;
     use std::os::unix::fs::OpenOptionsExt;
     OpenOptions::new()
         .read(true)
