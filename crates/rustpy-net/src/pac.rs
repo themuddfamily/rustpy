@@ -715,7 +715,12 @@ mod transport_fixtures {
             let started = Instant::now();
             let mut stream = loop {
                 match listener.accept() {
-                    Ok((stream, _)) => break stream,
+                    Ok((stream, _)) => {
+                        // Accepted sockets inherit the listener's non-blocking mode on
+                        // BSD systems and Windows.
+                        stream.set_nonblocking(false).unwrap();
+                        break stream;
+                    }
                     Err(error)
                         if error.kind() == io::ErrorKind::WouldBlock
                             && started.elapsed() < Duration::from_secs(5) =>
