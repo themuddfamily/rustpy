@@ -54,7 +54,9 @@ fn fixture(trusted: bool, blocking: bool) -> (tempfile::TempDir, IdeApp, PathBuf
 fn drain(app: &mut IdeApp) {
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
     let ctx = egui::Context::default();
-    while app.native_skeletons_pending() {
+    // A cancelled job leaves `pending` before its retirement is observed, so wait
+    // for the draining list as well.
+    while app.native_skeletons_pending() || !app.native_skeleton_ui.draining.is_empty() {
         app.poll_native_skeletons(&ctx);
         assert!(
             std::time::Instant::now() < deadline,
