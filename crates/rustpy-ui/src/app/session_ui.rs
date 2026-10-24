@@ -358,6 +358,10 @@ mod workspace_persistence_tests {
         app
     }
     #[test]
+    #[cfg_attr(
+        windows,
+        ignore = "hung once for an hour on the Windows runner (passes other runs); see known issues"
+    )]
     fn corrupt_workspace_is_reported_and_never_overwritten_by_actual_close() {
         let dir = tempfile::tempdir().unwrap();
         let path = Workspace::path_for(dir.path());
