@@ -1,0 +1,24 @@
+{
+  "name": "Sublime Text",
+  "bindings": {
+    "GotoAction": ["Ctrl+Shift+P"],
+    "GotoFile": ["Ctrl+P"],
+    "FileStructurePopup": ["Ctrl+R"],
+    "Replace": ["Ctrl+H"],
+    "ReplaceInPath": ["Ctrl+Shift+H"],
+    "SelectNextOccurrence": ["Ctrl+D"],
+    "SelectAllOccurrences": ["Alt+F3"],
+    "EditorDuplicate": ["Ctrl+Shift+D"],
+    "EditorDeleteLine": ["Ctrl+Shift+K"],
+    "MoveLineUp": ["Ctrl+Shift+ArrowUp"],
+    "MoveLineDown": ["Ctrl+Shift+ArrowDown"],
+    "MoveStatementUp": ["Ctrl+Alt+Shift+ArrowUp"],
+    "MoveStatementDown": ["Ctrl+Alt+Shift+ArrowDown"],
+    "EditorJoinLines": ["Ctrl+J"],
+    "EditorSelectWord": ["Ctrl+Shift+Space"],
+    "GotoDeclaration": ["F12"],
+    "CloseContent": ["Ctrl+W"],
+    "NextTab": ["Ctrl+PageDown"],
+    "PreviousTab": ["Ctrl+PageUp"]
+  }
+}

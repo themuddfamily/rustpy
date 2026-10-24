@@ -1,0 +1,197 @@
+{
+  "name": "Toy",
+  "scopeName": "source.toy",
+  "fileTypes": ["toy"],
+  "firstLineMatch": "^#!.*\\btoy\\b",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#import" },
+    { "include": "#heredoc" },
+    { "include": "#quote" },
+    { "include": "#embedded" },
+    { "include": "#declarations" },
+    { "include": "#annotation" },
+    { "include": "#brackets" },
+    { "include": "#block" },
+    { "include": "#expression" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.toy",
+          "match": "(//).*$",
+          "captures": { "1": { "name": "punctuation.definition.comment.toy" } }
+        },
+        {
+          "name": "comment.block.toy",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "beginCaptures": { "0": { "name": "punctuation.definition.comment.begin.toy" } },
+          "endCaptures": { "0": { "name": "punctuation.definition.comment.end.toy" } },
+          "patterns": [{ "match": "\\b(?:TODO|FIXME)\\b", "name": "keyword.other.todo.toy" }]
+        }
+      ]
+    },
+    "import": {
+      "match": "^\\s*(import)\\s+([\\w.]+)",
+      "captures": {
+        "1": { "name": "keyword.control.import.toy" },
+        "2": {
+          "name": "meta.path.toy",
+          "patterns": [
+            { "match": "\\w+", "name": "entity.name.namespace.toy" },
+            { "match": "\\.", "name": "punctuation.separator.namespace.toy" }
+          ]
+        }
+      }
+    },
+    "heredoc": {
+      "name": "string.unquoted.heredoc.toy",
+      "begin": "(<<)([A-Z]+)$",
+      "end": "^(\\2)$",
+      "beginCaptures": {
+        "1": { "name": "keyword.operator.heredoc.toy" },
+        "2": { "name": "entity.name.tag.heredoc.toy" }
+      },
+      "endCaptures": { "1": { "name": "entity.name.tag.heredoc.toy" } },
+      "contentName": "string.unquoted.heredoc.body.toy"
+    },
+    "quote": {
+      "name": "markup.quote.toy",
+      "begin": "^(>) ?",
+      "while": "^(>) ?",
+      "beginCaptures": { "1": { "name": "punctuation.definition.quote.toy" } },
+      "whileCaptures": { "1": { "name": "punctuation.definition.quote.toy" } },
+      "patterns": [{ "match": "\\*[^*]+\\*", "name": "markup.bold.toy" }]
+    },
+    "embedded": {
+      "begin": "\\b(rust)\\s*(\\{)",
+      "end": "\\}",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.embedded.toy" },
+        "2": { "name": "punctuation.section.embedded.begin.toy" }
+      },
+      "endCaptures": { "0": { "name": "punctuation.section.embedded.end.toy" } },
+      "contentName": "meta.embedded.block.rust-lite",
+      "patterns": [{ "include": "source.rust-lite" }]
+    },
+    "declarations": {
+      "patterns": [
+        {
+          "match": "\\b(fn)\\s+([A-Za-z_]\\w*)",
+          "captures": {
+            "1": { "name": "storage.type.function.toy" },
+            "2": { "name": "entity.name.function.toy" }
+          }
+        },
+        {
+          "match": "\\b(class)\\s+([A-Z]\\w*)",
+          "captures": {
+            "1": { "name": "storage.type.class.toy" },
+            "2": { "name": "entity.name.type.class.toy" }
+          }
+        },
+        {
+          "name": "meta.decorator.toy",
+          "match": "(@)([A-Za-z_]\\w*)",
+          "captures": { "1": { "name": "punctuation.definition.decorator.toy" } }
+        },
+        {
+          "comment": "A type annotation: only the type right after the colon (\\G).",
+          "name": "meta.type.annotation.toy",
+          "begin": ":(?!:)",
+          "end": "(?=[,)=;{])",
+          "beginCaptures": { "0": { "name": "punctuation.separator.annotation.toy" } },
+          "patterns": [
+            {
+              "match": "\\G\\s*([A-Z]\\w*)",
+              "captures": { "1": { "name": "entity.name.type.toy" } }
+            }
+          ]
+        }
+      ]
+    },
+    "annotation": {
+      "comment": "`]]` inside brackets is an escape: applyEndPatternLast lets it win over `]`.",
+      "name": "meta.brackets.escaped.toy",
+      "begin": "\\[\\[",
+      "end": "\\]",
+      "applyEndPatternLast": 1,
+      "patterns": [{ "match": "\\]\\]", "name": "constant.character.escape.bracket.toy" }]
+    },
+    "brackets": {
+      "name": "meta.brackets.toy",
+      "begin": "\\[",
+      "end": "\\]",
+      "patterns": [
+        { "match": "\\]\\]", "name": "constant.character.escape.bracket.toy" },
+        { "include": "#expression" }
+      ]
+    },
+    "block": {
+      "name": "meta.block.toy",
+      "begin": "\\{",
+      "end": "\\}",
+      "beginCaptures": { "0": { "name": "punctuation.section.block.begin.toy" } },
+      "endCaptures": { "0": { "name": "punctuation.section.block.end.toy" } },
+      "patterns": [{ "include": "$self" }]
+    },
+    "expression": {
+      "patterns": [
+        { "include": "#keywords" },
+        { "include": "#numbers" },
+        { "include": "#strings" },
+        { "include": "source.rust-lite#raw-strings" },
+        { "include": "#operators" },
+        {
+          "match": "\\b([a-z_]\\w*)(?=\\s*\\()",
+          "captures": { "1": { "name": "support.function.call.toy" } }
+        },
+        { "match": "\\b[a-z_]\\w*\\b", "name": "variable.other.toy" }
+      ]
+    },
+    "keywords": {
+      "match": "\\b(if|else|return|let|while)\\b",
+      "name": "keyword.control.$1.toy"
+    },
+    "numbers": {
+      "patterns": [
+        { "match": "\\b0[xX]\\h+\\b", "name": "constant.numeric.hex.toy" },
+        { "match": "\\b\\d+(?:\\.\\d+)?\\b", "name": "constant.numeric.decimal.toy" }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.toy",
+          "begin": "\"",
+          "end": "\"",
+          "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.toy" } },
+          "endCaptures": { "0": { "name": "punctuation.definition.string.end.toy" } },
+          "patterns": [
+            { "match": "\\\\.", "name": "constant.character.escape.toy" },
+            { "include": "#interpolation" }
+          ]
+        },
+        {
+          "name": "string.quoted.single.toy",
+          "match": "'(?:[^'\\\\]|\\\\.)'"
+        }
+      ]
+    },
+    "interpolation": {
+      "name": "meta.interpolation.toy",
+      "begin": "\\$\\{",
+      "end": "\\}",
+      "beginCaptures": { "0": { "name": "punctuation.section.interpolation.begin.toy" } },
+      "endCaptures": { "0": { "name": "punctuation.section.interpolation.end.toy" } },
+      "contentName": "source.toy.embedded",
+      "patterns": [{ "include": "#expression" }]
+    },
+    "operators": {
+      "match": "[-+*/=<>!]=?|&&|\\|\\|",
+      "name": "keyword.operator.toy"
+    }
+  }
+}

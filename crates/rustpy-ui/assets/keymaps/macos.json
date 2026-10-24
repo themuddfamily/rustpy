@@ -1,0 +1,26 @@
+{
+  "name": "macOS",
+  "note": "Cmd and Ctrl share one modifier in RustPy, so Cmd shortcuts are written as Ctrl.",
+  "bindings": {
+    "GotoClass": ["Ctrl+O"],
+    "GotoFile": ["Ctrl+Shift+O"],
+    "GotoSymbol": ["Ctrl+Alt+O"],
+    "GotoLine": ["Ctrl+L"],
+    "EditorDeleteLine": ["Ctrl+Backspace"],
+    "QuickJavaDoc": ["F1"],
+    "ShowSettings": ["Ctrl+Comma"],
+    "SelectNextOccurrence": ["Ctrl+G"],
+    "SelectAllOccurrences": ["Ctrl+Alt+G"],
+    "EditorSelectWord": ["Alt+ArrowUp"],
+    "EditorUnSelectWord": ["Alt+ArrowDown"],
+    "Resume": ["Ctrl+Alt+R"],
+    "CloseContent": ["Ctrl+W"],
+    "NextTab": ["Ctrl+Shift+CloseBracket"],
+    "PreviousTab": ["Ctrl+Shift+OpenBracket"],
+    "Back": ["Ctrl+OpenBracket"],
+    "Forward": ["Ctrl+CloseBracket"],
+    "EditorCodeBlockStart": ["Ctrl+Alt+OpenBracket"],
+    "EditorCodeBlockEnd": ["Ctrl+Alt+CloseBracket"],
+    "ActivateProjectToolWindow": ["Ctrl+Num1"]
+  }
+}

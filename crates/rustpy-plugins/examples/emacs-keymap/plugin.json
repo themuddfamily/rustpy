@@ -1,0 +1,11 @@
+{
+  "id": "com.example.emacs-keymap",
+  "name": "Emacs Keymap",
+  "version": "0.3.1",
+  "description": "Emacs-style shortcuts layered over the Default keymap. Chord sequences such as Ctrl+X Ctrl+S are not supported, so they are approximated by single chords (Alt+W copies, Ctrl+Y pastes, Ctrl+G cancels, Alt+X finds an action).",
+  "vendor": "RustPy Examples",
+  "homepage": "https://example.com/rustpy-plugins/emacs-keymap",
+  "contributes": {
+    "keymaps": ["keymaps/emacs.json"]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "NetBeans",
+  "source": "https://netbeans.apache.org/tutorial/main/kb/docs/java/editor-codereference/",
+  "bindings": {
+    "ReformatCode": [
+      "Alt+Shift+F"
+    ],
+    "GotoClass": [
+      "Ctrl+O"
+    ],
+    "GotoFile": [
+      "Alt+Shift+O"
+    ],
+    "GotoSymbol": [
+      "Ctrl+Alt+Shift+O"
+    ],
+    "CommentByLineComment": [
+      "Ctrl+Slash"
+    ],
+    "Run": [
+      "F6"
+    ],
+    "Debug": [
+      "Ctrl+F5"
+    ]
+  }
+}

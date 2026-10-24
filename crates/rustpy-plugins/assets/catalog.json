@@ -1,0 +1,56 @@
+{
+  "plugins": [
+    {
+      "id": "com.example.solarized-theme",
+      "name": "Solarized Theme",
+      "version": "1.0.0",
+      "description": "The Solarized Dark (Plugin) editor color scheme and a few Python live templates (bp, logger, todo). Source: crates/rustpy-plugins/examples/solarized-theme.",
+      "vendor": "RustPy Examples",
+      "download_url": "https://plugins.example.com/com.example.solarized-theme/1.0.0.rpplugin",
+      "sha256": "ce707efb129760edbe3e2e63a4cbed60907d3ca9aaa87739d373c55be107fd24",
+      "homepage": "https://github.com/altercation/solarized",
+      "tags": ["theme", "color scheme", "live templates"],
+      "min_ide_version": "0.1.0"
+    },
+    {
+      "id": "com.example.emacs-keymap",
+      "name": "Emacs Keymap",
+      "version": "0.3.1",
+      "description": "Emacs-style shortcuts layered over the Default keymap; chord sequences such as Ctrl+X Ctrl+S are approximated by single chords (Alt+W, Ctrl+Y, Ctrl+G, Alt+X). Source: crates/rustpy-plugins/examples/emacs-keymap.",
+      "vendor": "RustPy Examples",
+      "download_url": "https://plugins.example.com/com.example.emacs-keymap/0.3.1.rpplugin",
+      "sha256": "6b30ee118dcce634033a83b8bb55e14213ef4b3e82de979db2a7dae38354d06f",
+      "homepage": "https://example.com/rustpy-plugins/emacs-keymap",
+      "tags": ["keymap", "shortcuts"]
+    },
+    {
+      "id": "com.example.pytest-kit",
+      "file_extensions": ["py"],
+      "name": "Pytest Kit",
+      "version": "2.1.0",
+      "description": "File templates for pytest modules and conftest.py, fixture live templates, and a \"pytest current file\" external tool. Source: crates/rustpy-plugins/examples/pytest-kit.",
+      "vendor": "RustPy Examples",
+      "download_url": "https://plugins.example.com/com.example.pytest-kit/2.1.0.rpplugin",
+      "sha256": "90e1354558e609e4fe0545ee15e05c0dff23a11aab627be6479b63b988c0e3c3",
+      "homepage": "https://example.com/rustpy-plugins/pytest-kit",
+      "tags": ["testing", "pytest", "file templates", "external tools"]
+    },
+    {
+      "id": "org.rustpy.csv-table",
+      "file_extensions": ["csv", "tsv"],
+      "name": "CSV Table",
+      "version": "1.0.0",
+      "description": "Read-only CSV table with source editing fallback. Source: crates/rustpy-plugins/examples/csv-table.",
+      "vendor": "RustPy",
+      "download_url": "https://plugins.example.com/org.rustpy.csv-table/1.0.0.rpplugin",
+      "sha256": "717e12d07e7e4e568bf8b1bb8e2fc7d7f58fb0a3bd2136c12599a8d4e68892dd",
+      "homepage": "https://example.com/rustpy-plugins/csv-table",
+      "tags": [
+        "csv",
+        "table editor",
+        "data"
+      ],
+      "min_ide_version": "0.1.0"
+    }
+  ]
+}

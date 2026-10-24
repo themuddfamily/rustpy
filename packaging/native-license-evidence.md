@@ -1,0 +1,104 @@
+Native distribution evidence
+============================
+
+`collect-native-licenses.py --output EMPTY_DIRECTORY --runtime-root STAGING_ROOT
+--binary ACTUAL_PACKAGED_EXECUTABLE --runtime-manifest JSON`
+exports exact locked native crate archives and their nested license texts. The
+archive checksum must match Cargo.lock. `--cargo-vendor DIRECTORY` instead
+accepts an intact Cargo vendor tree, verifies every file against the original
+checksum-verified .crate archive, and exports those source trees. Original .crate
+archives must remain available in Cargo cache or RUSTPY_NATIVE_CRATE_CACHE
+(recursively searched). Offline Flatpak builds must provision these originals
+when preparing the vendor input. A self-asserted .cargo-checksum.json alone is
+insufficient authentication. Publish the
+result with the binary; retain the complete sources, not only the notices.
+
+`--runtime-manifest JSON` (or RUSTPY_NATIVE_RUNTIME_MANIFEST) is always required.
+It must include `binary_sha256`, verified against `--binary`, and an explicit
+`system_static_components` array. An empty array declares that no native code
+from system/toolchain packages is statically linked; otherwise each component
+requires name, exact version, license_files, source_archives, build_instructions
+and replacement_instructions using the same evidence schema as runtime entries
+(without `files`). Native code already retained from authenticated locked crate
+archives need not be duplicated. Record actual linkage from build/linker evidence;
+do not infer this declaration from an empty directory or absence of DLLs.
+Retain evidence for compiler runtimes statically included in the executable as
+well as statically linked OpenSSL or other system/toolchain libraries. Hash the
+final packaged binary after stripping/signing or other transformations.
+The default --binary-stage packaged records that stage. macOS may explicitly
+use --binary-stage pre-sign when bundling evidence before signing; the retained
+manifest records that the binary hash precedes signing, and the final signed
+artifact requires its separate release checksum. `--binary`
+can point outside STAGING_ROOT, allowing a documentation-only packaging stage.
+The declaration is producer evidence, not automatic detection of static code.
+
+The manifest's `components` array inventories redistributed shared libraries. The script's module documentation
+contains the schema. Library paths are relative to STAGING_ROOT; all evidence
+paths are relative to the JSON. File and source archive SHA256 values bind the
+evidence to the actual artifacts. Include distribution patches and build scripts
+in corresponding source, with exact package version/revision in `version`.
+License files must be the actual package copyright/license files, including all
+applicable exceptions, third-party notices and attribution. The collector
+requires source, build instructions and replacement instructions for every
+component, conservatively including permissive libraries. It rejects any
+uncovered ELF/PE/Mach-O files (including executables and extensionless AppImage
+runtime), and .dll/.so/.dylib paths even when format detection is inconclusive.
+Only the exact primary --binary path and collector output are excluded. When
+staging a copy of the executable, pass the staged copy as --binary. It validates coverage and integrity; a producer still
+must verify that supplied evidence actually corresponds to the shipped library.
+
+For Debian/Ubuntu builds, obtain the library owner with `dpkg-query -S`, retain
+`/usr/share/doc/PACKAGE/copyright`, and obtain the exact source package/version
+reported by `dpkg-query -W -f='${source:Package} ${source:Version}' PACKAGE`
+using `apt-get source --download-only SOURCE=VERSION`. Retain the .dsc, original
+source archives, Debian patch archives and build instructions. A newer upstream
+tarball does not substitute for distribution-patched corresponding source.
+Other distributions need equivalent package-owner and exact-source evidence.
+
+MinGW GCC runtime DLLs and winpthreads are separate components. Preserve the
+actual toolchain package licenses. GCC libstdc++ is GPLv3 with Runtime Library
+Exception 3.1; the exception concerns eligible compilation and does not waive
+all obligations on separately redistributed libraries. winpthreads' upstream
+COPYING includes both the mingw-w64 MIT terms and Lockless BSD-style terms; do
+not label it only as a GCC exception or omit either notice. Toolchain revisions
+can differ; the exact package evidence is authoritative.
+
+Flatpak's unixODBC 2.3.12 must retain its COPYING/LGPL and relevant file headers,
+exact source archive, patches and actual module build instructions. Keep the
+library dynamically replaceable and provide concrete instructions for exporting
+an installed app, rebuilding the library with the recorded options, replacing
+/app/lib/libodbc.so*, and running the replacement (including any sandbox override
+needed). Permit reverse engineering for debugging modifications to the LGPL
+library. Do not prohibit that activity through an installer or EULA. LGPL source
+and replacement requirements apply even when the main application is permissive.
+
+GTK/WebKitGTK and their transitive AppImage libraries are not cleared by a Rust
+wrapper crate's license. Collect each actually copied library's package-specific
+license and matching complete corresponding source/build material. Preserve a
+usable replacement mechanism and instructions for LGPL components, for example
+extracting the AppImage, rebuilding a library and replacing it before AppRun.
+Do not bundle those libraries until their evidence passes the gate. System
+libraries required from the host but not copied are outside this runtime bundle
+inventory; do not represent their absence as license clearance of a static copy.
+
+OpenSSL linked from a system/toolchain package also needs package-specific
+notice evidence when its code is redistributed, including when statically
+linked. OpenSSL 1.x and 3.x have different terms. The native crate collector
+retains openssl-src only when present in Cargo.lock; it does not manufacture
+OpenSSL provenance from openssl-sys's wrapper license. A static library producer
+must supply exact source/license/build evidence for system-sourced native
+code through system_static_components; the distribution gate refuses to proceed
+without the explicit binary-bound declaration.
+
+Primary terms consulted:
+https://github.com/libgit2/libgit2/blob/main/COPYING
+https://gcc.gnu.org/onlinedocs/libstdc++/manual/license.html
+https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/COPYING
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+https://www.unixodbc.org/unixODBC.html
+
+The retained libgit2 COPYING is from the locked 1.9.7 upstream payload, including
+its GPLv2 linking exception. Do not substitute upstream main for exact release
+terms. Sources exported from .crate archives retain embedded component source
+and notices (including zlib, llhttp and WinHTTP compatibility sources). SQLite's
+public-domain dedication is retained from the bundled amalgamation header.

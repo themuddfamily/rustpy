@@ -1,0 +1,80 @@
+# Snap of RustPy (https://snapcraft.io/docs), built by packaging/linux/build-snap.sh: it stages
+# a copy of the repository with this file as snap/snapcraft.yaml and runs snapcraft there,
+# so `source: .` below is the repository root.
+#
+# Classic confinement: the IDE runs the Python interpreters, virtual environments, Git,
+# shells and other tools installed on the computer and edits projects anywhere, which a
+# strictly confined snap cannot do. Classic snaps need a manual review before the Snap
+# Store publishes them; locally, install with `sudo snap install --classic --dangerous`.
+#
+# Like the .deb, the binary uses the host's C library and graphics stack (no ELF patching),
+# so it runs on systems at least as new as the core22 build base (glibc 2.35, Ubuntu 22.04).
+name: rustpy
+title: RustPy
+summary: Python IDE written in Rust
+description: |
+  RustPy is a full-featured Python IDE written from scratch in Rust: an editor with
+  Python code insight (completion, navigation, inspections, refactorings), run, debug and
+  test tool windows, Git integration, a terminal, a Python Console and Jupyter notebooks.
+  It uses the Python interpreters and tools installed on your computer.
+adopt-info: rustpy
+base: core24
+confinement: classic
+license: Apache-2.0
+icon: packaging/linux/rustpy.svg
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  rustpy:
+    command: bin/rustpy
+    desktop: usr/share/applications/rustpy.desktop
+    common-id: dev.rustpy.RustPy
+
+parts:
+  rustpy:
+    plugin: rust
+    source: .
+    rust-path: [crates/rustpy]
+    build-packages:
+      - pkg-config
+      - zlib1g-dev
+      - unixodbc-dev
+      - libgtk-3-dev
+      - libwebkit2gtk-4.1-dev
+      - libxkbcommon-dev
+      - libwayland-dev
+    # The database backend always links libodbc.so.2; development files alone
+    # do not provide an installed application's runtime dependency.
+    stage-packages:
+      - libodbc2
+    override-pull: |
+      craftctl default
+      version="$(awk -F'"' '/^\[/ { s = $0 } s == "[workspace.package]" && $1 ~ /^version *= *$/ { print $2; exit }' Cargo.toml)"
+      craftctl set version="$version"
+      case "$version" in
+        *-*) craftctl set grade=devel ;;
+        *) craftctl set grade=stable ;;
+      esac
+    override-build: |
+      python3 packaging/update-notices.py --check
+      cargo build --locked --release -p rustpy --features native-web-preview
+      install -Dm755 target/release/rustpy "$CRAFT_PART_INSTALL/bin/rustpy"
+      install -Dm644 THIRD-PARTY-NOTICES.txt "$CRAFT_PART_INSTALL/usr/share/doc/rustpy/THIRD-PARTY-NOTICES.txt"
+      install -Dm644 LICENSE "$CRAFT_PART_INSTALL/usr/share/doc/rustpy/LICENSE"
+      strip --strip-debug "$CRAFT_PART_INSTALL/bin/rustpy"
+      install -Dm644 packaging/linux/rustpy.desktop "$CRAFT_PART_INSTALL/usr/share/applications/rustpy.desktop"
+      install -Dm644 packaging/linux/rustpy.svg "$CRAFT_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/rustpy.svg"
+      install -Dm644 packaging/linux/dev.rustpy.RustPy.metainfo.xml "$CRAFT_PART_INSTALL/usr/share/metainfo/dev.rustpy.RustPy.metainfo.xml"
+    override-prime: |
+      craftctl default
+      cd "$CRAFT_PART_SRC"
+      python3 packaging/stage-native-licenses.py --binary "$CRAFT_PRIME/bin/rustpy" --runtime-root "$CRAFT_PRIME" --output "$CRAFT_PRIME/usr/share/doc/rustpy/Native-Licenses.zip"
+
+lint:
+  ignore:
+    # Deliberately unpatched: the IDE loads the host's X11/Wayland, xkbcommon and GL
+    # libraries, which must match the host's C library.
+    - classic
+    - library

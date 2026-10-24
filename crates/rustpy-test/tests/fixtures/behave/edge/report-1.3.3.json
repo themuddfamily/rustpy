@@ -1,0 +1,109 @@
+[
+{
+  "elements": [
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:3",
+      "name": "Hook explodes",
+      "status": "hook_error",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/edge.feature:4",
+          "name": "a step",
+          "step_type": "given"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:6",
+      "name": "Pending step",
+      "status": "error",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/edge.feature:7",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/edge_steps.py:15"
+          },
+          "name": "a pending step",
+          "result": {
+            "duration": 6.0558319091796875e-05,
+            "status": "pending"
+          },
+          "step_type": "given"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:9",
+      "name": "Noisy failure",
+      "status": "failed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/edge.feature:10",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/edge_steps.py:20"
+          },
+          "name": "a noisy failing step",
+          "result": {
+            "duration": 0.00011968612670898438,
+            "error_message": "ASSERT FAILED: noisy failed",
+            "status": "failed"
+          },
+          "step_type": "given"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:12",
+      "name": "Empty scenario",
+      "status": "passed",
+      "steps": [],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:14",
+      "name": "Fine",
+      "status": "passed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/edge.feature:15",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/edge_steps.py:10"
+          },
+          "name": "a step",
+          "result": {
+            "duration": 3.075599670410156e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    }
+  ],
+  "keyword": "Feature",
+  "location": "features/edge.feature:1",
+  "name": "Edge cases",
+  "status": "error",
+  "tags": []
+}
+]

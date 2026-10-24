@@ -1,0 +1,29 @@
+[package]
+name = "rustpy-secrets"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: password safe — OS keyring (Secret Service, Windows Credential Manager, macOS Keychain), AES-256-GCM encrypted file with master password or key file, memory-only mode"
+
+[dependencies]
+rustpy-settings.workspace = true
+log.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+ring = "0.17"
+base64 = "0.22"
+
+[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
+# Already in the tree (accesskit); `blocking-api` only adds zbus' blocking wrappers.
+zbus = { version = "5", default-features = false, features = ["async-io", "blocking-api"] }
+
+[target.'cfg(unix)'.dependencies]
+# flock() for the password database lock (std's File::lock needs Rust 1.89).
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security_Credentials", "Win32_Storage_FileSystem", "Win32_System_IO"] }
+
+[dev-dependencies]
+tempfile.workspace = true

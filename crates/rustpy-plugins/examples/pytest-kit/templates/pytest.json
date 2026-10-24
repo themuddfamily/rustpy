@@ -1,0 +1,24 @@
+[
+  {
+    "abbreviation": "fixture",
+    "description": "pytest fixture",
+    "template": "@pytest.fixture\ndef $NAME$():\n    $END$",
+    "contexts": ["Statement", "Module"],
+    "group": "Pytest"
+  },
+  {
+    "abbreviation": "param",
+    "description": "@pytest.mark.parametrize decorator",
+    "template": "@pytest.mark.parametrize(\"$ARGS$\", [$END$])",
+    "contexts": ["Statement", "Module", "ClassBody"],
+    "group": "Pytest"
+  },
+  {
+    "abbreviation": "raises",
+    "description": "with pytest.raises(...)",
+    "template": "with pytest.raises($EXCEPTION$):\n    $END$",
+    "contexts": ["Statement"],
+    "group": "Pytest",
+    "variables": [{ "name": "EXCEPTION", "expression": "", "default": "ValueError", "always_stop_at": true }]
+  }
+]

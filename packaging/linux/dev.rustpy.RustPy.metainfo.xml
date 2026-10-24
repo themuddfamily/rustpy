@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AppStream metadata (https://www.freedesktop.org/software/appstream/docs/) for software
+     centers, Flatpak and AppImage stores. Installed as
+     /usr/share/metainfo/dev.rustpy.RustPy.metainfo.xml by the .deb, the .rpm and the AppImage;
+     the Flatpak build renames the desktop entry it launches to dev.rustpy.RustPy.desktop.
+     Check it with appstreamcli (validate, no network: see packaging/README.md).
+     Add a release entry for every release (packaging/README.md, release checklist). -->
+<component type="desktop-application">
+  <id>dev.rustpy.RustPy</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Apache-2.0</project_license>
+
+  <name>RustPy</name>
+  <summary>Python IDE written in Rust</summary>
+  <developer id="dev.rustpy">
+    <name>RustPy contributors</name>
+  </developer>
+
+  <description>
+    <p>
+      RustPy is a full-featured Python IDE written from scratch in Rust. It opens
+      large projects quickly and keeps typing responsive while it analyses your code.
+    </p>
+    <ul>
+      <li>Editor with multiple carets, folding, live templates, Markdown preview and local history</li>
+      <li>Code insight: completion, quick documentation, inspections with quick fixes and intentions</li>
+      <li>Navigation and refactoring: Search Everywhere, find usages, rename, extract, inline, move</li>
+      <li>Run, debug and test: run configurations, a debugpy-based debugger, pytest and unittest, coverage and a profiler</li>
+      <li>Python Console, terminal, Git integration, package management and Jupyter notebooks</li>
+    </ul>
+    <p>
+      RustPy uses the Python interpreters, virtual environments and tools installed on your
+      computer.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">rustpy.desktop</launchable>
+  <icon type="stock">rustpy</icon>
+
+  <url type="homepage">https://github.com/themuddfamily/rustpy</url>
+  <url type="bugtracker">https://github.com/themuddfamily/rustpy/issues</url>
+  <url type="vcs-browser">https://github.com/themuddfamily/rustpy</url>
+
+  <categories>
+    <category>Development</category>
+    <category>IDE</category>
+  </categories>
+  <keywords>
+    <keyword>Python</keyword>
+    <keyword>IDE</keyword>
+    <keyword>Debugger</keyword>
+    <keyword>Jupyter</keyword>
+  </keywords>
+
+  <provides>
+    <binary>rustpy</binary>
+    <mediatype>text/x-python</mediatype>
+    <mediatype>text/x-python3</mediatype>
+    <mediatype>application/x-ipynb+json</mediatype>
+  </provides>
+
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Editing Python code</caption>
+      <image>https://raw.githubusercontent.com/themuddfamily/rustpy/main/docs/images/editor.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Debugging with breakpoints, frames and variables</caption>
+      <image>https://raw.githubusercontent.com/themuddfamily/rustpy/main/docs/images/debugger.png</image>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.1.0" date="2026-10-10" type="development">
+      <url type="details">https://github.com/themuddfamily/rustpy/releases</url>
+    </release>
+  </releases>
+</component>

@@ -1,0 +1,95 @@
+# Flatpak manifest for RustPy (https://docs.flatpak.org/en/latest/manifests.html).
+#
+# Build and install it for the current user from the repository root with
+#   packaging/linux/flatpak/build-flatpak.sh
+# which first writes cargo-sources.json next to this file (see below) and then runs
+#   flatpak-builder --user --install --force-clean --install-deps-from=flathub \
+#       target/flatpak/build-dir packaging/linux/flatpak/dev.rustpy.RustPy.yml
+#
+# Offline Cargo build: flatpak-builder downloads every source listed here before the build
+# starts and builds without network access. cargo-sources.json lists every crate of
+# Cargo.lock (an archive with its sha256, unpacked into cargo/vendor) plus a cargo/config
+# that replaces crates.io with that vendor directory; with CARGO_HOME pointing at
+# /run/build/rustpy/cargo, `cargo --offline` finds everything there. Generate it after every
+# Cargo.lock change with flatpak-cargo-generator.py from flatpak-builder-tools:
+#   python3 flatpak-cargo-generator.py Cargo.lock -o packaging/linux/flatpak/cargo-sources.json
+# (build-flatpak.sh --sources-only does this). The file is not committed.
+#
+# Sandbox: the IDE edits projects anywhere (--filesystem=host) and talks to the network
+# (update check, PyPI, AI Assistant, Git remotes). Python, Git and the terminal shell come
+# from the Flatpak runtime; to run the host's interpreters and tools, point RustPy at a
+# wrapper that calls `flatpak-spawn --host` (allowed by --talk-name=org.freedesktop.Flatpak).
+# For a Flathub submission, replace the `dir` source with a `git` source (url + tag + commit).
+id: dev.rustpy.RustPy
+runtime: org.gnome.Platform
+runtime-version: '49'
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+command: rustpy
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  - --filesystem=host
+  - --talk-name=org.freedesktop.Flatpak
+build-options:
+  append-path: /usr/lib/sdk/rust-stable/bin
+  env:
+    CARGO_HOME: /run/build/rustpy/cargo
+    CARGO_NET_OFFLINE: 'true'
+    CARGO_TERM_COLOR: never
+modules:
+  # The mandatory database backend links unixODBC (libodbc.so.2), which neither the GNOME
+  # runtime nor the SDK provides. Its configuration lives in /app/etc (odbcinst.ini,
+  # odbc.ini); the host's /etc/odbcinst.ini and drivers are not visible in the sandbox.
+  - name: unixodbc
+    config-opts:
+      - --disable-static
+      - --enable-gui=no
+    cleanup:
+      - /bin
+      - /include
+      - /lib/pkgconfig
+      - /share
+      - '*.la'
+    sources:
+      - type: archive
+        url: https://www.unixodbc.org/unixODBC-2.3.12.tar.gz
+        sha256: f210501445ce21bf607ba51ef8c125e10e22dffdffec377646462df5f01915ec
+  - name: rustpy
+    buildsystem: simple
+    build-options:
+      env:
+        # odbc-sys links -lodbc: the unixODBC module above installs it into /app/lib.
+        RUSTFLAGS: -L native=/app/lib
+    build-commands:
+      - python3 packaging/update-notices.py --check
+      - cargo --offline fetch --manifest-path Cargo.toml --locked
+      - cargo --offline build --release --locked -p rustpy --features native-web-preview
+      # flatpak-builder strips the binary and moves its debug info to the .Debug extension.
+      - install -Dm755 target/release/rustpy /app/bin/rustpy
+      - install -Dm644 THIRD-PARTY-NOTICES.txt /app/share/doc/rustpy/THIRD-PARTY-NOTICES.txt
+      - install -Dm644 LICENSE /app/share/doc/rustpy/LICENSE
+      - python3 packaging/stage-native-licenses.py --binary /app/bin/rustpy --runtime-root /app --output /app/share/doc/rustpy/Native-Licenses.zip
+      # Exported files must carry the application id in their names.
+      - install -Dm644 packaging/linux/rustpy.desktop /app/share/applications/dev.rustpy.RustPy.desktop
+      - desktop-file-edit --set-icon=dev.rustpy.RustPy /app/share/applications/dev.rustpy.RustPy.desktop
+      - install -Dm644 packaging/linux/rustpy.svg /app/share/icons/hicolor/scalable/apps/dev.rustpy.RustPy.svg
+      - install -Dm644 packaging/linux/rustpy-mime.xml /app/share/mime/packages/dev.rustpy.RustPy.xml
+      - install -Dm644 packaging/linux/dev.rustpy.RustPy.metainfo.xml /app/share/metainfo/dev.rustpy.RustPy.metainfo.xml
+      - >-
+        sed -i
+        -e 's|<launchable type="desktop-id">rustpy.desktop</launchable>|<launchable type="desktop-id">dev.rustpy.RustPy.desktop</launchable>|'
+        -e 's|<icon type="stock">rustpy</icon>|<icon type="stock">dev.rustpy.RustPy</icon>|'
+        /app/share/metainfo/dev.rustpy.RustPy.metainfo.xml
+    sources:
+      - type: dir
+        path: ../../..
+        skip:
+          - target
+          - .git
+          - .flatpak-builder
+      - cargo-sources.json

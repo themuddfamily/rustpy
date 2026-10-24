@@ -1,0 +1,15 @@
+# Retained upstream grants are byte-for-byte evidence. Preserve upstream line
+# endings and whitespace instead of rewriting legal texts during checkout.
+**/LICENSE* -text -whitespace
+**/NOTICE* -text -whitespace
+packaging/cargo-license-overrides/** -text -whitespace
+THIRD-PARTY-NOTICES.txt -text -whitespace
+packaging/CARGO-THIRD-PARTY-NOTICES.txt -text -whitespace
+
+# Hash inputs must be identical on Unix and Windows release hosts.
+Cargo.lock text eol=lf
+qa/Cargo.lock text eol=lf
+qa/fuzz/Cargo.lock text eol=lf
+scripts/generate-cargo-notices.py text eol=lf
+packaging/cargo-license-overrides.json text eol=lf
+packaging/cargo-license-manifest.json text eol=lf

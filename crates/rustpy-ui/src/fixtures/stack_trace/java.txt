@@ -1,0 +1,11 @@
+"worker-1" #21 prio=5 os_prio=0 tid=0x00001 nid=0x001 waiting for monitor entry
+   java.lang.Thread.State: BLOCKED (on object monitor)
+        at app.module/com.example.Worker.run(Worker.java:42)
+        at java.base/java.lang.Thread.sleep(Native Method)
+
+"main" #1 prio=5 os_prio=0 tid=0x00002 nid=0x002 runnable
+   java.lang.Thread.State: RUNNABLE
+        at com.example.Main.main(Main.java:12)
+Caused by: java.lang.IllegalStateException: broken
+        at com.example.Helper.call(Helper.java:19)
+        ... 2 more

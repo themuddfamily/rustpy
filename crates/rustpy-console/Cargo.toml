@@ -1,0 +1,20 @@
+[package]
+name = "rustpy-console"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: Python Console backend (interactive helper process speaking a JSON-lines protocol)"
+
+[dependencies]
+rustpy-core.workspace = true
+anyhow.workspace = true
+log.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+crossbeam-channel.workspace = true
+rustpy-debug = { path = "../rustpy-debug", version = "0.1.0" }
+
+[dev-dependencies]
+which.workspace = true
+tempfile.workspace = true

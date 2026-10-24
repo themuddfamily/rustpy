@@ -1,0 +1,12 @@
+# UNEXECUTED. Driver supplies the same bounded sequence with repeated requests.
+wait 3
+key End ctrl
+key Home
+key End
+key Space ctrl
+wait 0.2
+key Escape
+type value
+key Space ctrl
+wait 0.2
+key Escape

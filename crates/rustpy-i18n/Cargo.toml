@@ -1,0 +1,20 @@
+[package]
+name = "rustpy-i18n"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: UI localization (embedded JSON catalogs for zh-CN, ja, ko, de, fr, es, pt-BR, ru), CLDR plural rules, system locale detection and CJK fallback font discovery"
+
+[dependencies]
+chrono.workspace = true
+unicode-normalization = "0.1"
+dirs.workspace = true
+log.workspace = true
+rustc-hash.workspace = true
+serde_json.workspace = true
+walkdir.workspace = true
+
+[dev-dependencies]
+serde.workspace = true
+tempfile.workspace = true

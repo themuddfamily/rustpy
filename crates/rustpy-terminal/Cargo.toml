@@ -1,0 +1,15 @@
+[package]
+name = "rustpy-terminal"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: embedded terminal (PTY + VT emulation)"
+
+[dependencies]
+rustpy-run.workspace = true
+portable-pty.workspace = true
+vt100.workspace = true
+anyhow.workspace = true
+log.workspace = true
+parking_lot.workspace = true

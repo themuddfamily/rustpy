@@ -1,0 +1,25 @@
+[package]
+name = "rustpy-notebook"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: Jupyter notebook support (.ipynb model, .py conversion, cell execution through the console backend)"
+
+[dependencies]
+rustpy-core.workspace = true
+rustpy-console.workspace = true
+crossbeam-channel.workspace = true
+libc.workspace = true
+url.workspace = true
+pulldown-cmark = { workspace = true, features = ["html"] }
+anyhow.workspace = true
+log.workspace = true
+serde.workspace = true
+# Exact float parsing: notebooks must not change numbers on a load/save cycle.
+serde_json = { workspace = true, features = ["float_roundtrip"] }
+
+[dev-dependencies]
+rustpy-debug.workspace = true
+which.workspace = true
+tempfile.workspace = true

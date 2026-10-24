@@ -1,0 +1,114 @@
+[package]
+name = "rustpy-ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: ui"
+
+[features]
+# Genuine embedded WebView: WebView2 / WKWebView / WebKitGTK (X11 child hosting).
+native-web-preview = ["dep:wry", "dep:gtk"]
+
+[dependencies]
+wry = { version = "0.57", optional = true }
+flate2 = "1"
+roxmltree = "=0.20.0"
+tempfile.workspace = true
+rustpy-project.workspace = true
+rustpy-lsp.workspace = true
+rustpy-core.workspace = true
+rustpy-text.workspace = true
+rustpy-syntax.workspace = true
+rustpy-highlight.workspace = true
+rustpy-settings.workspace = true
+rustpy-semantic.workspace = true
+rustpy-analysis.workspace = true
+rustpy-refactor.workspace = true
+rustpy-run.workspace = true
+rustpy-terminal.workspace = true
+rustpy-vcs.workspace = true
+rustpy-search.workspace = true
+rustpy-debug.workspace = true
+rustpy-templates.workspace = true
+rustpy-test.workspace = true
+rustpy-format.workspace = true
+rustpy-packages.workspace = true
+rustpy-updates.workspace = true
+rustpy-http.workspace = true
+rustpy-db.workspace = true
+rustpy-regex.workspace = true
+url.workspace = true
+rustpy-grammar.workspace = true
+rustpy-docker.workspace = true
+rustpy-ai.workspace = true
+rustpy-emmet.workspace = true
+rustpy-notebook.workspace = true
+rustpy-deploy.workspace = true
+rustpy-gherkin.workspace = true
+rustpy-spell.workspace = true
+rustpy-i18n.workspace = true
+rustpy-textmate.workspace = true
+rustpy-index.workspace = true
+rustpy-net.workspace = true
+rustpy-secrets.workspace = true
+rustpy-cli.workspace = true
+base64 = "0.22"
+blake3 = "1"
+arboard = { version = "3", default-features = false }
+rustpy-console.workspace = true
+rustpy-plugins.workspace = true
+dirs.workspace = true
+chrono.workspace = true
+unicode-segmentation.workspace = true
+unicode-bidi = "0.3.18"
+unicode-bidi-mirroring = "0.4"
+arabic_reshaper = "0.4.2"
+unicode-normalization = "0.1"
+pulldown-cmark = { workspace = true, features = ["html"] }
+similar.workspace = true
+regex.workspace = true
+egui.workspace = true
+eframe.workspace = true
+raw-window-handle = "0.6"
+anyhow.workspace = true
+log.workspace = true
+# Large font files are mapped rather than read (src/fonts.rs); already in the tree.
+memmap2 = "0.9"
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+toml.workspace = true
+ureq = { version = "2", default-features = false, features = ["tls", "gzip"] }
+parking_lot.workspace = true
+crossbeam-channel.workspace = true
+getrandom.workspace = true
+rustc-hash.workspace = true
+ignore.workspace = true
+notify.workspace = true
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "bmp", "webp", "ico"] }
+# Installed fonts (Settings › Editor › Font, fallbacks for CJK and other scripts).
+fontdb = "0.24"
+resvg = { version = "0.48.1", default-features = false, features = ["text", "raster-images"] }
+# Validates a system CJK font with the parser egui uses (egui panics on fonts it cannot read).
+skrifa = { version = "0.44", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+which.workspace = true
+
+# The Windows Chromium launch diagnostic (examples/windows_chromium_diagnostic.rs).
+[target.'cfg(windows)'.dev-dependencies]
+windows-sys = { version = "0.61", features = ["Wdk_System_Threading", "Win32_Foundation", "Win32_Security", "Win32_System_Diagnostics_ToolHelp", "Win32_System_JobObjects", "Win32_System_Threading"] }
+
+# Finder "open documents" events (src/macos_open.rs).
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2.workspace = true
+objc2-foundation.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+libc.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Desktop notifications (src/system_notifications.rs); zbus is already in the tree.
+zbus = { version = "5", default-features = false, features = ["async-io", "blocking-api"] }
+gtk = { version = "0.18", optional = true }

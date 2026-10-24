@@ -1,0 +1,19 @@
+[package]
+name = "rustpy-text"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: text"
+
+[dependencies]
+rustpy-core.workspace = true
+ropey.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+memchr.workspace = true
+unicode-width.workspace = true
+unicode-segmentation.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true

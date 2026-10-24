@@ -1,0 +1,25 @@
+[package]
+name = "rustpy-debug"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: Debug Adapter Protocol client for debugpy"
+
+[dependencies]
+rustpy-project.workspace = true
+rustpy-core.workspace = true
+rustpy-settings.workspace = true
+rustpy-run.workspace = true
+rustpy-text.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+crossbeam-channel.workspace = true
+log.workspace = true
+anyhow.workspace = true
+getrandom.workspace = true
+roxmltree = "0.21.1"
+
+[dev-dependencies]
+tempfile.workspace = true
+which.workspace = true

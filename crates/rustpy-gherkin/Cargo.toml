@@ -1,0 +1,15 @@
+[package]
+name = "rustpy-gherkin"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: Gherkin (.feature) highlighting, parsing, behave / pytest-bdd step definitions, matching and stubs"
+
+[dependencies]
+rustpy-syntax.workspace = true
+regex.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true

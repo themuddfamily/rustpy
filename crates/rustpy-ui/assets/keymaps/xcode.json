@@ -1,0 +1,24 @@
+{
+  "name": "Xcode",
+  "source": "https://developer.apple.com/library/archive/documentation/IDEs/Conceptual/xcode_help-command_shortcuts/MenuCommands/MenuCommands014.html",
+  "bindings": {
+    "GotoFile": [
+      "Ctrl+Shift+O"
+    ],
+    "Run": [
+      "Ctrl+R"
+    ],
+    "FindInPath": [
+      "Ctrl+Shift+F"
+    ],
+    "CommentByLineComment": [
+      "Ctrl+Slash"
+    ],
+    "$Undo": [
+      "Ctrl+Z"
+    ],
+    "$Redo": [
+      "Ctrl+Shift+Z"
+    ]
+  }
+}

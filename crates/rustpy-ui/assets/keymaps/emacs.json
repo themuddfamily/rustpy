@@ -1,0 +1,64 @@
+{
+  "name": "Emacs",
+  "source": "https://www.gnu.org/software/emacs/manual/html_node/emacs/Basic-Files.html",
+  "bindings": {
+    "EditorLeft": [
+      "ArrowLeft",
+      "Control+B"
+    ],
+    "EditorRight": [
+      "ArrowRight",
+      "Control+F"
+    ],
+    "EditorUp": [
+      "ArrowUp",
+      "Control+P"
+    ],
+    "EditorDown": [
+      "ArrowDown",
+      "Control+N"
+    ],
+    "EditorLineStart": [
+      "Home",
+      "Control+A"
+    ],
+    "EditorLineEnd": [
+      "End",
+      "Control+E"
+    ],
+    "OpenFile": [
+      "Control+X, Control+F"
+    ],
+    "EditorEmacsKillLine": [
+      "Control+K"
+    ],
+    "EditorEmacsKillRegion": [
+      "Control+W"
+    ],
+    "EditorEmacsCopyRegion": [
+      "Alt+W"
+    ],
+    "EditorEmacsYank": [
+      "Control+Y"
+    ],
+    "EditorEmacsYankPop": [
+      "Alt+Y"
+    ],
+    "EditorEmacsTranspose": [
+      "Control+T"
+    ],
+    "Find": [
+      "Control+S"
+    ],
+    "FindPrevious": [
+      "Shift+F3",
+      "Control+R"
+    ],
+    "SaveDocument": [
+      "Control+X, Control+S"
+    ],
+    "Exit": [
+      "Control+X, Control+C"
+    ]
+  }
+}

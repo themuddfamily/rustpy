@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- RustPy logo: a snake-like S in a rounded square; the source of every icon format
+       (.ico, .icns, PNG). Filled shapes in solid colours only (no strokes, gradients or
+       filters), so every renderer draws it the same way: rsvg, resvg, Inkscape, browsers,
+       Quick Look and ImageMagick's built-in MSVG renderer. -->
+  <!-- Keep this comment inside <svg>: appstreamcli compose sniffs the first bytes and
+       rejects an SVG whose root element comes after a long comment. -->
+  <title>RustPy</title>
+  <!-- rounded square: a rust-orange rim around a dark tile -->
+  <rect x="8" y="8" width="240" height="240" rx="56" ry="56" fill="#e9763a"/>
+  <rect x="16" y="16" width="224" height="224" rx="48" ry="48" fill="#20263a"/>
+  <!-- body: a 30 px band along two arcs (radius 42, centres 128,86 and 128,170) ending in a tapered tail -->
+  <path fill="#ffcc33" d="M 174.69 53.31 A 57 57 0 1 0 128 143 A 27 27 0 1 1 105.88 185.49 L 76.39 169.52 L 81.31 202.69 A 57 57 0 1 0 128 113 A 27 27 0 1 1 150.12 70.51 Z"/>
+  <!-- head and eye -->
+  <circle cx="165.85" cy="66.82" r="20" fill="#ffcc33"/>
+  <circle cx="176.66" cy="66.58" r="4.5" fill="#20263a"/>
+  <!-- forked tongue -->
+  <path fill="#f0504f" d="M 174.7 82.6 L 182.84 94.23 L 185.79 92.17 L 177.64 80.54 Z M 183.01 93.91 L 191.47 96.99 L 192.7 93.61 L 184.24 90.53 Z M 181.83 92.22 L 181.83 101.22 L 185.43 101.22 L 185.43 92.22 Z"/>
+</svg>

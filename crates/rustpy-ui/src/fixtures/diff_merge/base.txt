@@ -1,0 +1,5 @@
+header
+left edit
+middle
+right edit
+footer

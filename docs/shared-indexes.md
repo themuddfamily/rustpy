@@ -1,0 +1,7 @@
+# Prebuilt shared indexes
+
+Settings → Tools → Shared Indexes imports local `.rpidx` bundles or downloads them from a publisher's HTTPS URL. Enter that exact release's SHA-256 before choosing Download and install verified bundle. Downloads use the configured HTTP proxy and certificate trust, follow at most five HTTPS redirects, and enforce the chosen size limit. Cancel is available in Settings and the global Stop picker; Quit retains ownership until the task result is accepted or discarded.
+
+The download worker checks SHA-256, the current binary format/schema and nonempty shared-bundle metadata before staging a replacement. The IDE publishes the completed result only while it still owns that uncancelled job. Failed or cancelled downloads preserve installed cache data. The library refresh and all ordinary search/navigation/import consumers reuse the same bundle cache. Reuse requires matching local source content; an incompatible or changed file is parsed normally.
+
+To publish standard-library or package indexes, export an indexed interpreter from the same Settings page. Select Include site-packages when publishing the installed popular packages as well; editable/private project sources outside those library roots are excluded. Host the resulting `.rpidx` file and publish its SHA-256 alongside that release. There is no built-in remote catalog or implicit background download. The URL and checksum are user-selected settings.

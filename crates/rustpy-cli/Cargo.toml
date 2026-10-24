@@ -1,0 +1,44 @@
+[package]
+name = "rustpy-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: command-line launcher, single-instance IPC and headless modes (format, inspect)"
+
+[dependencies]
+rustpy-core.workspace = true
+rustpy-http.workspace = true
+rustpy-net.workspace = true
+rustpy-settings.workspace = true
+rustpy-updates.workspace = true
+rustpy-text.workspace = true
+rustpy-format.workspace = true
+rustpy-semantic.workspace = true
+rustpy-analysis.workspace = true
+rustpy-search.workspace = true
+rustpy-project.workspace = true
+rustpy-test.workspace = true
+rustpy-run.workspace = true
+which.workspace = true
+ctrlc = { version = "3.4", features = ["termination"] }
+rustpy-vcs.workspace = true
+rustpy-regex.workspace = true
+rustpy-spell.workspace = true
+rustpy-grammar.workspace = true
+anyhow.workspace = true
+log.workspace = true
+env_logger.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+dirs.workspace = true
+regex.workspace = true
+toml.workspace = true
+getrandom.workspace = true
+blake3 = "1"
+flate2 = "1"
+tar = { version = "0.4", default-features = false }
+tempfile.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+libc.workspace = true

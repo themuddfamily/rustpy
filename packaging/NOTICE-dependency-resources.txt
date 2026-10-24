@@ -1,0 +1,41 @@
+Embedded dependency resource notices
+
+The following license files are retained verbatim from the published crate
+sources. They are aggregated into THIRD-PARTY-NOTICES.txt by update-notices.py.
+
+epaint_default_fonts 0.36.2 (unmodified fonts embedded by egui)
+Upstream: https://github.com/emilk/egui/tree/49682f8baa058bf49e011035cfbd6e825f88a5ef/crates/epaint_default_fonts
+Published source: https://crates.io/crates/epaint_default_fonts/0.36.2
+Retained files: fonts/OFL.txt, fonts/UFL.txt, fonts/Hack-Regular.txt,
+fonts/emoji-icon-font-mit-license.txt.
+The font name-table copyright statements include:
+Ubuntu Light: Copyright 2011 Canonical Ltd. Licensed under the Ubuntu Font Licence 1.0
+Noto Emoji: Copyright 2013 Google Inc. All Rights Reserved.
+Noto is a trademark of Google Inc.
+Hack and emoji-icon-font copyright statements are retained with their licenses.
+These font licenses apply to the embedded font software, not to RustPy code or
+documents rendered with the fonts. Original font names and license terms remain
+unchanged. The fonts are not sold separately.
+Official terms: https://openfontlicense.org/open-font-license-official-text/
+https://canonical.com/legal/font-licence
+
+webpki-roots 1.0.9 (Mozilla root-certificate data)
+Upstream: https://github.com/rustls/webpki-roots/tree/0a553dbc8b3f18ea05c4f881cffa3f2d005d0d30/webpki-roots
+Published source: https://crates.io/crates/webpki-roots/1.0.9
+Retained file: LICENSE (CDLA-Permissive-2.0).
+The agreement is supplied alongside the embedded data as required by section 2.1.
+Official terms: https://cdla.dev/permissive-2-0/
+
+webpki-roots 0.26.11 (compatibility re-export of v1 root-certificate data)
+Upstream: https://github.com/rustls/webpki-roots/tree/65a47ac297fb378a602472d447b1260439253bd4/webpki-roots
+Published source: https://crates.io/crates/webpki-roots/0.26.11
+Its LICENSE is byte-identical to the retained webpki-roots 1.0.9 agreement in
+LICENSE-webpki-roots.txt. That full agreement applies to both versions and is
+included in this notice bundle; no duplicate license text is needed.
+
+borrow-or-share 0.2.4
+Upstream: https://github.com/yescallop/borrow-or-share/tree/fa67a43ce36367757ace1824434b9edaa53f5a09
+Published source: https://crates.io/crates/borrow-or-share/0.2.4
+Retained file: LICENSE (MIT No Attribution, Copyright 2024 Scallop Ye).
+This license permits redistribution without an attribution requirement; its
+complete upstream text is retained voluntarily.

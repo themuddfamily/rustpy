@@ -1,0 +1,19 @@
+Solarized palette notice
+
+The Solarized palette is by Ethan Schoonover, copyright (c) 2011,
+and is provided under the MIT license reproduced in LICENSE.solarized.
+
+Upstream project: https://github.com/altercation/solarized
+Author's project page: https://ethanschoonover.com/solarized/
+Upstream revision observed on 2026-10-15:
+62f656a02f93c5190a8753159e34b385588d5ff3
+Pinned license source:
+https://raw.githubusercontent.com/altercation/solarized/62f656a02f93c5190a8753159e34b385588d5ff3/LICENSE
+SHA-256 of the exact LICENSE.solarized bytes:
+494aefdabf86acce06bd63001ad8aedad4ee38da23509d3f917d95aa3368b9a6
+
+This RustPy example adapts the Solarized palette to RustPy's editor scheme
+format and includes RustPy Python live templates. The revision above pins
+the license checked for this notice; it does not establish the revision or
+source file used for the historical palette import. That import provenance
+is not recorded here. The palette has not been changed by this notice update.

@@ -1,0 +1,106 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <!-- Build with the WixToolset.UI.wixext extension (same version as WiX, 5.0.2):
+         wix extension add -g WixToolset.UI.wixext/5.0.2
+         wix build rustpy.wxs -ext WixToolset.UI.wixext ...
+       Features (feature tree in the interactive installer; all optional ones default on):
+         Core              rustpy.exe, notices, install marker, Start menu shortcut (required)
+         FileAssociations  .py/.pyi/.ipynb open with RustPy
+         ContextMenu       Explorer "Open with RustPy" / "Open Folder with RustPy"
+         AddToPath         install folder appended to the user PATH
+       Silent installs choose features with the standard ADDLOCAL/REMOVE properties, e.g.
+         msiexec /i rustpy.msi /qn ADDLOCAL=Core,ContextMenu,AddToPath
+       or with the convenience properties ASSOCIATE_FILES=0, CONTEXT_MENU=0, ADD_TO_PATH=0,
+       which disable (Level 0) the matching feature whatever ADDLOCAL says. -->
+  <Package Name="RustPy" Manufacturer="RustPy" Version="$(var.Version)" UpgradeCode="418E653B-A5FC-4AA9-82F3-25A3AADF7EA4" Scope="perUser">
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer RustPy is installed." />
+    <MediaTemplate EmbedCab="yes" />
+    <Property Id="ASSOCIATE_FILES" Value="1" Secure="yes" />
+    <Property Id="CONTEXT_MENU" Value="1" Secure="yes" />
+    <Property Id="ADD_TO_PATH" Value="1" Secure="yes" />
+    <!-- Windows Installer does not persist a custom INSTALLFOLDER: without this, repair and
+         uninstall resolve the default folder and leave the files and PATH entry behind. -->
+    <Property Id="RUSTPY_INSTALLFOLDER" Secure="yes">
+      <RegistrySearch Id="RememberedInstallFolder" Root="HKCU" Key="Software\RustPy" Name="InstallFolder" Type="raw" />
+    </Property>
+    <SetDirectory Id="INSTALLFOLDER" Value="[RUSTPY_INSTALLFOLDER]" Condition="Installed AND RUSTPY_INSTALLFOLDER" Sequence="both" />
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="ProgramsFolder" Name="Programs"><Directory Id="INSTALLFOLDER" Name="RustPy">
+        <!-- Per-user component (ICE38/ICE43/ICE64): its key path is an HKCU value, not the
+             file, and the folders it creates under %LOCALAPPDATA% are removed on uninstall. -->
+        <Component Id="Executable" Guid="5D0C3E61-7F0B-4C1E-9A3C-0B8E2C6B9F21">
+          <File Id="RustPyExe" Source="$(var.BinDir)\rustpy.exe" />
+          <File Id="ThirdPartyNotices" Source="$(var.Notices)" Name="THIRD-PARTY-NOTICES.txt" />
+          <File Id="NativeLicenses" Source="$(var.NativeLicenses)" Name="Native-Licenses.zip" />
+          <File Id="ProjectLicense" Source="$(var.ProjectLicense)" Name="LICENSE" />
+          <File Id="InstallKind" Source="$(var.Marker)" Name="rustpy-install.kind" />
+          <RegistryValue Root="HKCU" Key="Software\RustPy" Name="InstallKind" Value="msi" Type="string" KeyPath="yes" />
+          <RegistryValue Root="HKCU" Key="Software\RustPy" Name="InstallFolder" Value="[INSTALLFOLDER]" Type="string" />
+          <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
+          <RemoveFolder Id="RemoveProgramsFolder" Directory="ProgramsFolder" On="uninstall" />
+          <!-- Registers the application for "Open with" lists only; changes no association. -->
+          <RegistryValue Root="HKCU" Key="Software\Classes\Applications\rustpy.exe\shell\open\command" Value="&quot;[#RustPyExe]&quot; &quot;%1&quot;" Type="string" />
+          <Shortcut Id="StartMenuShortcut" Directory="ProgramMenuFolder" Name="RustPy" Advertise="no" Target="[#RustPyExe]" WorkingDirectory="INSTALLFOLDER" />
+        </Component>
+        <!-- Per-user registry-only components (ICE38/ICE43): each key path is an HKCU value.
+             Commands name [INSTALLFOLDER]rustpy.exe rather than [#RustPyExe]: a formatted file
+             reference from another feature's component is an ICE69 error. The associations
+             are plain HKCU values (not ProgId/Extension, which write HKCR: ICE57). -->
+        <Component Id="FileAssociationsReg" Guid="8F2A6C1D-3B47-4E9A-B5D2-7C1E0F94A3B6">
+          <RegistryValue Root="HKCU" Key="Software\RustPy" Name="FileAssociations" Value="1" Type="integer" KeyPath="yes" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\.py" Value="RustPy.Python" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\.py" Name="Content Type" Value="text/x-python" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\.py\OpenWithProgids" Name="RustPy.Python" Value="" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\RustPy.Python" Value="Python source" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\RustPy.Python\shell\open" Value="Open with RustPy" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\RustPy.Python\shell\open\command" Value="&quot;[INSTALLFOLDER]rustpy.exe&quot; &quot;%1&quot;" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\.pyi" Value="RustPy.PythonStub" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\.pyi\OpenWithProgids" Name="RustPy.PythonStub" Value="" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\RustPy.PythonStub" Value="Python type stub" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\RustPy.PythonStub\shell\open" Value="Open with RustPy" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\RustPy.PythonStub\shell\open\command" Value="&quot;[INSTALLFOLDER]rustpy.exe&quot; &quot;%1&quot;" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\.ipynb" Value="RustPy.Notebook" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\.ipynb\OpenWithProgids" Name="RustPy.Notebook" Value="" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\RustPy.Notebook" Value="Jupyter notebook" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\RustPy.Notebook\shell\open" Value="Open with RustPy" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\RustPy.Notebook\shell\open\command" Value="&quot;[INSTALLFOLDER]rustpy.exe&quot; &quot;%1&quot;" Type="string" />
+        </Component>
+        <Component Id="ContextMenuReg" Guid="C4E7B2A9-61D5-4F38-9E0C-2A8B5D3F71E4">
+          <RegistryValue Root="HKCU" Key="Software\RustPy" Name="ContextMenu" Value="1" Type="integer" KeyPath="yes" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\RustPy" Value="Open with RustPy" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\RustPy\command" Value="&quot;[INSTALLFOLDER]rustpy.exe&quot; &quot;%1&quot;" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\RustPy" Value="Open Folder with RustPy" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\RustPy\command" Value="&quot;[INSTALLFOLDER]rustpy.exe&quot; &quot;%1&quot;" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\Directory\Background\shell\RustPy" Value="Open Folder with RustPy" Type="string" />
+          <RegistryValue Root="HKCU" Key="Software\Classes\Directory\Background\shell\RustPy\command" Value="&quot;[INSTALLFOLDER]rustpy.exe&quot; &quot;%V&quot;" Type="string" />
+        </Component>
+        <Component Id="UserPath" Guid="1B9D4E72-A3C6-4D85-8F17-6E2C0B5A94D3">
+          <RegistryValue Root="HKCU" Key="Software\RustPy" Name="AddToPath" Value="1" Type="integer" KeyPath="yes" />
+          <Environment Id="RustPyPath" Name="PATH" Value="[INSTALLFOLDER]" Part="last" Action="set" System="no" />
+        </Component>
+      </Directory></Directory>
+    </StandardDirectory>
+    <Feature Id="Core" Title="RustPy" Description="The RustPy IDE, its notices and the Start menu shortcut." Level="1" AllowAbsent="no" AllowAdvertise="no" Display="expand">
+      <ComponentRef Id="Executable" />
+      <Feature Id="FileAssociations" Title="File associations" Description="Open .py, .pyi and .ipynb files with RustPy." Level="1" AllowAdvertise="no">
+        <ComponentRef Id="FileAssociationsReg" />
+        <Level Value="0" Condition="ASSOCIATE_FILES = &quot;0&quot;" />
+      </Feature>
+      <Feature Id="ContextMenu" Title="Explorer context menu" Description="Add &quot;Open with RustPy&quot; to the Explorer context menu of files and folders." Level="1" AllowAdvertise="no">
+        <ComponentRef Id="ContextMenuReg" />
+        <Level Value="0" Condition="CONTEXT_MENU = &quot;0&quot;" />
+      </Feature>
+      <Feature Id="AddToPath" Title="Add to PATH" Description="Append the install folder to your user PATH so rustpy runs from a terminal." Level="1" AllowAdvertise="no">
+        <ComponentRef Id="UserPath" />
+        <Level Value="0" Condition="ADD_TO_PATH = &quot;0&quot;" />
+      </Feature>
+    </Feature>
+    <!-- Interactive installs: Welcome, feature tree, Ready. The stock WixUI_FeatureTree
+         also shows a license-acceptance page; the later-ordered NewDialog events below
+         skip it (RustPy is Apache-2.0, nothing to accept). -->
+    <ui:WixUI Id="WixUI_FeatureTree" />
+    <UI>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="CustomizeDlg" Order="10" Condition="NOT Installed" />
+      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="10" Condition="NOT Installed" />
+    </UI>
+  </Package>
+</Wix>

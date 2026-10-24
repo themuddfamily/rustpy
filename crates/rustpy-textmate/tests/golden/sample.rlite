@@ -1,0 +1,8 @@
+#[derive(Debug, "x")]
+pub struct Point<'a> { name: &'a str }
+fn len(self) -> usize { self.name.len() }
+/* outer /* inner */ still
+outer */ let x = 0..end;
+let c = 'x'; let s = "esc\n\x41"; println!("{}", 1_000u32);
+let r = r##"has "# inside"##;
+{ let deep = { 1 }; }

@@ -1,0 +1,25 @@
+#!/usr/bin/env toy
+import std.io.file
+// a line comment
+/* block TODO
+   still comment */ let after = 1
+@inline
+fn add(a: Int, b: int) {
+    let x = 0x1F + 42 * 3.5;
+    if x >= 10 { return "sum: ${x + 1}\n"; } else { return 'c'; }
+}
+class Point {
+    let p: Point = r#"raw "quoted" text"#;
+}
+text = <<EOT
+raw $ text { not code
+EOTX
+EOT
+> quoted *bold* line
+> second
+after
+[[a]]b] [a]]b]
+rust {
+    fn main() { let y = 1; }
+}
+done(r"x")

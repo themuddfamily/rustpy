@@ -1,0 +1,1388 @@
+{
+  "revision": "6305bf1ae645ab7541be4f5028a86239316178eb",
+  "tag": "26.1.0",
+  "files": [
+    {
+      "path": "tests/data/cases/allow_empty_first_line.py",
+      "file": "allow_empty_first_line.py",
+      "git_blob": "32a170a97d06a7770a808a67536460ca8e59e31c",
+      "sha256": "92e3c387665a006c7b303aac5bcef48f7d1f6f3cf2f47459d1b85fcb5bbfc3c9",
+      "bytes": 1794
+    },
+    {
+      "path": "tests/data/cases/annotations.py",
+      "file": "annotations.py",
+      "git_blob": "4d7af3d077f26a2e352bf4ea6069534acffd92c4",
+      "sha256": "6de6bb3c59b9b23e6d009d93e7df5eae4aa76c5eb2ce3505bf8687b780d30a41",
+      "bytes": 460
+    },
+    {
+      "path": "tests/data/cases/async_stmts.py",
+      "file": "async_stmts.py",
+      "git_blob": "fe9594b216492e983dad24561b563b5ff9466d3f",
+      "sha256": "b7b696959e625eca161ab6e39ef96868abef105f114ae7052f9cc1f95a4b725e",
+      "bytes": 279
+    },
+    {
+      "path": "tests/data/cases/attribute_access_on_number_literals.py",
+      "file": "attribute_access_on_number_literals.py",
+      "git_blob": "7c16bdfb3a52bd5ff45ffd89fe430504fe40d3c6",
+      "sha256": "f4a5afcdafd5762684052170a0fbcdaef904a27e38ca5496f5a65ac890b16c36",
+      "bytes": 907
+    },
+    {
+      "path": "tests/data/cases/backslash_before_indent.py",
+      "file": "backslash_before_indent.py",
+      "git_blob": "2d126a945e4a20d3a6715daf89935339eda9a9d8",
+      "sha256": "cf5e59bd7db1163423eb788ad776905f759aa874b12386615b7645c9e292e9d6",
+      "bytes": 219
+    },
+    {
+      "path": "tests/data/cases/beginning_backslash.py",
+      "file": "beginning_backslash.py",
+      "git_blob": "66c347d99df7d62370a501cafd14312b94b8af68",
+      "sha256": "cccd4c67d6584721723ebe59c7532dca56ced95511e2b6aebfcdf3123e25cded",
+      "bytes": 63
+    },
+    {
+      "path": "tests/data/cases/bracketmatch.py",
+      "file": "bracketmatch.py",
+      "git_blob": "0aaa2d8e6702621d2dbd698a85012f7bf8a79c1b",
+      "sha256": "a15a0a5b42968a47ee995d6d28e37b2495dfea95d55b5f62a02cadac2192e8f0",
+      "bytes": 333
+    },
+    {
+      "path": "tests/data/cases/bytes_docstring.py",
+      "file": "bytes_docstring.py",
+      "git_blob": "2326e95293af871e08d3643b29985b656df7fa8d",
+      "sha256": "fdc4b233f0713534938886113ee1869497e1ff27fc67f10e80450591685afc6a",
+      "bytes": 511
+    },
+    {
+      "path": "tests/data/cases/cantfit.py",
+      "file": "cantfit.py",
+      "git_blob": "619119279577a0a11bcb6c7384a4b006882ef33b",
+      "sha256": "1c46e24bfccd82080c1b3150699f4d330ea58a6ea6e9c52f0ad7d443e11a1c0c",
+      "bytes": 3523
+    },
+    {
+      "path": "tests/data/cases/class_blank_parentheses.py",
+      "file": "class_blank_parentheses.py",
+      "git_blob": "3c460d9bd7993beaf44a85a52cb6e996285eb490",
+      "sha256": "16d08de29b7e263615dbc8584389ad06f0f35c38c1f942b3faa9a8827a44d477",
+      "bytes": 1092
+    },
+    {
+      "path": "tests/data/cases/class_methods_new_line.py",
+      "file": "class_methods_new_line.py",
+      "git_blob": "9a96ffe49d4695b57d1ce6cd91f7da95923f91ef",
+      "sha256": "21d1cb8ef94a7bbf54547fc60d35855eade2594d898b91fd7b672f92d8a52f14",
+      "bytes": 4318
+    },
+    {
+      "path": "tests/data/cases/collections.py",
+      "file": "collections.py",
+      "git_blob": "684316652116fb4acb4419dba1f23cb47812bc94",
+      "sha256": "8b480d47878cf8d7273c6fccfd08eb18c0b0bdadfa662938fd99435729676a08",
+      "bytes": 3294
+    },
+    {
+      "path": "tests/data/cases/comment_after_escaped_newline.py",
+      "file": "comment_after_escaped_newline.py",
+      "git_blob": "133c230a3a806c8cfb1bd86eb76ca3389dc1aec5",
+      "sha256": "5ca376fa5f2c2ad7c1f05784ee9f4a35ee235892968fb302ecf9bf33e28d01b0",
+      "bytes": 216
+    },
+    {
+      "path": "tests/data/cases/comment_type_hint.py",
+      "file": "comment_type_hint.py",
+      "git_blob": "2992da88d9073144719d7abc7acbf811d25e0813",
+      "sha256": "fbffccb95627195610cd94a11d6d82fdb0a4350ace73a16fda97bcbba2081c81",
+      "bytes": 174
+    },
+    {
+      "path": "tests/data/cases/comments.py",
+      "file": "comments.py",
+      "git_blob": "c34daaf6f0833d9e7f600f07a03daea03ed64812",
+      "sha256": "b1873a19e87f219496e5be165afa11b91e4285b4bff9779ae73326668d752584",
+      "bytes": 1909
+    },
+    {
+      "path": "tests/data/cases/comments2.py",
+      "file": "comments2.py",
+      "git_blob": "261c5e9f0a07491cfe38bcbeec439602cfd7b05c",
+      "sha256": "85706f03321c656888d196a8025484be057e7b1d7093323d3c9daeb6af58e319",
+      "bytes": 7640
+    },
+    {
+      "path": "tests/data/cases/comments3.py",
+      "file": "comments3.py",
+      "git_blob": "f964bee66517c592afb03dbdeb317b3b40dd8552",
+      "sha256": "6c6058ca7d92129ff41df05d2324814afd4786c78b71d92aea5091dd4a6ee5cf",
+      "bytes": 1573
+    },
+    {
+      "path": "tests/data/cases/comments4.py",
+      "file": "comments4.py",
+      "git_blob": "9f4f39d83599dde87d3f720ea3b4cbbc3a33988c",
+      "sha256": "dbb3a02bb5cc185e644fc918a32c94fa0b32c59a348139a5743de20386d5aa1c",
+      "bytes": 3532
+    },
+    {
+      "path": "tests/data/cases/comments5.py",
+      "file": "comments5.py",
+      "git_blob": "f86e54732e8fc4b4b185e0aa064b8fb447b44924",
+      "sha256": "c1af8fd67c29335a8fd9fd68eb9816ef4ac3bb3131f5678b26ed047a9849aa5a",
+      "bytes": 1011
+    },
+    {
+      "path": "tests/data/cases/comments6.py",
+      "file": "comments6.py",
+      "git_blob": "735c6aa6d7adbc0dcf60414e7c15b0c2b27f0404",
+      "sha256": "859333987e8e155c1e52af6c702674bc877b276641d79bb4f498bf1bdd096532",
+      "bytes": 2479
+    },
+    {
+      "path": "tests/data/cases/comments8.py",
+      "file": "comments8.py",
+      "git_blob": "a2030c2a092628e61e25e467baef7ffa6581a3e2",
+      "sha256": "a851cf0d4b5b216736e411f2610bc9c8f9c7c53d1766f5df011b14ce4ff07e93",
+      "bytes": 298
+    },
+    {
+      "path": "tests/data/cases/comments9.py",
+      "file": "comments9.py",
+      "git_blob": "77b25556e74aae2dc4a02e4e32f2b7aac460d484",
+      "sha256": "3e3d17e6154b2e1a875a9cdbf904ed56ae85f51f8e64aaea766aeb7c3b09f8c6",
+      "bytes": 5279
+    },
+    {
+      "path": "tests/data/cases/comments_in_blocks.py",
+      "file": "comments_in_blocks.py",
+      "git_blob": "1221139b6d818109d1d0c2ab3ff3ba1187cda6a0",
+      "sha256": "f7fe82b7e4d44d24e83ee62ce7e419e97b01c29d855bd1ae4b53c5f5f4903c90",
+      "bytes": 2150
+    },
+    {
+      "path": "tests/data/cases/comments_in_double_parens.py",
+      "file": "comments_in_double_parens.py",
+      "git_blob": "80e7a5e5bf55a73847a3fc40a3bb48ba43fa90a8",
+      "sha256": "0392bd4f280ad75838e738e59df8fc9ff15f506f5776192ce8eeea1909267c2c",
+      "bytes": 1142
+    },
+    {
+      "path": "tests/data/cases/comments_non_breaking_space.py",
+      "file": "comments_non_breaking_space.py",
+      "git_blob": "e17c3f4ca3983d1f4956bfb7651e4188c38ad7cd",
+      "sha256": "c39a023bd25a069d33da6b2fb73cbb71d81d58dab2a304dfc8c2b9ee17fa1e20",
+      "bytes": 994
+    },
+    {
+      "path": "tests/data/cases/composition.py",
+      "file": "composition.py",
+      "git_blob": "0798d3f3b2971d2d8bf36589e773d2d8fc6273b4",
+      "sha256": "3b5b642f16ec4c278b1934178e1df23071f9376aefeb0713a0eed1d299c68023",
+      "bytes": 5574
+    },
+    {
+      "path": "tests/data/cases/composition_no_trailing_comma.py",
+      "file": "composition_no_trailing_comma.py",
+      "git_blob": "88d17b743dece862e8416597c39188cf84021bc5",
+      "sha256": "c76a912ac432feb3bc4d2b9f5c0b1da65e460eb99fbcb37a4ea03acfa4af8e39",
+      "bytes": 11174
+    },
+    {
+      "path": "tests/data/cases/conditional_expression.py",
+      "file": "conditional_expression.py",
+      "git_blob": "f65d6fb00e74a009b45ab3f4d962c3c28fb4fb72",
+      "sha256": "a25372554e0fc295c5a5f798059f749ff83575b9ed5a7d69d5d0dc2c743f0973",
+      "bytes": 4910
+    },
+    {
+      "path": "tests/data/cases/context_managers_38.py",
+      "file": "context_managers_38.py",
+      "git_blob": "f125cdffb8af26e4d3cc78aa3b456809e7b6fb90",
+      "sha256": "bdf6ed5f3fc277dd259e92382d5c5b273db798b537cd2d302871c27141b84296",
+      "bytes": 1140
+    },
+    {
+      "path": "tests/data/cases/context_managers_39.py",
+      "file": "context_managers_39.py",
+      "git_blob": "7f1ee2d576b980dcbab92d461f5cf153374604bd",
+      "sha256": "61c23c1b69158fa05b40d5a5d3ee58bbca45000cdd730970254bad8d1cc45094",
+      "bytes": 3560
+    },
+    {
+      "path": "tests/data/cases/context_managers_autodetect_310.py",
+      "file": "context_managers_autodetect_310.py",
+      "git_blob": "80f211032e53add59d2ad022cda904ef6c7ad86d",
+      "sha256": "4f4801624d291a35f12ba8de45c1b53b969497c3ecc0dd2dd5db94e0397a79ac",
+      "bytes": 627
+    },
+    {
+      "path": "tests/data/cases/context_managers_autodetect_311.py",
+      "file": "context_managers_autodetect_311.py",
+      "git_blob": "020c4cea967ac387920c23c238b80e96d4902bee",
+      "sha256": "d4847b05cff474cd59e46b4953a80a2b38bd1f46bdcbbdff41f298c4f30eba5a",
+      "bytes": 585
+    },
+    {
+      "path": "tests/data/cases/context_managers_autodetect_38.py",
+      "file": "context_managers_autodetect_38.py",
+      "git_blob": "79e438b995e742fa7887d1a1555dff53aa22cfcb",
+      "sha256": "f72c964821022b6a86c16e9d3143d1af18ce4f476a5c90b95710ca293d7626a0",
+      "bytes": 1058
+    },
+    {
+      "path": "tests/data/cases/context_managers_autodetect_39.py",
+      "file": "context_managers_autodetect_39.py",
+      "git_blob": "0d28f9931081ba153cf34d2b8fd7da57fda802dd",
+      "sha256": "d566a449e4c61360495435d7e7b67bc55b14260b4afbba8caa224a9fa862ba7e",
+      "bytes": 623
+    },
+    {
+      "path": "tests/data/cases/docstring.py",
+      "file": "docstring.py",
+      "git_blob": "e983c5bd438ad3021f2d6d98ea2f3ad5b2f5f021",
+      "sha256": "71a2c5e293b54bea1aee954b43a1de7d5cef2131c2591b52d27f2effa4ce4cd4",
+      "bytes": 7978
+    },
+    {
+      "path": "tests/data/cases/docstring2.py",
+      "file": "docstring2.py",
+      "git_blob": "a3c656be2f8f869f957274a25e419aa02db25d67",
+      "sha256": "7406b90f9f59fb7d578a7a1c8b11dea921c73ae65d5ec612337b16b884d46ebb",
+      "bytes": 3518
+    },
+    {
+      "path": "tests/data/cases/docstring_newline.py",
+      "file": "docstring_newline.py",
+      "git_blob": "75b8db4817538a82b3b807e9dd33650524572fef",
+      "sha256": "c4f306b51ce58beb92009b0dc4a0e1a347d323da9247add1065cbe5a7cd1c9f4",
+      "bytes": 99
+    },
+    {
+      "path": "tests/data/cases/docstring_no_extra_empty_line_before_eof.py",
+      "file": "docstring_no_extra_empty_line_before_eof.py",
+      "git_blob": "6fea860adf6aab2a3b5ec6ae61d954a07fe7c77d",
+      "sha256": "5e4022fcff6e1cf6e57da9dc00ed424becd65b2ff467b41885e1716a9636b953",
+      "bytes": 140
+    },
+    {
+      "path": "tests/data/cases/docstring_no_string_normalization.py",
+      "file": "docstring_no_string_normalization.py",
+      "git_blob": "4ec6b8a01535a17d092a4ac0d255c43d8ec524d2",
+      "sha256": "63ab81fef654cb0b6ded95a82fbe615f37e95cef7c29aea644c34944c7b90b05",
+      "bytes": 3638
+    },
+    {
+      "path": "tests/data/cases/dummy_implementations.py",
+      "file": "dummy_implementations.py",
+      "git_blob": "107bc2c506f7f53ecce60674ca01d5b401d97d18",
+      "sha256": "b9d196e4431980a8e31402b31a7d02c70554e09d927349a16b59173d54a0ce83",
+      "bytes": 3384
+    },
+    {
+      "path": "tests/data/cases/empty_lines.py",
+      "file": "empty_lines.py",
+      "git_blob": "4c03e432383c174127c803dea8076488a09a8daf",
+      "sha256": "5fba35f2bbf0d6c2e43b6cb2b8a5b6b899ec160371888e8b01b31e74dd5fc71a",
+      "bytes": 4597
+    },
+    {
+      "path": "tests/data/cases/expression.py",
+      "file": "expression.py",
+      "git_blob": "06096c589f1791f9389f07b6ecef0f6b88299580",
+      "sha256": "cc0de92a0ef0d0661a8c715f5c5506316e3be1b7d25e1471d163e7d26372439d",
+      "bytes": 18624
+    },
+    {
+      "path": "tests/data/cases/f_docstring.py",
+      "file": "f_docstring.py",
+      "git_blob": "667f550b353aa571ef6bdc3fbabe8ef0168558a7",
+      "sha256": "6b9dc0031d762a9f6afdec6dc2e22e0fa113e7a4881cc4ace96ad201c42217ea",
+      "bytes": 234
+    },
+    {
+      "path": "tests/data/cases/fmtonoff.py",
+      "file": "fmtonoff.py",
+      "git_blob": "56d99b8caf5c16b6f53f86e41f6014f5cf20d2ab",
+      "sha256": "0d1a8de2c12aa76b604edeff0cf50df5841ac3d7e88f96f789e1034c0e923f4d",
+      "bytes": 11187
+    },
+    {
+      "path": "tests/data/cases/fmtonoff2.py",
+      "file": "fmtonoff2.py",
+      "git_blob": "e8657c749b3e69e909b51978d22f443e617e5122",
+      "sha256": "e98eddc169df7bbd74c005f6310bb01b4a72755fefcdf798c5b914a3cf076a39",
+      "bytes": 604
+    },
+    {
+      "path": "tests/data/cases/fmtonoff3.py",
+      "file": "fmtonoff3.py",
+      "git_blob": "4e3b024ed3c04c7f56dc8a2f2278c612bdb1ce2c",
+      "sha256": "426cb967f835d2b1505aac7048a6289e751e6a54de9f9a0c4b6e658b590a6d91",
+      "bytes": 251
+    },
+    {
+      "path": "tests/data/cases/fmtonoff4.py",
+      "file": "fmtonoff4.py",
+      "git_blob": "4ca707965ad17ee268cabe1b353a35f5b19b2418",
+      "sha256": "df932fbd371d22ae876590b9f6a0ae42ae783a5a913347d20655c47e728bd033",
+      "bytes": 278
+    },
+    {
+      "path": "tests/data/cases/fmtonoff5.py",
+      "file": "fmtonoff5.py",
+      "git_blob": "4c134a9eea32d6563e8a7a7cc166e69dbb4dfb48",
+      "sha256": "a2f793de7753871197370d75e94431f5f7685b0b62a36f0d4b081f0494c19bf8",
+      "bytes": 3619
+    },
+    {
+      "path": "tests/data/cases/fmtonoff6.py",
+      "file": "fmtonoff6.py",
+      "git_blob": "9d23925063c748de456f242015a5c27bc7606fba",
+      "sha256": "4bcba09645474f4cc568ea84b31350eb8b0f367ad138016c052c8bff80ecb11f",
+      "bytes": 274
+    },
+    {
+      "path": "tests/data/cases/fmtpass_imports.py",
+      "file": "fmtpass_imports.py",
+      "git_blob": "8b3c0bc662a45bda119ebeb21c2b68e2b68ef733",
+      "sha256": "ca85640bb145488b82cd16d5b987f538bd01c15e25fd92c6bb6afb97cabd9496",
+      "bytes": 277
+    },
+    {
+      "path": "tests/data/cases/fmtskip.py",
+      "file": "fmtskip.py",
+      "git_blob": "1d5836fc0311b875cf0c8a468ad7213a72ab7e8d",
+      "sha256": "f6786b2f8f83ef0b0e2a80e0a0058c7232cae7b5eb0aed25fd4bd29644f8ef33",
+      "bytes": 40
+    },
+    {
+      "path": "tests/data/cases/fmtskip10.py",
+      "file": "fmtskip10.py",
+      "git_blob": "640ac4ddec97b8c5316ca33d52393aaa42d910f0",
+      "sha256": "9a257115542e52618407d18f7a0bbe80548574e1820abc82dac98badc5fbd727",
+      "bytes": 644
+    },
+    {
+      "path": "tests/data/cases/fmtskip11.py",
+      "file": "fmtskip11.py",
+      "git_blob": "2b0e1e8581c0c5e70be577ec0ed1af70734c1efb",
+      "sha256": "6fc206e6ac914fb26553300d8c29b6868ab77ace00df5650137fba3bc0a281c9",
+      "bytes": 769
+    },
+    {
+      "path": "tests/data/cases/fmtskip12.py",
+      "file": "fmtskip12.py",
+      "git_blob": "217fc2b5bb29ecc0951fbd7fe751820a3a6bfa19",
+      "sha256": "8ec7e749982f572c70e727b412f5e497f37754763e3706483cf4285a31c487be",
+      "bytes": 671
+    },
+    {
+      "path": "tests/data/cases/fmtskip13.py",
+      "file": "fmtskip13.py",
+      "git_blob": "1f2d53437cb56201d84cc6fd78c9265fdcaa4eed",
+      "sha256": "67c980b6b8293b4a4f12c92cb519a0485ead8d28f67b8a6f6b09990ca4a29905",
+      "bytes": 1398
+    },
+    {
+      "path": "tests/data/cases/fmtskip2.py",
+      "file": "fmtskip2.py",
+      "git_blob": "0189d4e642dd11abf00a53f47af75be4becffc4c",
+      "sha256": "622417d9bf6f8ef88ea3c250b7da25b4c70796ac8fd2444dac7de5ba07cb3601",
+      "bytes": 708
+    },
+    {
+      "path": "tests/data/cases/fmtskip3.py",
+      "file": "fmtskip3.py",
+      "git_blob": "6e166888e21926ac6a7aea4801ff0b097ca7a213",
+      "sha256": "067f65eec121177e0e3327156dbffc288ce6ac3f5b6a9221c08e1f0fb1c00d11",
+      "bytes": 362
+    },
+    {
+      "path": "tests/data/cases/fmtskip4.py",
+      "file": "fmtskip4.py",
+      "git_blob": "aadd77d0e53d272bdd90b2af72fb6ee7ff7f127e",
+      "sha256": "c06dbf670b90fd0dd5bef05be6470215f89d8dcab8636a34ea00a5a37e5a07d5",
+      "bytes": 92
+    },
+    {
+      "path": "tests/data/cases/fmtskip5.py",
+      "file": "fmtskip5.py",
+      "git_blob": "d7b15e0ff41af35d85ee96a91978868dba7ecba6",
+      "sha256": "1506afd729a2d8bfe2a495278b0f3794c29bea35e6e866739ed0e65971feecf0",
+      "bytes": 301
+    },
+    {
+      "path": "tests/data/cases/fmtskip6.py",
+      "file": "fmtskip6.py",
+      "git_blob": "0a779fcee00f470b69eec84c52ee1f7073fb9eb1",
+      "sha256": "579707946127a537a3603dfa1bf3bba0d273f67f3273bb1d0cea9f5d8a984076",
+      "bytes": 235
+    },
+    {
+      "path": "tests/data/cases/fmtskip7.py",
+      "file": "fmtskip7.py",
+      "git_blob": "89b295131523089de198c927993ec933acead2c5",
+      "sha256": "df49c7c57c6a03baa36ab5e971b31bb98ed30a8f19f12ed98687aed6a6b2dcc3",
+      "bytes": 395
+    },
+    {
+      "path": "tests/data/cases/fmtskip8.py",
+      "file": "fmtskip8.py",
+      "git_blob": "38e9c2a9f47b99acbe8e710ddae9eb675a94797c",
+      "sha256": "ecf908df68b1b8b0ee9f0c3a7691dbe3b89d6fb6f1a2340ae2ccc1f5d89431ba",
+      "bytes": 1705
+    },
+    {
+      "path": "tests/data/cases/fmtskip9.py",
+      "file": "fmtskip9.py",
+      "git_blob": "d070a7f17eb8fa88d4d801fbdc373b2a136ea2c6",
+      "sha256": "3fc2651157865d214937348efb0fc565192ec2e7033199abe035b789dea657fa",
+      "bytes": 94
+    },
+    {
+      "path": "tests/data/cases/fmtskip_multiple_in_clause.py",
+      "file": "fmtskip_multiple_in_clause.py",
+      "git_blob": "7a47e907ebd4b1792092673ab1fc3ef3d5fc3752",
+      "sha256": "54fba9c734206876857914a7b5630e3aba16db91f81f3634e2f103977b039b28",
+      "bytes": 871
+    },
+    {
+      "path": "tests/data/cases/fmtskip_multiple_strings.py",
+      "file": "fmtskip_multiple_strings.py",
+      "git_blob": "3ba70a63c40ed023dd7a91bd795e3e0a7d6df964",
+      "sha256": "9ca5a6d2ea4c4eda849fab37c7b9d311bcf5e9a8f06eb66a68b4ac5c659b0104",
+      "bytes": 1567
+    },
+    {
+      "path": "tests/data/cases/form_feeds.py",
+      "file": "form_feeds.py",
+      "git_blob": "957b4a1db957a9bea0ba8124af1add3d59ce3a77",
+      "sha256": "b11b8b277248ba3e9352f7ce7acb642fdaaebe3644cacd3a68b335644d7d8196",
+      "bytes": 1933
+    },
+    {
+      "path": "tests/data/cases/format_unicode_escape_seq.py",
+      "file": "format_unicode_escape_seq.py",
+      "git_blob": "3440696c3039191b1c4f74ad0c111b62b7882f8d",
+      "sha256": "18eba5eadf2287d1c93ddebf042e87ba1f4c00b3736ac3fe2854b6c1708ad394",
+      "bytes": 613
+    },
+    {
+      "path": "tests/data/cases/fstring.py",
+      "file": "fstring.py",
+      "git_blob": "60560309376351e79d53d505dd3f89b1745eae7b",
+      "sha256": "ec765d19d80ec79ef73660d8d48fae39df32bacb295a2078856fc1878164c93b",
+      "bytes": 989
+    },
+    {
+      "path": "tests/data/cases/fstring_quotations.py",
+      "file": "fstring_quotations.py",
+      "git_blob": "c1cb430c931b8dab08c860c5de96a89602522c99",
+      "sha256": "bc03d7ddf371f74a8ebe3a03f06e7655c257fd879c44592cf8329d2cf1a21909",
+      "bytes": 1664
+    },
+    {
+      "path": "tests/data/cases/funcdef_return_type_trailing_comma.py",
+      "file": "funcdef_return_type_trailing_comma.py",
+      "git_blob": "6335cf733964f4a23083282451f1ab2a119d3148",
+      "sha256": "cfdc98abf00be30690ac8329a2d38ad46830b337c8b3b60af836fb1160a1ac3b",
+      "bytes": 5777
+    },
+    {
+      "path": "tests/data/cases/function.py",
+      "file": "function.py",
+      "git_blob": "4e3f91fd8b175e594381ebc2e14e4edc81d61184",
+      "sha256": "68a5546b4aea3c2397d2d612020550ebd0b11d1e96efd8b9b64cbd45c9f660c9",
+      "bytes": 6408
+    },
+    {
+      "path": "tests/data/cases/function2.py",
+      "file": "function2.py",
+      "git_blob": "5bb36c26318cbd0b9992b55fd73da3485cf500c7",
+      "sha256": "5e13257d3b22f5becc763fe59592edab0b1724556d296ba65338f295ce8ce1bd",
+      "bytes": 2419
+    },
+    {
+      "path": "tests/data/cases/function_trailing_comma.py",
+      "file": "function_trailing_comma.py",
+      "git_blob": "63cf3999c2eb2e41df9a53e62535fa2ff080671e",
+      "sha256": "a43e9a559d6c8baa3294714170270f0aa9cf334d08b29c6fc677222f0cb37dc5",
+      "bytes": 5318
+    },
+    {
+      "path": "tests/data/cases/generics_wrapping.py",
+      "file": "generics_wrapping.py",
+      "git_blob": "734e2a3c752b6721c87b8cee10128b04bfce4cba",
+      "sha256": "f9897d8000c6ba8620e09b864805d2ec668fd7e0ca89194b23723a28c2aece0f",
+      "bytes": 3888
+    },
+    {
+      "path": "tests/data/cases/ignore_pyi.py",
+      "file": "ignore_pyi.py",
+      "git_blob": "4fae7530eb98ab918766980229dc88320c83a8e0",
+      "sha256": "6fac0a631b42323fed1ee5aadab8d4d562c520960b685d3518e27204d86b3ac5",
+      "bytes": 520
+    },
+    {
+      "path": "tests/data/cases/import_line_collapse.py",
+      "file": "import_line_collapse.py",
+      "git_blob": "2c6c915f539071dd4e9e90fc93d056c9685706c9",
+      "sha256": "beb673a4d4d0ab274d90d8be0be2fecdd94add79de4aeca4dab2f672597a2e33",
+      "bytes": 2076
+    },
+    {
+      "path": "tests/data/cases/import_spacing.py",
+      "file": "import_spacing.py",
+      "git_blob": "8e6e23cc348d0a25ce4aa637ddfa1815a430cf6b",
+      "sha256": "c82a04106f5dfd5560496cf374ec03cbca2f3a7cc265b12d5ba9999b2bab0b9a",
+      "bytes": 2542
+    },
+    {
+      "path": "tests/data/cases/is_simple_lookup_for_doublestar_expression.py",
+      "file": "is_simple_lookup_for_doublestar_expression.py",
+      "git_blob": "ae3643ba4e80141d6ad3549a58012e4ce064888b",
+      "sha256": "69449a7648bc0079532420c634a78018e321ac16a0a4c8464ad72e4ba9560e1a",
+      "bytes": 546
+    },
+    {
+      "path": "tests/data/cases/jupytext_markdown_fmt.py",
+      "file": "jupytext_markdown_fmt.py",
+      "git_blob": "43e94630047944826d41c1e29675713a5ea0bf27",
+      "sha256": "da710b197ef3e589d1e4feec83a5ce9440531eebd1c6f2d4c13681e828064ba6",
+      "bytes": 345
+    },
+    {
+      "path": "tests/data/cases/keep_newline_after_match.py",
+      "file": "keep_newline_after_match.py",
+      "git_blob": "dbeccce62647d823e03ee8b31c8287e1e43b7216",
+      "sha256": "aee0836373f717d50d274d8f8cf6a37d3188190ff339bde583eee31f014d679e",
+      "bytes": 547
+    },
+    {
+      "path": "tests/data/cases/line_ranges_basic.py",
+      "file": "line_ranges_basic.py",
+      "git_blob": "9f0fb2da70e624ff0a051592ae57cb523cc78888",
+      "sha256": "d2cbebffa2a45f6bc2b2753ade21c91d4313abbb3f5edd28d0d7b2df059c4d44",
+      "bytes": 3519
+    },
+    {
+      "path": "tests/data/cases/line_ranges_decorator_edge_case.py",
+      "file": "line_ranges_decorator_edge_case.py",
+      "git_blob": "483fbe8c57d868c236373b9711d76e552379ec33",
+      "sha256": "df37fc817ff3ee109b1d94ce010c9164ace0b15d0d09067ad4e545c74be00b22",
+      "bytes": 108
+    },
+    {
+      "path": "tests/data/cases/line_ranges_diff_edge_case.py",
+      "file": "line_ranges_diff_edge_case.py",
+      "git_blob": "f5cb2d0bb5fa639832ff0637a184b2df8a0d3544",
+      "sha256": "7cd1a903907e3033a85ca2060995221105199d94f812dff0321faf9ae9164f5b",
+      "bytes": 954
+    },
+    {
+      "path": "tests/data/cases/line_ranges_exceeding_end.py",
+      "file": "line_ranges_exceeding_end.py",
+      "git_blob": "8f17491f684a1256fc2c89a8fe9444cc00454801",
+      "sha256": "39f15770f9803feec417d0f39ec36608fdce4876fba7edf61e0d531f87673ce1",
+      "bytes": 1276
+    },
+    {
+      "path": "tests/data/cases/line_ranges_fmt_off.py",
+      "file": "line_ranges_fmt_off.py",
+      "git_blob": "b51cef58fe5f759fb4a422a7128b8a9c995bbb7a",
+      "sha256": "16604ae967ebf53c6b1084d812d784d6b70acec138bb3295a2cd546a2232d16a",
+      "bytes": 1373
+    },
+    {
+      "path": "tests/data/cases/line_ranges_fmt_off_decorator.py",
+      "file": "line_ranges_fmt_off_decorator.py",
+      "git_blob": "065bf4328d7e68f9e3ab959479c249f653bf1b88",
+      "sha256": "2b4e6e276ba21702916d5638541512011d02084fd09f911f38cc140be7b218e0",
+      "bytes": 998
+    },
+    {
+      "path": "tests/data/cases/line_ranges_fmt_off_overlap.py",
+      "file": "line_ranges_fmt_off_overlap.py",
+      "git_blob": "0391d17a843f774d9f3c20323d550e2b4a183578",
+      "sha256": "e7b37c54a89d78fcde72fa70f5ae3bf32ed964745b1e8b669047a65f1064039b",
+      "bytes": 1155
+    },
+    {
+      "path": "tests/data/cases/line_ranges_imports.py",
+      "file": "line_ranges_imports.py",
+      "git_blob": "76b18ffecb3c340dc1d2b6c3a341e92a7bab9cbf",
+      "sha256": "7bba9ee4f0b482836aac065c2a466fbc639771d6b17bac3a6e1c34c0ffb16d27",
+      "bytes": 346
+    },
+    {
+      "path": "tests/data/cases/line_ranges_indentation.py",
+      "file": "line_ranges_indentation.py",
+      "git_blob": "82d3ad69a5e5bc16d788aa9e5cef633ad5b5bdf9",
+      "sha256": "1aa6cd5295bcbefb4f87bb69fb4dee347f25b34ecceec61cc4f4994e0ae5bde5",
+      "bytes": 633
+    },
+    {
+      "path": "tests/data/cases/line_ranges_outside_source.py",
+      "file": "line_ranges_outside_source.py",
+      "git_blob": "edec9015ff82e9e23b45e3850fec37b3df523018",
+      "sha256": "657763073154898aadbf759e7ff2cc14959dd980570d826d82c329e8b1079e3c",
+      "bytes": 619
+    },
+    {
+      "path": "tests/data/cases/line_ranges_two_passes.py",
+      "file": "line_ranges_two_passes.py",
+      "git_blob": "aeed3260b8ef734ac3895c7e47a0419ee70f1e50",
+      "sha256": "93f08e62c32c44a50bb17f20807241e1be59d845cabd57b9d0409a95906221ec",
+      "bytes": 1065
+    },
+    {
+      "path": "tests/data/cases/line_ranges_unwrapping.py",
+      "file": "line_ranges_unwrapping.py",
+      "git_blob": "cd7751b9417eab95c9a4e45a770449aff978af98",
+      "sha256": "9e1d57f3151338a94f0d2133ca8fec003b60636ae502d44f69b5c35981b87ff9",
+      "bytes": 591
+    },
+    {
+      "path": "tests/data/cases/linelength6.py",
+      "file": "linelength6.py",
+      "git_blob": "158038bf960607aa048e6cde702c8a4ce6c0bb62",
+      "sha256": "e5e88875f59819457a878e5975cf71599e4220e7d858bba088b36f6b35e4995a",
+      "bytes": 126
+    },
+    {
+      "path": "tests/data/cases/long_strings__type_annotations.py",
+      "file": "long_strings__type_annotations.py",
+      "git_blob": "45de882d02c079e9b8e84e424e25c9530a7e8f9f",
+      "sha256": "d419726251d682ecd58d6085e682b608de332c75960e8ebfb61227e7372e73c7",
+      "bytes": 1075
+    },
+    {
+      "path": "tests/data/cases/long_strings_flag_disabled.py",
+      "file": "long_strings_flag_disabled.py",
+      "git_blob": "d81c331cab25653dda045d7287a005dee5cb30f1",
+      "sha256": "e5dbf4cbae9174871c922994e39d5543db34ae362769ec33a7c0dc00fef049f4",
+      "bytes": 11608
+    },
+    {
+      "path": "tests/data/cases/module_docstring_1.py",
+      "file": "module_docstring_1.py",
+      "git_blob": "5751154f7f08e8a12d29b75f8ab8a3b2452d6c71",
+      "sha256": "014422ab7fd5dd7d53c596b0ee8ccf4cf55e5410fe1fd871a785e7fcfaab8b7b",
+      "bytes": 329
+    },
+    {
+      "path": "tests/data/cases/module_docstring_2.py",
+      "file": "module_docstring_2.py",
+      "git_blob": "b1d0aaf4ab9adba4c7b72b002326e8ce38878970",
+      "sha256": "6224b600ee693506bbc21a2f83bdc33da0a647d229e19568d1c693b6970844bb",
+      "bytes": 2135
+    },
+    {
+      "path": "tests/data/cases/module_docstring_3.py",
+      "file": "module_docstring_3.py",
+      "git_blob": "3d0058dd554f13a664cdf58e2984168c7d744d8a",
+      "sha256": "d8d7550ec96ca84de36e36e4414d62ee87348d9a1a2d697eee683c292ccc93ff",
+      "bytes": 181
+    },
+    {
+      "path": "tests/data/cases/module_docstring_4.py",
+      "file": "module_docstring_4.py",
+      "git_blob": "b1720078f712a04ba61c197f50f1555a69afc91f",
+      "sha256": "140136c4de9959aa79b290cb2a7f760fe7a098792baafb6752ed6eee3fd71940",
+      "bytes": 182
+    },
+    {
+      "path": "tests/data/cases/module_docstring_after_comment.py",
+      "file": "module_docstring_after_comment.py",
+      "git_blob": "5709b92b197b815931beb2f58154980b9b5da3ca",
+      "sha256": "d0f9e540e21059752288a1ee68bf7645eb458b78feb47a34d5da5625b66a1d82",
+      "bytes": 217
+    },
+    {
+      "path": "tests/data/cases/module_docstring_followed_by_class.py",
+      "file": "module_docstring_followed_by_class.py",
+      "git_blob": "c291e61b960d5c1c0456a6b9b28d299588415275",
+      "sha256": "937c911711c09e1c6eb330a97a20035ca40d6bf2acfb6de3fd955cb6d3915677",
+      "bytes": 180
+    },
+    {
+      "path": "tests/data/cases/module_docstring_followed_by_function.py",
+      "file": "module_docstring_followed_by_function.py",
+      "git_blob": "fd29b98da8e63219d7060b205b68518dcd997a4c",
+      "sha256": "dc46a5095e0573164a15dd21c725e8c8327b388c9da17daa7272a244f9a7d4af",
+      "bytes": 196
+    },
+    {
+      "path": "tests/data/cases/multiline_consecutive_open_parentheses_ignore.py",
+      "file": "multiline_consecutive_open_parentheses_ignore.py",
+      "git_blob": "6ec8bb454088d5707c7db4b61e223655c1f695db",
+      "sha256": "a3aa70290928e3409b3d2fde6d9af2117d81d6deb7f9a4931b54acfceba532a2",
+      "bytes": 644
+    },
+    {
+      "path": "tests/data/cases/multiline_strings.py",
+      "file": "multiline_strings.py",
+      "git_blob": "10662d8dc38a863ae838407f2326d059c9bc3ca6",
+      "sha256": "16d6f5254e271388b1118c9f96714e6b990d76cea42bc4b4243bd3b336684178",
+      "bytes": 9985
+    },
+    {
+      "path": "tests/data/cases/nested_stub.py",
+      "file": "nested_stub.py",
+      "git_blob": "40ca11e9330ab26bb1c7abf208ad688daf8d535a",
+      "sha256": "355a0ea649610190fc807c5eab0013ca478998b3cc639d64b8278a4c23ea301d",
+      "bytes": 1243
+    },
+    {
+      "path": "tests/data/cases/no_blank_line_before_docstring.py",
+      "file": "no_blank_line_before_docstring.py",
+      "git_blob": "74d43cd7eafba24b6c24b2b37bf03193c285571c",
+      "sha256": "2902a174555063ec95a75fc6543dba0e0fad27d4d0c8d7982f682e6d16112108",
+      "bytes": 987
+    },
+    {
+      "path": "tests/data/cases/numeric_literals.py",
+      "file": "numeric_literals.py",
+      "git_blob": "996693287448580093d4be201fc770b6a985308c",
+      "sha256": "10ce3488bf2b157aaf1a44440717863e9db83ee00e3f6d581f4b5cda5c0a97a6",
+      "bytes": 544
+    },
+    {
+      "path": "tests/data/cases/numeric_literals_skip_underscores.py",
+      "file": "numeric_literals_skip_underscores.py",
+      "git_blob": "6d60bdbb34d185dd63a79b1fcf579b8183ee78dc",
+      "sha256": "c3d7df83f8ce167915fdc36a30d0eb7d8f11a7c4e9586be952c5d55b527b6a8e",
+      "bytes": 215
+    },
+    {
+      "path": "tests/data/cases/one_element_subscript.py",
+      "file": "one_element_subscript.py",
+      "git_blob": "39205ba9f7aae25cafd20b132920bcb676420a57",
+      "sha256": "d417d3795c9d8103d7369b7d9d98e62b56d3ec5f36050de8e20f76512023df51",
+      "bytes": 674
+    },
+    {
+      "path": "tests/data/cases/parenthesized_context_managers.py",
+      "file": "parenthesized_context_managers.py",
+      "git_blob": "16645a18baa25b65deb728300c91e44ae92a5c55",
+      "sha256": "bafb96b73bb5bc8950dcbc01d731dd0c4456686af58619d80aa3d7a169e6b8e2",
+      "bytes": 797
+    },
+    {
+      "path": "tests/data/cases/pattern_matching_complex.py",
+      "file": "pattern_matching_complex.py",
+      "git_blob": "028832d772ab20059c945054874def4e7c786d9a",
+      "sha256": "ae1daca43fdef04a994828a36c47e11e3b2a5e142944f7b7d369c77f2bc556ce",
+      "bytes": 2965
+    },
+    {
+      "path": "tests/data/cases/pattern_matching_extras.py",
+      "file": "pattern_matching_extras.py",
+      "git_blob": "1aef8f16b5a8ef3c3f654e20a61863232cb21f7a",
+      "sha256": "4bb9f3a7331ef563e487c0924ed44a0797023e09b062d0d5f7cf95fe38411019",
+      "bytes": 1796
+    },
+    {
+      "path": "tests/data/cases/pattern_matching_generic.py",
+      "file": "pattern_matching_generic.py",
+      "git_blob": "4b4d45f0bffb5966e63225efb87a220bad9f8e0d",
+      "sha256": "4610fa68cae2a939a32e6a55072acf578397918d8e3c0a8cf7a37561c4d54777",
+      "bytes": 3098
+    },
+    {
+      "path": "tests/data/cases/pattern_matching_long.py",
+      "file": "pattern_matching_long.py",
+      "git_blob": "9a944c9d0c9e7e0fd6e0eaa4771cad3c3daa1e4f",
+      "sha256": "999fa245fd930e70124b028399c304e3c3d818ed710748a1b94f191aa363b590",
+      "bytes": 692
+    },
+    {
+      "path": "tests/data/cases/pattern_matching_simple.py",
+      "file": "pattern_matching_simple.py",
+      "git_blob": "6fa2000f0dedc93db0837093443e98376ac78025",
+      "sha256": "c7e13f58de4b6e6b371507409912a4c28420cbd472e2cceac4bcd4d4f3349056",
+      "bytes": 2673
+    },
+    {
+      "path": "tests/data/cases/pattern_matching_style.py",
+      "file": "pattern_matching_style.py",
+      "git_blob": "2ee6ea2b6e99b5d168227f9803386e92f64f6c9d",
+      "sha256": "a7ae3d5a0e7868964e4941d99fadb53889cca87a4a168849585fe1c55062f0eb",
+      "bytes": 1093
+    },
+    {
+      "path": "tests/data/cases/pattern_matching_trailing_comma.py",
+      "file": "pattern_matching_trailing_comma.py",
+      "git_blob": "5660b0f6a14de5ce40db50c133fdd8000a1181ad",
+      "sha256": "597168f69bb83f28e2a889c815e976193119c9eb167e765ac38451c205ed03e1",
+      "bytes": 547
+    },
+    {
+      "path": "tests/data/cases/pattern_matching_with_if_stmt.py",
+      "file": "pattern_matching_with_if_stmt.py",
+      "git_blob": "1c5d58f16f23800574fa242d936cdf50f581338e",
+      "sha256": "fa6d65664473d84421bcf86d3993390ed45f4b09554a9ecd0532d7d8ca982a1e",
+      "bytes": 2180
+    },
+    {
+      "path": "tests/data/cases/pep604_union_types_line_breaks.py",
+      "file": "pep604_union_types_line_breaks.py",
+      "git_blob": "745bc9e8b02545cfdb58f6d5259cc71857768f22",
+      "sha256": "933dab2280d56c3db1a13ace7d2b89fd9c5597a2750fee24e43efec629ec6242",
+      "bytes": 4689
+    },
+    {
+      "path": "tests/data/cases/pep646_typed_star_arg_type_var_tuple.py",
+      "file": "pep646_typed_star_arg_type_var_tuple.py",
+      "git_blob": "6dfb5445efec0308e323688bbf687562fd43a83d",
+      "sha256": "f691536e87124d74787096134c774d937cacf2fed8a1098e36335d88e641d653",
+      "bytes": 102
+    },
+    {
+      "path": "tests/data/cases/pep_570.py",
+      "file": "pep_570.py",
+      "git_blob": "ca8f7ab1d95d08f642db68a852f2821c09a9c720",
+      "sha256": "410fb2af140b6714a30f5925dc9c741d84ee227993e8472012eeb8e58057a4b9",
+      "bytes": 680
+    },
+    {
+      "path": "tests/data/cases/pep_572.py",
+      "file": "pep_572.py",
+      "git_blob": "d41805f1cb16d93eb0600ae30b69019973652522",
+      "sha256": "bd1cbdc10061618fdc80cd3eec1238ee0e079cb5d64b50707f31245b25c237d2",
+      "bytes": 970
+    },
+    {
+      "path": "tests/data/cases/pep_572_do_not_remove_parens.py",
+      "file": "pep_572_do_not_remove_parens.py",
+      "git_blob": "08dba3ffdf9b3eacc1c4410452bd631f06085384",
+      "sha256": "92176daa1a2863661d7bbcb5953f8e79799ebda4714b2ed3e567854d4999a4a0",
+      "bytes": 514
+    },
+    {
+      "path": "tests/data/cases/pep_572_py310.py",
+      "file": "pep_572_py310.py",
+      "git_blob": "f79024931f42dce70a95fa51194e55ee08ad4feb",
+      "sha256": "7bcbe1e487d97c7b2596625481cb9776d0aa826ff0db5a8afef23a9908aba007",
+      "bytes": 643
+    },
+    {
+      "path": "tests/data/cases/pep_572_py39.py",
+      "file": "pep_572_py39.py",
+      "git_blob": "b8b081b8c4574d3638f6dcc9242cffcc096f6ea2",
+      "sha256": "44ccf47d0ad37dda1340a7ffed6a6681c4b36cd0f19e35275d97672a7b02c7e1",
+      "bytes": 251
+    },
+    {
+      "path": "tests/data/cases/pep_572_remove_parens.py",
+      "file": "pep_572_remove_parens.py",
+      "git_blob": "75113771ae0a2de9f8c17c5f7512db45f49c4409",
+      "sha256": "71888dbde2866a78213f31d23c04d0541fe058f0cc20e32ae15905922803a95f",
+      "bytes": 1888
+    },
+    {
+      "path": "tests/data/cases/pep_572_slices.py",
+      "file": "pep_572_slices.py",
+      "git_blob": "aa772b1f1f5e42decf08e62ff48aab6c09705d7b",
+      "sha256": "01e0104714c87ae546391d0161aa17e33e95d63e35cde131ccc424bfe8ab5fb6",
+      "bytes": 60
+    },
+    {
+      "path": "tests/data/cases/pep_604.py",
+      "file": "pep_604.py",
+      "git_blob": "b68d59d6440785756af07c118a9d5cbee2ce615d",
+      "sha256": "59cf24b8cf5198c5ebed98af3c0a9f5349b797d6dd9be28d3a8f3f8d3abc7cb0",
+      "bytes": 583
+    },
+    {
+      "path": "tests/data/cases/pep_646.py",
+      "file": "pep_646.py",
+      "git_blob": "92b568a379c4202aae7a45e5f0e46bc126eb408d",
+      "sha256": "31937dabb8ec01b836a693fcd8dd49cf96468d70cf746395a2f276cc408f3fab",
+      "bytes": 2146
+    },
+    {
+      "path": "tests/data/cases/pep_654.py",
+      "file": "pep_654.py",
+      "git_blob": "12e49180e415f8ea07e81fbc8d99e7eb16ce3e4a",
+      "sha256": "6cf73b29ab234f89e0860b80a058c3ac952a451f870dc12c7db4578024675c41",
+      "bytes": 1004
+    },
+    {
+      "path": "tests/data/cases/pep_654_style.py",
+      "file": "pep_654_style.py",
+      "git_blob": "0d34650e0980fabfd2ed63cf52df37ce818219d9",
+      "sha256": "3d68b78decf855d5c03850d52b115a5b5cb0c69c0ad50dfb2074b9726aeec6b1",
+      "bytes": 2065
+    },
+    {
+      "path": "tests/data/cases/pep_701.py",
+      "file": "pep_701.py",
+      "git_blob": "6f86988f0fbebecff4de2afa0a5b91f6bbd2d446",
+      "sha256": "a2abec0c68f4a848c2590c5b60b60d9286efe1d4569ac5193740ae1b3ec10629",
+      "bytes": 4699
+    },
+    {
+      "path": "tests/data/cases/pep_750.py",
+      "file": "pep_750.py",
+      "git_blob": "ca9921165869e2679e7e56f0f6c0a456466225cc",
+      "sha256": "20e328b8db6ab5ccf4f9386b44d2e625213b89e839af49e97277c8c47f1ff886",
+      "bytes": 1126
+    },
+    {
+      "path": "tests/data/cases/percent_precedence.py",
+      "file": "percent_precedence.py",
+      "git_blob": "7822e42c69dfe6232f4d29dadce66e639bf2a3b8",
+      "sha256": "fcce832b6af766fde5722d7219e92f02bd644c8c2f859cd4e427aa2d52aa6f33",
+      "bytes": 485
+    },
+    {
+      "path": "tests/data/cases/power_op_newline.py",
+      "file": "power_op_newline.py",
+      "git_blob": "d9b31403c9d639d27cb5addaa7491624710a1301",
+      "sha256": "81c99a5cd10f1439ea6778be4db0949deed6a8d0b46d4a8d745110c849890bec",
+      "bytes": 94
+    },
+    {
+      "path": "tests/data/cases/power_op_spacing.py",
+      "file": "power_op_spacing.py",
+      "git_blob": "b3ef0aae08462ee21c6cf1e6e9ae7193cef62fa8",
+      "sha256": "fea0c6f0f681e9f0319a2f03c5ccd6a42f70ee4d36984578dfec09c203124d07",
+      "bytes": 3533
+    },
+    {
+      "path": "tests/data/cases/power_op_spacing_long.py",
+      "file": "power_op_spacing_long.py",
+      "git_blob": "30e6eb788b341cee7dd9ee711843bcd64ffd9aa4",
+      "sha256": "9d4114decaef48ff492be6be8934069eed9616b5a3942591227224a8581491e1",
+      "bytes": 2500
+    },
+    {
+      "path": "tests/data/cases/prefer_rhs_split.py",
+      "file": "prefer_rhs_split.py",
+      "git_blob": "f3d9fd672515c8d680b3aeeb3209652d36745c8f",
+      "sha256": "b399fcb5b777d1a01c81c84a7aef50d2d0fe4a59dba17c41d3cbdc75d3cc69ec",
+      "bytes": 3270
+    },
+    {
+      "path": "tests/data/cases/prefer_rhs_split_reformatted.py",
+      "file": "prefer_rhs_split_reformatted.py",
+      "git_blob": "2ec0728af821d2962905cf63c30e7d64946e0693",
+      "sha256": "bfbbcb51afd361a426aef157b5b81300b07202be38dd4ac04b712d71a6083dcf",
+      "bytes": 1547
+    },
+    {
+      "path": "tests/data/cases/preview_cantfit_string.py",
+      "file": "preview_cantfit_string.py",
+      "git_blob": "3b48e318adeb90ca375cc302ef561a5c2c145137",
+      "sha256": "89c4b03b66fdd64fb49bcd1e3a3d469c62f84a7d764143cc60707c1157e4e370",
+      "bytes": 829
+    },
+    {
+      "path": "tests/data/cases/preview_comments7.py",
+      "file": "preview_comments7.py",
+      "git_blob": "703e3c8fbdeb26ba74b80c5c0267c6913a467f34",
+      "sha256": "d6dda7b2149edcf71c04e4eea62308e9864cf585d56ecf76d629728216e3fa06",
+      "bytes": 8995
+    },
+    {
+      "path": "tests/data/cases/preview_fstring.py",
+      "file": "preview_fstring.py",
+      "git_blob": "e0a3eacfa20a1727f703153e6cf0f3a1c6f6e199",
+      "sha256": "e7755bab6c957834dfd998f5e4d05419e08d61bcccb0120c385a8c5acb98bc45",
+      "bytes": 37
+    },
+    {
+      "path": "tests/data/cases/preview_hug_parens_with_braces_and_square_brackets.py",
+      "file": "preview_hug_parens_with_braces_and_square_brackets.py",
+      "git_blob": "cbbcf16d3bd63032688add8b8a7040128ea9d9ef",
+      "sha256": "d59e9e51b8b06a1e9c3ed4d48683281f7f5e380ec5c5bc20c24f7872d22fb44f",
+      "bytes": 5823
+    },
+    {
+      "path": "tests/data/cases/preview_hug_parens_with_braces_and_square_brackets_no_ll1.py",
+      "file": "preview_hug_parens_with_braces_and_square_brackets_no_ll1.py",
+      "git_blob": "16ebea379bc85705f52b8149ceda64bf3aede657",
+      "sha256": "920799eb00e837b4d739aeb21d5e7c23f51971b5f4df34277c57846b5881b1c2",
+      "bytes": 4093
+    },
+    {
+      "path": "tests/data/cases/preview_long_dict_values.py",
+      "file": "preview_long_dict_values.py",
+      "git_blob": "c1b30f27e22475438e0dc096fd6f34f1b3a25628",
+      "sha256": "80a90fed949f0a8ef8537646e0205774557133f77c2178a0e0f92e0a9acdd443",
+      "bytes": 8191
+    },
+    {
+      "path": "tests/data/cases/preview_long_strings.py",
+      "file": "preview_long_strings.py",
+      "git_blob": "a267a50905734c9eca61feb19c30d9dcd29928de",
+      "sha256": "6ead235dbea173f7f43c0c64719087912d28e15a94b67a9893ac40a64084015c",
+      "bytes": 37348
+    },
+    {
+      "path": "tests/data/cases/preview_long_strings__east_asian_width.py",
+      "file": "preview_long_strings__east_asian_width.py",
+      "git_blob": "01165f9c032a912a28bd3dfa9157f6d15c7d2e6d",
+      "sha256": "9cf4251fcb6de94e196f25a82cdfaa9cff7c999b2d4b5b64bc68e45d0e0a866f",
+      "bytes": 3183
+    },
+    {
+      "path": "tests/data/cases/preview_long_strings__edge_case.py",
+      "file": "preview_long_strings__edge_case.py",
+      "git_blob": "28497e731bc0502161c5dac1c704acafeff5000e",
+      "sha256": "20b9c3f7c24504967afc02e72609d99cc408134b5b9ed1ee6f896bb1445a6328",
+      "bytes": 6556
+    },
+    {
+      "path": "tests/data/cases/preview_long_strings__regression.py",
+      "file": "preview_long_strings__regression.py",
+      "git_blob": "123342f575c961e1e2aa581cfc7dca1373025159",
+      "sha256": "fcda1165fc281cabc666c1771349090cc53f631062bfb3d172e91ca0c0554c9b",
+      "bytes": 45984
+    },
+    {
+      "path": "tests/data/cases/preview_remove_multiline_lone_list_item_parens.py",
+      "file": "preview_remove_multiline_lone_list_item_parens.py",
+      "git_blob": "0856302624569c16cffacaf5baca022ad3919fca",
+      "sha256": "af08f5d3c40805add3d2715cf93b2ec0637231a465318850d9159f9e0aae5d12",
+      "bytes": 5456
+    },
+    {
+      "path": "tests/data/cases/preview_return_annotation_brackets_string.py",
+      "file": "preview_return_annotation_brackets_string.py",
+      "git_blob": "2f937cf54efdfbdd817444ed3b1b27e6728c05c0",
+      "sha256": "6fe5799487b72ecd4d785c59c4cffd0ff541964e7fa5e57332d62e5f2c2b6ee5",
+      "bytes": 742
+    },
+    {
+      "path": "tests/data/cases/preview_wrap_comprehension_in.py",
+      "file": "preview_wrap_comprehension_in.py",
+      "git_blob": "e457f0e772fd48d3b7fadd49eed415efa8846a48",
+      "sha256": "f658cb4c1d36d6f4d2a4736cb10a6797f0642461de65b21d8529d1620cb4f7dd",
+      "bytes": 4397
+    },
+    {
+      "path": "tests/data/cases/py310_pep572.py",
+      "file": "py310_pep572.py",
+      "git_blob": "73fbe44d42c2687bd97e4458463579cfa25658da",
+      "sha256": "275ca2f33ea20e3bef34b04756f92e60422c50b37f5e76fa4f21a7b59750e9d3",
+      "bytes": 173
+    },
+    {
+      "path": "tests/data/cases/python37.py",
+      "file": "python37.py",
+      "git_blob": "a600621e0d179090071d2e67fbe3d86f9c9266f1",
+      "sha256": "47c1bdc0c5f42f20c96cbcf8198f435baf6ac76bcff7d9596252e938585d90ae",
+      "bytes": 1173
+    },
+    {
+      "path": "tests/data/cases/python38.py",
+      "file": "python38.py",
+      "git_blob": "715641b1871b553344142ad5bbb7479ad55e549c",
+      "sha256": "e25ed3dfef17c6738b661514e31614b0151e397bc342da1bf3581b1adad42f21",
+      "bytes": 780
+    },
+    {
+      "path": "tests/data/cases/python39.py",
+      "file": "python39.py",
+      "git_blob": "719c2b5574564fd62f194b03973c03a4c2af30a5",
+      "sha256": "4c1a7832e9328f34f72041429117386272dbd5a82a7cdf9e53322f9c502cb8ec",
+      "bytes": 630
+    },
+    {
+      "path": "tests/data/cases/raw_docstring.py",
+      "file": "raw_docstring.py",
+      "git_blob": "7f88bb2de86e2eca21e16c39837c5b3a39a0fa4d",
+      "sha256": "803bf5d358d629e1401046289d501e0e85639f5e783830bdb28aabd2a4ed428b",
+      "bytes": 292
+    },
+    {
+      "path": "tests/data/cases/raw_docstring_no_string_normalization.py",
+      "file": "raw_docstring_no_string_normalization.py",
+      "git_blob": "a201c1e8fae1bef88f08b77cb19c0dd75ef8b0e1",
+      "sha256": "3eceea4308840fb297328a14cebd68f2e349683f2bce4c30e8cfa424611b2062",
+      "bytes": 394
+    },
+    {
+      "path": "tests/data/cases/remove_await_parens.py",
+      "file": "remove_await_parens.py",
+      "git_blob": "073150c5f08a34dd60486a09d81a4d915acbc206",
+      "sha256": "5b6cb492450963e82e064b7e8a37e60a10859b63582ce879e11dbc4a4d8dc9cc",
+      "bytes": 3538
+    },
+    {
+      "path": "tests/data/cases/remove_except_parens.py",
+      "file": "remove_except_parens.py",
+      "git_blob": "322c5b7a51b07e74257a989d6668044f54988bce",
+      "sha256": "310eacc09fa0ff2c5286c3f80ce328c8f371002af1a31627436e9d8e595428ea",
+      "bytes": 2025
+    },
+    {
+      "path": "tests/data/cases/remove_except_types_parens.py",
+      "file": "remove_except_types_parens.py",
+      "git_blob": "463be7e52d44ea3e68b28e213e7e459c391ca7c3",
+      "sha256": "2c10700f493e8c8d1ef772895510500f7401f0edb7f9907b7338c9c91be666c5",
+      "bytes": 3386
+    },
+    {
+      "path": "tests/data/cases/remove_except_types_parens_pre_py314.py",
+      "file": "remove_except_types_parens_pre_py314.py",
+      "git_blob": "acd2458c8a971d0ceaac9e8e3c4446568f0ec474",
+      "sha256": "364299a96bed4b07b2b03cac49ff505e4d8a8304fa54ecb1dd91e69cf7f98f7d",
+      "bytes": 2962
+    },
+    {
+      "path": "tests/data/cases/remove_for_brackets.py",
+      "file": "remove_for_brackets.py",
+      "git_blob": "cd5340462da800a429fa080a3d3037a471cff975",
+      "sha256": "b291d5aee01736bcdd06c75edd585df8cab3b92b6a1b60aee21adffe010d79c2",
+      "bytes": 1460
+    },
+    {
+      "path": "tests/data/cases/remove_lone_list_item_parens.py",
+      "file": "remove_lone_list_item_parens.py",
+      "git_blob": "8127e038e1c74279d2fd992ce8af328d06bac12c",
+      "sha256": "4b5ba7085866a0aac7ca279188129a5527aa0f6b628e0ac0f56824173a71ec09",
+      "bytes": 3417
+    },
+    {
+      "path": "tests/data/cases/remove_newline_after_code_block_open.py",
+      "file": "remove_newline_after_code_block_open.py",
+      "git_blob": "6622e8afb7d3ffafd98a445564bc377134d5689d",
+      "sha256": "265f357cd249c115bfdf52977a8f97b152285863e62f44c5d479e99a9e47e864",
+      "bytes": 3218
+    },
+    {
+      "path": "tests/data/cases/remove_parens.py",
+      "file": "remove_parens.py",
+      "git_blob": "abd5f71fcd0f46f40bb70ddd2aafa81aef4a46fd",
+      "sha256": "31ef611820b49118b751f76225d213a865ef76e5835927a5b983c36c1b788f9b",
+      "bytes": 3493
+    },
+    {
+      "path": "tests/data/cases/remove_parens_from_lhs.py",
+      "file": "remove_parens_from_lhs.py",
+      "git_blob": "b172aa748f70a74eb12069e810efc1f7d5d1ecd3",
+      "sha256": "0f35a9e3869d0146e6c1fe833b627a173f7adbb8d895ab7360201333f2aeeb46",
+      "bytes": 709
+    },
+    {
+      "path": "tests/data/cases/remove_redundant_parens_in_case_guard.py",
+      "file": "remove_redundant_parens_in_case_guard.py",
+      "git_blob": "4739fc5478ee6f85ecb3bf34a7e0de111f6b1d8a",
+      "sha256": "3d1e44f0ed0bd6c3ab77c7ebed08e70b1deaadfe63a1f1a380f9f27a0594e4ae",
+      "bytes": 1486
+    },
+    {
+      "path": "tests/data/cases/remove_with_brackets.py",
+      "file": "remove_with_brackets.py",
+      "git_blob": "f2319e0da8471db6285ccf8236f4cbd63cde1a67",
+      "sha256": "3cf8279832efba9ec71260c36b6892616bf62a5e767b2ad4ac3d69efb99dfe59",
+      "bytes": 2869
+    },
+    {
+      "path": "tests/data/cases/return_annotation_brackets.py",
+      "file": "return_annotation_brackets.py",
+      "git_blob": "ed05bed61f46b83546f7750af257541dfb8191a0",
+      "sha256": "960f1ab0791aff6809b28c3fc58ffede71f2e42cd7ec9fa2d5c0a138d59d7c82",
+      "bytes": 5207
+    },
+    {
+      "path": "tests/data/cases/single_line_format_skip_with_multiple_comments.py",
+      "file": "single_line_format_skip_with_multiple_comments.py",
+      "git_blob": "7212740fc42d7fbdf55419fdc571547471de0257",
+      "sha256": "dd5b076b255f1b5dcbbda9e10852be036e2cb308c69eb7131fb98ae4b6b6c96d",
+      "bytes": 646
+    },
+    {
+      "path": "tests/data/cases/skip_magic_trailing_comma.py",
+      "file": "skip_magic_trailing_comma.py",
+      "git_blob": "1ef34af4f119977191ab61056bb1b6f037ec247c",
+      "sha256": "4548b46d1c7a5a4fc3bb1a8ffca3f0f2238b5e2e3abd636baf1f23d91de81ef3",
+      "bytes": 1433
+    },
+    {
+      "path": "tests/data/cases/skip_magic_trailing_comma_generic_wrap.py",
+      "file": "skip_magic_trailing_comma_generic_wrap.py",
+      "git_blob": "a833f3df86371c675a084a29c6f9076eed36596e",
+      "sha256": "1a9862d6e131408ef3a7533d031b6d78b935b1a8dc6981691afcbce337b09477",
+      "bytes": 2150
+    },
+    {
+      "path": "tests/data/cases/slices.py",
+      "file": "slices.py",
+      "git_blob": "165117cdcb495be4470d8cbe41bb4c584432380c",
+      "sha256": "d4c8c1861951665cc76cff6770c30948b72f28dd00dda723267d64bde1c5e2de",
+      "bytes": 787
+    },
+    {
+      "path": "tests/data/cases/split_delimiter_comments.py",
+      "file": "split_delimiter_comments.py",
+      "git_blob": "ea29f7c034f8fc73cd4e4bf3b9671582d0e395b5",
+      "sha256": "4310ab9d17c1fa7a1552772e17ab8848fbb7f41a72f9916450e4fd4da69c2220",
+      "bytes": 817
+    },
+    {
+      "path": "tests/data/cases/standardize_type_comments.py",
+      "file": "standardize_type_comments.py",
+      "git_blob": "0b3e63c92f75e1a675bd63f4a73d5eee7cfd9e61",
+      "sha256": "afc362a9206482fcb22e680cbca5a803f455863725894e419a7fe319c94d74b2",
+      "bytes": 396
+    },
+    {
+      "path": "tests/data/cases/starred_for_target.py",
+      "file": "starred_for_target.py",
+      "git_blob": "13e517816d65fd63401228b0832c47dac07e854b",
+      "sha256": "5da65a37a18c3b7d7cb67b1f56258a084be8bc734e8027ac0e53e888313d0844",
+      "bytes": 412
+    },
+    {
+      "path": "tests/data/cases/string_prefixes.py",
+      "file": "string_prefixes.py",
+      "git_blob": "f86da696e1566482850877c8ca3d1ed745ed0647",
+      "sha256": "94d27da88a2fbf96441a7b175b853f8b0a97125cd69783df1fe0f433c9764752",
+      "bytes": 845
+    },
+    {
+      "path": "tests/data/cases/stub.py",
+      "file": "stub.py",
+      "git_blob": "f3828d55ba2b302c4521ac238a1dbb96d897667b",
+      "sha256": "78d693677cab16feb4b1e23179806517b6cb5fafec49abe228384cec502e787f",
+      "bytes": 2281
+    },
+    {
+      "path": "tests/data/cases/target_version_flag.py",
+      "file": "target_version_flag.py",
+      "git_blob": "56972812896ace89487bb9a7f0d3cafc12c285f9",
+      "sha256": "5329734b97759ec97dc10f5f66fffd505afff95e2eb32127669b297ff086e405",
+      "bytes": 265
+    },
+    {
+      "path": "tests/data/cases/torture.py",
+      "file": "torture.py",
+      "git_blob": "2a194759a821ecb1b8529dc71cd5d6363a2e69d9",
+      "sha256": "10d21ec7e2a40367155ebed9a8a7565463bafeef8723fc63ba384aae34d0b7df",
+      "bytes": 2279
+    },
+    {
+      "path": "tests/data/cases/trailing_comma.py",
+      "file": "trailing_comma.py",
+      "git_blob": "5b09c6646062998e81b428b891e5cf83f0ee2226",
+      "sha256": "8a1a1ec08150bd782b8541ff2ad33f624c7456d53f4bb3e80471fd96915e342a",
+      "bytes": 655
+    },
+    {
+      "path": "tests/data/cases/trailing_comma_optional_parens1.py",
+      "file": "trailing_comma_optional_parens1.py",
+      "git_blob": "85aa8badb261652e60427d43a5796d42e2e72bec",
+      "sha256": "fa4425f001dfe0e244c4fd3d6e3cbcb839544c718752bf75a4da6f47e4f02b78",
+      "bytes": 1615
+    },
+    {
+      "path": "tests/data/cases/trailing_comma_optional_parens2.py",
+      "file": "trailing_comma_optional_parens2.py",
+      "git_blob": "9541670e3945df95d264f18e1176f38244c6f8cf",
+      "sha256": "236a92714206ada79fef9ba9850990046060e2fc89a2424919db2ce5822abdb6",
+      "bytes": 248
+    },
+    {
+      "path": "tests/data/cases/trailing_comma_optional_parens3.py",
+      "file": "trailing_comma_optional_parens3.py",
+      "git_blob": "c0ed699e6a61c2db737fefdcf727ef58941a6b33",
+      "sha256": "294aca850728c806402bad90ea3a679ac6e43ad1988b5f558575b2d634399d8a",
+      "bytes": 967
+    },
+    {
+      "path": "tests/data/cases/trailing_commas_in_leading_parts.py",
+      "file": "trailing_commas_in_leading_parts.py",
+      "git_blob": "99d82a677f8359041c030d8b4cadb2f89f966693",
+      "sha256": "6e56047e6b1d9e6cc697fabbff53b5953a76fb542c0a79890276326b48a6cf48",
+      "bytes": 2123
+    },
+    {
+      "path": "tests/data/cases/tricky_unicode_symbols.py",
+      "file": "tricky_unicode_symbols.py",
+      "git_blob": "ad8b610859031ec17b2d2a3d40b53b53f27eb4a3",
+      "sha256": "ca9efe6865cb7afd25435cf16c67a3567d403586d894a766982d8ee843bc0e86",
+      "bytes": 80
+    },
+    {
+      "path": "tests/data/cases/tuple_with_stmt.py",
+      "file": "tuple_with_stmt.py",
+      "git_blob": "885a300f4462bbf06624582c2f165583f18e69f9",
+      "sha256": "9f34fe60cd0c3cc2be075fcfc79f33a1cd0a1900408e11a4a1a21ff83a7e5445",
+      "bytes": 555
+    },
+    {
+      "path": "tests/data/cases/tupleassign.py",
+      "file": "tupleassign.py",
+      "git_blob": "d948fee52f62df8c57c4949bf6c8a32ce928c5c1",
+      "sha256": "e5acca3d3cf67b7017133c450fcd32f5cff7d254b10664c87c15a0839d21bd0d",
+      "bytes": 510
+    },
+    {
+      "path": "tests/data/cases/type_aliases.py",
+      "file": "type_aliases.py",
+      "git_blob": "7c2009e8202cf9a2820c69d485c36dbd2d1d4551",
+      "sha256": "ffeb146692f31a13db3bdc2a312bb643e82ead98d79274265c3b97ed57e762c6",
+      "bytes": 458
+    },
+    {
+      "path": "tests/data/cases/type_comment_syntax_error.py",
+      "file": "type_comment_syntax_error.py",
+      "git_blob": "2e5ca2ede8c9ec1bd63ccc8813e9ad3ed30cd7a9",
+      "sha256": "5c00448a0145a7ef62af8d0cf4623a6485f025b4a51df232e0aba86feb710e9f",
+      "bytes": 93
+    },
+    {
+      "path": "tests/data/cases/type_expansion.py",
+      "file": "type_expansion.py",
+      "git_blob": "d5cbc6e7274ad806646d9c110982afea4569a080",
+      "sha256": "78cc8bc487c1fd1fab3b5578361cea470a69f4ba8f246169501b485bf050016a",
+      "bytes": 666
+    },
+    {
+      "path": "tests/data/cases/type_param_defaults.py",
+      "file": "type_param_defaults.py",
+      "git_blob": "f8c24eb7cffeeb42088e08b92d3723da91959836",
+      "sha256": "6a1888ddfcddd7152442a19458ab653fc2397ccdef6967abd69c7efa7fc80ac2",
+      "bytes": 1705
+    },
+    {
+      "path": "tests/data/cases/type_params.py",
+      "file": "type_params.py",
+      "git_blob": "124292d6d5481337e18b2cb5c34341f90b61c757",
+      "sha256": "f4896b4619e97b48e9d98121387ac85bdd0fe08731e175b7ab25c7b89c48b1a7",
+      "bytes": 1460
+    },
+    {
+      "path": "tests/data/cases/typed_params_trailing_comma.py",
+      "file": "typed_params_trailing_comma.py",
+      "git_blob": "5bcdb94196613581fdfa478054c74b25c14d2367",
+      "sha256": "cbf611d36ee642eb4162ed4c798df6d7b6480ccc42dccb9885b3d93bc3b046db",
+      "bytes": 525
+    },
+    {
+      "path": "tests/data/cases/walrus_in_dict.py",
+      "file": "walrus_in_dict.py",
+      "git_blob": "33af6ab907f6375ccee7a157be4c1cef94b67023",
+      "sha256": "e587e110722379204c1354371274d505b7f65fde33527960baca517721a0284e",
+      "bytes": 120
+    },
+    {
+      "path": "tests/data/cases/whitespace.py",
+      "file": "whitespace.py",
+      "git_blob": "a319c0117b19e2d198575c42faf95d6af928ae1b",
+      "sha256": "fc2833f6ce903c832f06d4b4a56ae1e9b1c5a2f47d654337759f8d125ff273ee",
+      "bytes": 27
+    }
+  ],
+  "license": "MIT",
+  "source": "https://github.com/psf/black",
+  "selection": "All 197 tests/data/cases/*.py files at the pinned commit; no outcome-based selection."
+}

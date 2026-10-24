@@ -1,0 +1,105 @@
+test_sample
+  OtherTest
+    test_a ...                                                        [SKIPPED]
+  SampleTest
+    test_deferred_fail ...                                               [FAIL]
+    test_error ...                                                      [ERROR]
+    test_fail ...                                                        [FAIL]
+    test_pass ... hello from pass
+                                                         [OK]
+    test_skip ...                                                     [SKIPPED]
+    test_todo ...                                                        [TODO]
+    test_unexpected ...                                            [SUCCESS!?!]
+  SlowTest
+    test_sleep ...                                                         [OK]
+tests/test_broken
+  py ...                                                                [ERROR]
+
+===============================================================================
+[SKIPPED]
+whole class skipped
+
+test_sample.OtherTest.test_a
+===============================================================================
+[SKIPPED]
+not today
+
+test_sample.SampleTest.test_skip
+===============================================================================
+[TODO]
+Reason: 'known bug'
+Traceback (most recent call last):
+  File "tests/test_sample.py", line 20, in test_todo
+    self.fail("expected to fail")
+twisted.trial.unittest.FailTest: expected to fail
+
+test_sample.SampleTest.test_todo
+===============================================================================
+[FAIL]
+Traceback (most recent call last):
+  File "tests/test_sample.py", line 31, in <lambda>
+    d.addCallback(lambda _: self.fail("deferred failed"))
+twisted.trial.unittest.FailTest: deferred failed
+
+test_sample.SampleTest.test_deferred_fail
+===============================================================================
+[FAIL]
+Traceback (most recent call last):
+  File "tests/test_sample.py", line 11, in test_fail
+    self.assertEqual(1, 2, "one is not two")
+  File "/usr/lib/python3/dist-packages/twisted/trial/_synctest.py", line 444, in assertEqual
+    super().assertEqual(first, second, msg)
+  File "/usr/lib/python3.12/unittest/case.py", line 885, in assertEqual
+    assertion_func(first, second, msg=msg)
+  File "/usr/lib/python3.12/unittest/case.py", line 878, in _baseAssertEqual
+    raise self.failureException(msg)
+twisted.trial.unittest.FailTest: 1 != 2 : one is not two
+
+test_sample.SampleTest.test_fail
+===============================================================================
+[ERROR]
+Traceback (most recent call last):
+  File "tests/test_sample.py", line 14, in test_error
+    raise RuntimeError("boom")
+builtins.RuntimeError: boom
+
+test_sample.SampleTest.test_error
+===============================================================================
+[ERROR]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/twisted/trial/runner.py", line 711, in loadByName
+    return self.suiteFactory([self.findByName(name, recurse=recurse)])
+  File "/usr/lib/python3/dist-packages/twisted/trial/runner.py", line 460, in findByName
+    return self.loadFile(_name, recurse=recurse)
+  File "/usr/lib/python3/dist-packages/twisted/trial/runner.py", line 763, in loadFile
+    module = SourceFileLoader(name, fileName).load_module()
+  File "<frozen importlib._bootstrap_external>", line 649, in _check_name_wrapper
+    
+  File "<frozen importlib._bootstrap_external>", line 1176, in load_module
+    
+  File "<frozen importlib._bootstrap_external>", line 1000, in load_module
+    
+  File "<frozen importlib._bootstrap>", line 537, in _load_module_shim
+    
+  File "<frozen importlib._bootstrap>", line 966, in _load
+    
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+    
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+    
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+    
+  File "tests/test_broken.py", line 1, in <module>
+    import does_not_exist  # noqa: F401
+builtins.ModuleNotFoundError: No module named 'does_not_exist'
+
+tests/test_broken.py
+===============================================================================
+[SUCCESS!?!]
+Reason: 'should fail but passes'
+
+test_sample.SampleTest.test_unexpected
+-------------------------------------------------------------------------------
+Ran 10 tests in 0.073s
+
+FAILED (skips=2, expectedFailures=1, failures=2, errors=2, unexpectedSuccesses=1, successes=2)

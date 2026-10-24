@@ -1,0 +1,331 @@
+{
+  "schema": "cpython-ast-fields-surrogate-codepoints-v2",
+  "fixtures": [
+    {
+      "token": "'\\ud800'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            55296
+          ]
+        },
+        "kind": null
+      }
+    },
+    {
+      "token": "'\u03c0\\udfff\ud83d\ude42'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            960,
+            57343,
+            128578
+          ]
+        },
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\ud83d\\ude00'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            55357,
+            56832
+          ]
+        },
+        "kind": null
+      }
+    },
+    {
+      "token": "u'\\ud800'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            55296
+          ]
+        },
+        "kind": "u"
+      }
+    },
+    {
+      "token": "U'\\ud800'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            55296
+          ]
+        },
+        "kind": null
+      }
+    },
+    {
+      "token": "r'\\ud800'",
+      "constant_fields": {
+        "value": "\\ud800",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\U0000d800'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            55296
+          ]
+        },
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\ud800\\nend'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            55296,
+            10,
+            101,
+            110,
+            100
+          ]
+        },
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{SNOWMAN}'",
+      "constant_fields": {
+        "value": "\u2603",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{snowman}'",
+      "constant_fields": {
+        "value": "\u2603",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{NULL}'",
+      "constant_fields": {
+        "value": "\u0000",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{LATIN CAPITAL LETTER GHA}'",
+      "constant_fields": {
+        "value": "\u01a2",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{HANGUL SYLLABLE GAG}'",
+      "constant_fields": {
+        "value": "\uac01",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{CJK UNIFIED IDEOGRAPH-4E00}'",
+      "constant_fields": {
+        "value": "\u4e00",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{CJK UNIFIED IDEOGRAPH-31350}'",
+      "constant_fields": {
+        "value": "\ud884\udf50",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{VARIATION SELECTOR-256}'",
+      "constant_fields": {
+        "value": "\udb40\uddef",
+        "kind": null
+      }
+    },
+    {
+      "token": "r'\\N{SNOWMAN}'",
+      "constant_fields": {
+        "value": "\\N{SNOWMAN}",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{COPYRIGHT SIGN}'",
+      "constant_fields": {
+        "value": "\u00a9",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{CYRILLIC SMALL LETTER ZHE}'",
+      "constant_fields": {
+        "value": "\u0436",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{EM SPACE}'",
+      "constant_fields": {
+        "value": "\u2003",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{EN SPACE}'",
+      "constant_fields": {
+        "value": "\u2002",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{GREEK CAPITAL LETTER OMEGA}'",
+      "constant_fields": {
+        "value": "\u03a9",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{GREEK SMALL LETTER ALPHA}'",
+      "constant_fields": {
+        "value": "\u03b1",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{GREEK SMALL LETTER ZETA}'",
+      "constant_fields": {
+        "value": "\u03b6",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{LATIN CAPITAL LETTER A WITH DIAERESIS}'",
+      "constant_fields": {
+        "value": "\u00c4",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{LATIN SMALL LETTER A WITH DIAERESIS}'",
+      "constant_fields": {
+        "value": "\u00e4",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{LONG RIGHTWARDS SQUIGGLE ARROW}'",
+      "constant_fields": {
+        "value": "\u27ff",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{NARROW NO-BREAK SPACE}'",
+      "constant_fields": {
+        "value": "\u202f",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{NO-BREAK SPACE}'",
+      "constant_fields": {
+        "value": "\u00a0",
+        "kind": null
+      }
+    },
+    {
+      "token": "'\\N{SNOWMAN}'",
+      "constant_fields": {
+        "value": "\u2603",
+        "kind": null
+      }
+    }
+  ],
+  "concat": [
+    {
+      "left": "u'\\ud800'",
+      "right": "'\u03c0'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            55296,
+            960
+          ]
+        },
+        "kind": "u"
+      }
+    },
+    {
+      "left": "'\u03c0'",
+      "right": "'\\ud800'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            960,
+            55296
+          ]
+        },
+        "kind": null
+      }
+    },
+    {
+      "left": "'\\ud800'",
+      "right": "u'\\udfff'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            55296,
+            57343
+          ]
+        },
+        "kind": null
+      }
+    },
+    {
+      "left": "u''",
+      "right": "'\\ud800'",
+      "constant_fields": {
+        "value": {
+          "literal_type": "str",
+          "codepoints": [
+            55296
+          ]
+        },
+        "kind": "u"
+      }
+    }
+  ],
+  "rejected": [
+    {
+      "token": "'\\N{NO SUCH NAME}'",
+      "accepted": false,
+      "error_type": "SyntaxError"
+    },
+    {
+      "token": "'\\N{KEYCAP DIGIT ONE}'",
+      "accepted": false,
+      "error_type": "SyntaxError"
+    },
+    {
+      "token": "'\\U00110000'",
+      "accepted": false,
+      "error_type": "SyntaxError"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+[
+  {
+    "abbreviation": "bp",
+    "description": "Pause in the debugger: breakpoint()",
+    "template": "breakpoint()$END$",
+    "contexts": ["Statement"]
+  },
+  {
+    "abbreviation": "logger",
+    "description": "Module-level logger",
+    "template": "logger = logging.getLogger(__name__)$END$",
+    "contexts": ["Module"]
+  },
+  {
+    "abbreviation": "todo",
+    "description": "TODO comment signed with the user name",
+    "text": "# TODO($USER$): $END$",
+    "context": "Statement",
+    "variables": [{ "name": "USER", "expression": "user()", "default": "me", "always_stop_at": false }]
+  }
+]

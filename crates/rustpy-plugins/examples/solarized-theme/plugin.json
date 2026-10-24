@@ -1,0 +1,13 @@
+{
+  "id": "com.example.solarized-theme",
+  "name": "Solarized Theme",
+  "version": "1.0.0",
+  "description": "The Solarized Dark editor color scheme (palette by Ethan Schoonover) and a few Python live templates.",
+  "vendor": "RustPy Examples",
+  "homepage": "https://github.com/altercation/solarized",
+  "min_ide_version": "0.1.0",
+  "contributes": {
+    "color_schemes": ["colors/solarized-dark.json"],
+    "live_templates": ["templates/python.json"]
+  }
+}

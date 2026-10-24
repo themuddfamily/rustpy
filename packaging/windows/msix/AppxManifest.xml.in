@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  RustPy MSIX manifest template (Microsoft Store and sideloaded .msix).
+  build-msix.sh / build-msix.ps1 substitute the @...@ placeholders; the identity values come
+  from identity.env (or RUSTPY_MSIX_* environment variables) and must be replaced with the
+  values Partner Center shows under Product management > Product identity before a Store
+  submission:
+    @IDENTITY_NAME@           Package/Identity/Name
+    @PUBLISHER@               Package/Identity/Publisher ("CN=...")
+    @PUBLISHER_DISPLAY_NAME@  Package/Properties/PublisherDisplayName
+    @DISPLAY_NAME@            the reserved app name
+  @VERSION@ is the Cargo.toml version as four parts (0.1.0 -> 0.1.0.0; the Store requires
+  the fourth part to be 0) and @ARCH@ is x64 or arm64.
+  Full-trust desktop app: rustpy.exe runs unmodified with the runFullTrust capability.
+  No Explorer folder context menu: desktop4/desktop5 FileExplorerContextMenus require a COM
+  IExplorerCommand handler, which RustPy does not ship (see packaging/README.md).
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap uap5 desktop rescap">
+
+  <Identity
+    Name="@IDENTITY_NAME@"
+    Publisher="@PUBLISHER@"
+    Version="@VERSION@"
+    ProcessorArchitecture="@ARCH@" />
+
+  <Properties>
+    <DisplayName>@DISPLAY_NAME@</DisplayName>
+    <PublisherDisplayName>@PUBLISHER_DISPLAY_NAME@</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>RustPy: a fast Python IDE written in Rust.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="RustPy" Executable="rustpy.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="@DISPLAY_NAME@"
+        Description="RustPy Python IDE"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile
+          Wide310x150Logo="Assets\Wide310x150Logo.png"
+          Square71x71Logo="Assets\Square71x71Logo.png"
+          Square310x310Logo="Assets\Square310x310Logo.png"
+          ShortName="RustPy">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+            <uap:ShowOn Tile="wide310x150Logo" />
+            <uap:ShowOn Tile="square310x310Logo" />
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile>
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+      </uap:VisualElements>
+      <Extensions>
+        <!-- Associations are only offered: Windows asks, or the user picks RustPy in
+             Settings > Apps > Default apps. A package never takes them over. -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="python">
+            <uap:DisplayName>Python source file</uap:DisplayName>
+            <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.py</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="python-stub">
+            <uap:DisplayName>Python stub file</uap:DisplayName>
+            <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.pyi</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="jupyter-notebook">
+            <uap:DisplayName>Jupyter notebook</uap:DisplayName>
+            <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.ipynb</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+        <!-- `rustpy` in any terminal: %LOCALAPPDATA%\Microsoft\WindowsApps\rustpy.exe
+             (replaces the MSI's PATH entry). -->
+        <uap5:Extension Category="windows.appExecutionAlias" Executable="rustpy.exe" EntryPoint="Windows.FullTrustApplication">
+          <uap5:AppExecutionAlias>
+            <uap5:ExecutionAlias Alias="rustpy.exe" />
+          </uap5:AppExecutionAlias>
+        </uap5:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

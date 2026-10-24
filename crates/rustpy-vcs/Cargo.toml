@@ -1,0 +1,30 @@
+[package]
+name = "rustpy-vcs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: Git integration"
+
+[dependencies]
+rustpy-core.workspace = true
+rustpy-settings.workspace = true
+rustpy-net.workspace = true
+url.workspace = true
+rustpy-secrets.workspace = true
+ureq = { version = "2", default-features = false, features = ["tls", "gzip"] }
+serde_json.workspace = true
+git2 = { workspace = true, features = ["ssh", "https"] }
+similar.workspace = true
+anyhow.workspace = true
+log.workspace = true
+serde.workspace = true
+roxmltree = "=0.20.0"
+chrono.workspace = true
+regex.workspace = true
+base64 = "=0.22.1"
+hmac = "=0.12.1"
+sha1 = "=0.10.7"
+
+[dev-dependencies]
+tempfile.workspace = true

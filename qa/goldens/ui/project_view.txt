@@ -1,0 +1,77 @@
+# rustpy ui snapshot: project_view
+# screen 320x400 @1x, theme "Dark"
+clip [0,0 320,400]
+rect [0,0 320,400] fill=#3c3f41
+clip [8,8 312,392]
+path [14,17 22,22] points=3 closed fill=#8c8c8c stroke=0none
+rect [29,16 42,26] fill=#59a869 radius=2,2,2,2
+rect [29,13 35,17] fill=#59a869 radius=1,1,1,1
+text (48,12) 100x15 "snapshot_project"
+  [0..16] Proportional 13 #bbbbbb
+clip [158,8 312,30]
+text (158,12) 64x14 "Project root"
+  [0..12] Proportional 12 #8c8c8c
+clip [8,8 312,392]
+path [28,43 36,48] points=3 closed fill=#8c8c8c stroke=0none
+rect [43,42 56,52] fill=#afb1b3 radius=2,2,2,2
+rect [43,39 49,43] fill=#afb1b3 radius=1,1,1,1
+text (62,38) 21x15 "pkg"
+  [0..3] Proportional 13 #bbbbbb
+clip [93,34 312,56]
+text (93,38) 50x14 "Directory"
+  [0..9] Proportional 12 #8c8c8c
+clip [8,8 312,392]
+rect [57,65 70,78] fill=#3e7cb8 radius=2,2,2,2
+text (59,67) 8x9 "py"
+  [0..2] Proportional 8 #ffffff
+text (76,64) 80x15 "◦ __init__.py"
+  [0..15] Proportional 13 #bbbbbb
+clip [166,60 312,82]
+text (166,64) 38x14 "Python"
+  [0..6] Proportional 12 #8c8c8c
+clip [8,8 312,392]
+rect [57,91 70,104] fill=#3e7cb8 radius=2,2,2,2
+text (59,93) 8x9 "py"
+  [0..2] Proportional 8 #ffffff
+text (76,90) 36x15 "util.py"
+  [0..7] Proportional 13 #bbbbbb
+clip [122,86 312,108]
+text (122,90) 38x14 "Python"
+  [0..6] Proportional 12 #8c8c8c
+clip [8,8 312,392]
+path [29,119 34,127] points=3 closed fill=#8c8c8c stroke=0none
+rect [43,120 56,130] fill=#afb1b3 radius=2,2,2,2
+rect [43,117 49,121] fill=#afb1b3 radius=1,1,1,1
+text (62,116) 28x15 "tests"
+  [0..5] Proportional 13 #bbbbbb
+clip [100,112 312,134]
+text (100,116) 50x14 "Directory"
+  [0..9] Proportional 12 #8c8c8c
+clip [8,8 312,392]
+rect [8,138 312,160] fill=#0d293e
+rect [43,143 56,156] fill=#3e7cb8 radius=2,2,2,2
+text (45,145) 8x9 "py"
+  [0..2] Proportional 8 #ffffff
+text (62,142) 45x15 "main.py"
+  [0..7] Proportional 13 #bbbbbb
+clip [117,138 312,160]
+text (117,142) 38x14 "Python"
+  [0..6] Proportional 12 #bbbbbb
+clip [8,8 312,392]
+rect [43,169 56,182] fill=#4a6fa5 radius=2,2,2,2
+text (46,171) 7x9 "M"
+  [0..1] Proportional 8 #ffffff
+text (62,168) 74x15 "README.md"
+  [0..9] Proportional 13 #bbbbbb
+clip [146,164 312,186]
+text (146,168) 57x14 "Markdown"
+  [0..8] Proportional 12 #8c8c8c
+clip [8,8 312,392]
+rect [43,195 56,208] fill=#808080 radius=2,2,2,2
+text (47,197) 4x9 "T"
+  [0..1] Proportional 8 #ffffff
+text (62,194) 98x15 "requirements.txt"
+  [0..16] Proportional 13 #bbbbbb
+clip [170,190 312,212]
+text (170,194) 75x14 "Requirements"
+  [0..12] Proportional 12 #8c8c8c

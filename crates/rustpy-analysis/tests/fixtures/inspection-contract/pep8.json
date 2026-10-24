@@ -1,0 +1,642 @@
+[
+  {
+    "id": "PEP8:E101",
+    "source": "if True:\n \tpass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E111",
+    "source": "  a = 1\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E112",
+    "source": "for item in items:\npass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E113",
+    "source": "a = 1\n    b = 2\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E114",
+    "source": "  # a = 1\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E115",
+    "source": "for item in items:\n# Hi\n    pass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E116",
+    "source": "a = 1\n    # b = 2\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E121",
+    "source": "a = (\n   42)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E122",
+    "source": "a = (\n42)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E123",
+    "source": "a = (\n    )\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E124",
+    "source": "a = (24,\n     42\n)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E125",
+    "source": "if (\n    b):\n    pass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E126",
+    "source": "a = (\n        42)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E127",
+    "source": "a = (24,\n      42)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E128",
+    "source": "a = (24,\n    42)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E129",
+    "source": "if (a or\n    b):\n    pass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E131",
+    "source": "a = (\n    42\n 24)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E133",
+    "source": "values = [\n    1,\n]\n",
+    "control": "value = 1\n",
+    "hang_closing": true,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E201",
+    "source": "spam( ham[1], {eggs: 2})\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E202",
+    "source": "spam(ham[1], {eggs: 2} )\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E203",
+    "source": "if x == 4: print x, y; x, y = y , x\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E204",
+    "source": "@ decorator\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E211",
+    "source": "spam (1)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E221",
+    "source": "a = 4  + 5\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E222",
+    "source": "a = 4 +  5\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E223",
+    "source": "a = 4\t+ 5\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E224",
+    "source": "a = 4 +\t5\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E225",
+    "source": "i=i+1\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E226",
+    "source": "c = (a+b) * (a-b)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E227",
+    "source": "c = a|b\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E228",
+    "source": "msg = fmt%(errno, errmsg)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E231",
+    "source": "['a','b']\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E241",
+    "source": "a = (1,  2)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E242",
+    "source": "a = (1,\t2)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E251",
+    "source": "def complex(real, imag = 0.0):\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E252",
+    "source": "def complex(real, image: float=0.0):\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E261",
+    "source": "x = x + 1 # Increment x\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E262",
+    "source": "x = x + 1  #Increment x\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E265",
+    "source": "#Block comment\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E266",
+    "source": "### Block comment\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E271",
+    "source": "True and  False\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E272",
+    "source": "True  and False\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E273",
+    "source": "True and\tFalse\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E274",
+    "source": "True\tand False\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E275",
+    "source": "from foo import(bar, baz)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E301",
+    "source": "class Foo:\n    b = 0\n    def bar():\n        pass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E302",
+    "source": "def a():\n    pass\n\ndef b(n):\n    pass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E303",
+    "source": "def a():\n    pass\n\n\n\ndef b(n):\n    pass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E304",
+    "source": "@decorator\n\ndef a():\n    pass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E305",
+    "source": "def a():\n    pass\na()\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E306",
+    "source": "def a():\n    def b():\n        pass\n    def c():\n        pass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E401",
+    "source": "import sys, os\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E402",
+    "source": "a=1\nimport os\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E501",
+    "source": "value = \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E502",
+    "source": "aaa = [123, \\\n       123]\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E701",
+    "source": "if foo == 'blah': do_blah_thing()\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E702",
+    "source": "do_one(); do_two(); do_three()\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E703",
+    "source": "do_four();  # useless semicolon\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E704",
+    "source": "def f(x): return 2*x\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E711",
+    "source": "if arg != None:\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E712",
+    "source": "if arg == True:\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E713",
+    "source": "Z = not X in Y\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E714",
+    "source": "if not X is Y:\n    pass\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E721",
+    "source": "if type(obj) == type(1):\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E722",
+    "source": "except:\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E731",
+    "source": "f = lambda x: 2*x\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E741",
+    "source": "l = 0\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E742",
+    "source": "class I(object):\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E743",
+    "source": "def l(x):\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E901",
+    "source": "value = (\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:E902",
+    "source": "",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": true
+  },
+  {
+    "id": "PEP8:W191",
+    "source": "if True:\n\treturn\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:W291",
+    "source": "spam(1) \n#\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:W292",
+    "source": "value = 1",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:W293",
+    "source": "class Foo(object):\n    \n    bang = 12\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:W391",
+    "source": "spam(1)\n\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:W503",
+    "source": "(width == 0\n + height == 0)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:W504",
+    "source": "(width == 0 +\n height == 0)\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:W505",
+    "source": "# documented prose documented prose documented prose documented prose documented prose documented prose documented prose documented prose \n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": 40,
+    "missing_file": false
+  },
+  {
+    "id": "PEP8:W605",
+    "source": "regex = '\\.png$'\n",
+    "control": "value = 1\n",
+    "hang_closing": false,
+    "max_doc_length": null,
+    "missing_file": false
+  }
+]

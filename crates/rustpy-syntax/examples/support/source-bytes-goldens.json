@@ -1,0 +1,260 @@
+{
+  "oracle": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "fixtures": [
+    {
+      "bytes_hex": "2320636f64696e673a206c6174696e2d310a783d22ff220d0a",
+      "oracle": {
+        "accepted": true,
+        "ast": {
+          "node": "Module",
+          "fields": {
+            "body": [
+              {
+                "node": "Assign",
+                "fields": {
+                  "targets": [
+                    {
+                      "node": "Name",
+                      "fields": {
+                        "id": "x",
+                        "ctx": {
+                          "node": "Store",
+                          "fields": {}
+                        }
+                      }
+                    }
+                  ],
+                  "value": {
+                    "node": "Constant",
+                    "fields": {
+                      "value": "ÿ",
+                      "kind": null
+                    }
+                  },
+                  "type_comment": null
+                }
+              }
+            ],
+            "type_ignores": []
+          }
+        }
+      }
+    },
+    {
+      "bytes_hex": "23212f7573722f62696e2f707974686f6e0a2320636f64696e673d61736369690a783d310a",
+      "oracle": {
+        "accepted": true,
+        "ast": {
+          "node": "Module",
+          "fields": {
+            "body": [
+              {
+                "node": "Assign",
+                "fields": {
+                  "targets": [
+                    {
+                      "node": "Name",
+                      "fields": {
+                        "id": "x",
+                        "ctx": {
+                          "node": "Store",
+                          "fields": {}
+                        }
+                      }
+                    }
+                  ],
+                  "value": {
+                    "node": "Constant",
+                    "fields": {
+                      "value": 1,
+                      "kind": null
+                    }
+                  },
+                  "type_comment": null
+                }
+              }
+            ],
+            "type_ignores": []
+          }
+        }
+      }
+    },
+    {
+      "bytes_hex": "efbbbf2320636f64696e673a207574662d380a783d22cf80220a",
+      "oracle": {
+        "accepted": true,
+        "ast": {
+          "node": "Module",
+          "fields": {
+            "body": [
+              {
+                "node": "Assign",
+                "fields": {
+                  "targets": [
+                    {
+                      "node": "Name",
+                      "fields": {
+                        "id": "x",
+                        "ctx": {
+                          "node": "Store",
+                          "fields": {}
+                        }
+                      }
+                    }
+                  ],
+                  "value": {
+                    "node": "Constant",
+                    "fields": {
+                      "value": "π",
+                      "kind": null
+                    }
+                  },
+                  "type_comment": null
+                }
+              }
+            ],
+            "type_ignores": []
+          }
+        }
+      }
+    },
+    {
+      "bytes_hex": "783d310a2320636f64696e673a206c6174696e2d310a783d22ff22",
+      "oracle": {
+        "accepted": false,
+        "error_type": "SyntaxError"
+      }
+    },
+    {
+      "bytes_hex": "efbbbf2320636f64696e673a206c6174696e2d310a783d31",
+      "oracle": {
+        "accepted": false,
+        "error_type": "SyntaxError"
+      }
+    },
+    {
+      "bytes_hex": "23206f7264696e61727920636f64696e67206d656e74696f6e0a783d310d",
+      "oracle": {
+        "accepted": true,
+        "ast": {
+          "node": "Module",
+          "fields": {
+            "body": [
+              {
+                "node": "Assign",
+                "fields": {
+                  "targets": [
+                    {
+                      "node": "Name",
+                      "fields": {
+                        "id": "x",
+                        "ctx": {
+                          "node": "Store",
+                          "fields": {}
+                        }
+                      }
+                    }
+                  ],
+                  "value": {
+                    "node": "Constant",
+                    "fields": {
+                      "value": 1,
+                      "kind": null
+                    }
+                  },
+                  "type_comment": null
+                }
+              }
+            ],
+            "type_ignores": []
+          }
+        }
+      }
+    },
+    {
+      "bytes_hex": "efbbbf2320636f64696e673a20757466380a783d31",
+      "oracle": {
+        "accepted": false,
+        "error_type": "SyntaxError"
+      }
+    },
+    {
+      "bytes_hex": "23212f7573722f62696e2f707974686f6e0d0a2320636f64696e673a206c6174696e2d310d0a783d22ff220d0a",
+      "oracle": {
+        "accepted": true,
+        "ast": {
+          "node": "Module",
+          "fields": {
+            "body": [
+              {
+                "node": "Assign",
+                "fields": {
+                  "targets": [
+                    {
+                      "node": "Name",
+                      "fields": {
+                        "id": "x",
+                        "ctx": {
+                          "node": "Store",
+                          "fields": {}
+                        }
+                      }
+                    }
+                  ],
+                  "value": {
+                    "node": "Constant",
+                    "fields": {
+                      "value": "ÿ",
+                      "kind": null
+                    }
+                  },
+                  "type_comment": null
+                }
+              }
+            ],
+            "type_ignores": []
+          }
+        }
+      }
+    },
+    {
+      "bytes_hex": "23212f7573722f62696e2f707974686f6e0d2320636f64696e673a206c6174696e2d310d783d22ff220d",
+      "oracle": {
+        "accepted": true,
+        "ast": {
+          "node": "Module",
+          "fields": {
+            "body": [
+              {
+                "node": "Assign",
+                "fields": {
+                  "targets": [
+                    {
+                      "node": "Name",
+                      "fields": {
+                        "id": "x",
+                        "ctx": {
+                          "node": "Store",
+                          "fields": {}
+                        }
+                      }
+                    }
+                  ],
+                  "value": {
+                    "node": "Constant",
+                    "fields": {
+                      "value": "ÿ",
+                      "kind": null
+                    }
+                  },
+                  "type_comment": null
+                }
+              }
+            ],
+            "type_ignores": []
+          }
+        }
+      }
+    }
+  ]
+}

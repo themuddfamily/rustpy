@@ -1,0 +1,7 @@
+{
+  "format": "rustpy-plugin",
+  "version": 1,
+  "files": {
+    "plugin.json": "{\n  \"id\": \"org.rustpy.csv-table\",\n  \"name\": \"CSV Table\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Read-only CSV table with source editing fallback\",\n  \"vendor\": \"RustPy\",\n  \"contributes\": {\n    \"table_editors\": [\n      {\n        \"name\": \"CSV Table\",\n        \"extensions\": [\n          \"csv\"\n        ],\n        \"kind\": \"Csv\"\n      }\n    ]\n  }\n}\n"
+  }
+}

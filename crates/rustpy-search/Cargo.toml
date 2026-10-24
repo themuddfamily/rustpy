@@ -1,0 +1,23 @@
+[package]
+name = "rustpy-search"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: find in files, file finder, structural search and fuzzy matching"
+
+[dependencies]
+rustpy-core.workspace = true
+rustpy-text.workspace = true
+rustpy-settings.workspace = true
+rustpy-semantic.workspace = true
+rustpy-syntax.workspace = true
+rustpy-project.workspace = true
+regex.workspace = true
+once_cell.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rayon = "1"
+
+[dev-dependencies]
+tempfile.workspace = true

@@ -1,0 +1,181 @@
+[
+{
+  "description": [
+    "As a user I want to add numbers."
+  ],
+  "elements": [
+    {
+      "keyword": "Background",
+      "location": "features/calculator.feature:5",
+      "name": "",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "name": "a fresh calculator",
+          "step_type": "given"
+        }
+      ],
+      "type": "background"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/calculator.feature:12",
+      "name": "Failing addition",
+      "status": "failed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 7.748603820800781e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:13",
+          "match": {
+            "arguments": [
+              {
+                "name": "a",
+                "original": "2",
+                "value": 2
+              },
+              {
+                "name": "b",
+                "original": "2",
+                "value": 2
+              }
+            ],
+            "location": "features/steps/calc_steps.py:9"
+          },
+          "name": "I add 2 and 2",
+          "result": {
+            "duration": 4.7206878662109375e-05,
+            "status": "passed"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:14",
+          "match": {
+            "arguments": [
+              {
+                "name": "expected",
+                "original": "5",
+                "value": 5
+              }
+            ],
+            "location": "features/steps/calc_steps.py:20"
+          },
+          "name": "the result is 5",
+          "result": {
+            "duration": 5.030632019042969e-05,
+            "error_message": "ASSERT FAILED: expected 5 but got 4",
+            "status": "failed"
+          },
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/calculator.feature:21",
+      "name": "Skipped scenario",
+      "status": "skipped",
+      "steps": [],
+      "tags": [
+        "skip"
+      ],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario Outline",
+      "location": "features/calculator.feature:36",
+      "name": "Add 2 and 2 -- @1.2 Small numbers",
+      "status": "failed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 4.1484832763671875e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:30",
+          "match": {
+            "arguments": [
+              {
+                "name": "a",
+                "original": "2",
+                "value": 2
+              },
+              {
+                "name": "b",
+                "original": "2",
+                "value": 2
+              }
+            ],
+            "location": "features/steps/calc_steps.py:9"
+          },
+          "name": "I add 2 and 2",
+          "result": {
+            "duration": 3.886222839355469e-05,
+            "status": "passed"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:31",
+          "match": {
+            "arguments": [
+              {
+                "name": "expected",
+                "original": "5",
+                "value": 5
+              }
+            ],
+            "location": "features/steps/calc_steps.py:20"
+          },
+          "name": "the result is 5",
+          "result": {
+            "duration": 3.743171691894531e-05,
+            "error_message": "ASSERT FAILED: expected 5 but got 4",
+            "status": "failed"
+          },
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    }
+  ],
+  "keyword": "Feature",
+  "location": "features/calculator.feature:2",
+  "name": "Calculator",
+  "status": "failed",
+  "tags": [
+    "calc"
+  ]
+}
+]

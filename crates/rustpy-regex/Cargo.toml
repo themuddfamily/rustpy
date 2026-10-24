@@ -1,0 +1,17 @@
+[package]
+name = "rustpy-regex"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: Python regular-expression language injection (tokenizer, validation, injection points, Check RegExp)"
+
+[dependencies]
+rustpy-core.workspace = true
+rustpy-syntax.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+which.workspace = true

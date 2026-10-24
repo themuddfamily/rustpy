@@ -1,0 +1,33 @@
+[package]
+name = "rustpy-net"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: shared HTTP(S) agent setup — proxy settings (none / environment / manual HTTP or SOCKS, no-proxy lists), server certificate trust (accepted certificates, system CA bundle, untrusted-certificate prompts) and connection checks"
+
+[dependencies]
+rustpy-settings.workspace = true
+log.workspace = true
+serde_json.workspace = true
+# Boa 0.22 replaces the unmaintained paste dependency with pastey.
+# Keep optional runtime/Web APIs disabled; PAC only gets the native helpers below.
+boa_engine = { version = "=0.22.0", default-features = false }
+# Same declaration as the other crates; rustls is used through `ureq::rustls`
+# so its version always matches the one ureq is built with.
+ureq = { version = "2", default-features = false, features = ["tls", "gzip"] }
+webpki-roots = "1"
+ring = "0.17"
+base64 = "0.22"
+url = "2"
+tempfile.workspace = true
+
+[target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
+# getsockname/getpeername (and proc_pidinfo on macOS): proxy bridges serve only
+# connections made by this process.
+libc.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+# The Windows certificate store (Tools › Server Certificates › trust the OS CAs)
+# and the TCP connection table (proxy bridges serve only this process).
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security_Cryptography", "Win32_NetworkManagement_IpHelper"] }

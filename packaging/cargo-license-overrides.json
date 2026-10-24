@@ -1,0 +1,1144 @@
+{
+  "packages": {
+    "accesskit@0.24.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-a55d3e1a18bb/AUTHORS",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/a55d3e1a18bb9ef0e4bccc9083fb13c3e0ad8969/AUTHORS",
+          "sha256": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-a55d3e1a18bb/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/a55d3e1a18bb9ef0e4bccc9083fb13c3e0ad8969/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-a55d3e1a18bb/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/a55d3e1a18bb9ef0e4bccc9083fb13c3e0ad8969/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-a55d3e1a18bb/LICENSE.chromium",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/a55d3e1a18bb9ef0e4bccc9083fb13c3e0ad8969/LICENSE.chromium",
+          "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "accesskit_consumer@0.35.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/AUTHORS",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/AUTHORS",
+          "sha256": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE.chromium",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/LICENSE.chromium",
+          "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "accesskit_consumer@0.36.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-f40dfc01a0c0/AUTHORS",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/f40dfc01a0c0e76de535969f82fb35e19513737d/AUTHORS",
+          "sha256": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-f40dfc01a0c0/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/f40dfc01a0c0e76de535969f82fb35e19513737d/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-f40dfc01a0c0/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/f40dfc01a0c0e76de535969f82fb35e19513737d/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-f40dfc01a0c0/LICENSE.chromium",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/f40dfc01a0c0e76de535969f82fb35e19513737d/LICENSE.chromium",
+          "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "accesskit_consumer@0.38.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-c88605b96d04/AUTHORS",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/c88605b96d04431f9c3c792464a0f2f253480e94/AUTHORS",
+          "sha256": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-c88605b96d04/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/c88605b96d04431f9c3c792464a0f2f253480e94/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-c88605b96d04/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/c88605b96d04431f9c3c792464a0f2f253480e94/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-c88605b96d04/LICENSE.chromium",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/c88605b96d04431f9c3c792464a0f2f253480e94/LICENSE.chromium",
+          "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "accesskit_macos@0.26.3": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-c88605b96d04/AUTHORS",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/c88605b96d04431f9c3c792464a0f2f253480e94/AUTHORS",
+          "sha256": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-c88605b96d04/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/c88605b96d04431f9c3c792464a0f2f253480e94/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-c88605b96d04/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/c88605b96d04431f9c3c792464a0f2f253480e94/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-c88605b96d04/LICENSE.chromium",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/c88605b96d04431f9c3c792464a0f2f253480e94/LICENSE.chromium",
+          "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "accesskit_unix@0.21.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-f40dfc01a0c0/AUTHORS",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/f40dfc01a0c0e76de535969f82fb35e19513737d/AUTHORS",
+          "sha256": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-f40dfc01a0c0/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/f40dfc01a0c0e76de535969f82fb35e19513737d/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-f40dfc01a0c0/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/f40dfc01a0c0e76de535969f82fb35e19513737d/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-f40dfc01a0c0/LICENSE.chromium",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/f40dfc01a0c0e76de535969f82fb35e19513737d/LICENSE.chromium",
+          "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "accesskit_windows@0.32.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/AUTHORS",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/AUTHORS",
+          "sha256": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE.chromium",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/LICENSE.chromium",
+          "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "accesskit_winit@0.32.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/AUTHORS",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/AUTHORS",
+          "sha256": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE.chromium",
+          "url": "https://raw.githubusercontent.com/AccessKit/accesskit/1bbcf100942bac96c2c3a4a91cb67b0b20201a24/LICENSE.chromium",
+          "sha256": "845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "anes@0.1.6": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/zrzka--anes-rs-378ac7461eca/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/zrzka/anes-rs/378ac7461ecac29fde9e10df7b08359d1315a9ad/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/zrzka--anes-rs-378ac7461eca/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/zrzka/anes-rs/378ac7461ecac29fde9e10df7b08359d1315a9ad/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "block2@0.5.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-4fc083f1c6d6/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/4fc083f1c6d6784577e38b0ee8dbd344481e2fd2/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "block2@0.6.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-b4167b582b2f/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/b4167b582b2f75f9a1be75495c41b765344fd03c/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "boa_ast@0.22.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-MIT",
+          "sha256": "60d7cf4b66cef6bab24701e25f87829c4ce01fb734def53c41e5ed79ab434cb3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-UNLICENSE",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-UNLICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "boa_engine@0.22.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-MIT",
+          "sha256": "60d7cf4b66cef6bab24701e25f87829c4ce01fb734def53c41e5ed79ab434cb3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-UNLICENSE",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-UNLICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "boa_gc@0.22.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-MIT",
+          "sha256": "60d7cf4b66cef6bab24701e25f87829c4ce01fb734def53c41e5ed79ab434cb3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-UNLICENSE",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-UNLICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "boa_interner@0.22.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-MIT",
+          "sha256": "60d7cf4b66cef6bab24701e25f87829c4ce01fb734def53c41e5ed79ab434cb3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-UNLICENSE",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-UNLICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "boa_macros@0.22.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-MIT",
+          "sha256": "60d7cf4b66cef6bab24701e25f87829c4ce01fb734def53c41e5ed79ab434cb3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-UNLICENSE",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-UNLICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "boa_parser@0.22.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-MIT",
+          "sha256": "60d7cf4b66cef6bab24701e25f87829c4ce01fb734def53c41e5ed79ab434cb3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-UNLICENSE",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-UNLICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "boa_string@0.22.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-MIT",
+          "sha256": "60d7cf4b66cef6bab24701e25f87829c4ce01fb734def53c41e5ed79ab434cb3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-337a3668a0dc/LICENSE-UNLICENSE",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/337a3668a0dc86dd401ea20906e782249a64a228/LICENSE-UNLICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "clipboard-win@5.4.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/DoumanAsh--clipboard-win-3b27cf2bfd1a/LICENSE",
+          "url": "https://raw.githubusercontent.com/DoumanAsh/clipboard-win/3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342/LICENSE",
+          "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "defmt-parser@1.0.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/knurling-rs--defmt-4a8cdb44891e/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/knurling-rs/defmt/4a8cdb44891ed57b8ff5a023b6bec7137c48708f/LICENSE-APACHE",
+          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/knurling-rs--defmt-4a8cdb44891e/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/knurling-rs/defmt/4a8cdb44891ed57b8ff5a023b6bec7137c48708f/LICENSE-MIT",
+          "sha256": "2710a622a896bba67356913d4d0492cab5465f61b2ecce6d880aeb483834fb50"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "dispatch2@0.3.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-8852b424193c/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/8852b424193ca41602281b3d7540d7c8ed51e49a/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "dispatch@0.2.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/SSheldon--rust-dispatch-82d6c7a5b75d/Cargo.toml",
+          "url": "https://raw.githubusercontent.com/SSheldon/rust-dispatch/82d6c7a5b75dc0c71c3f46f87bb6c16a476f7748/Cargo.toml",
+          "sha256": "05c60b829931ef7f1f130735843c11f5cf9cc69546eca5fc941d014781c68e31"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/spdx--license-list-data-31ba1a50e539/text/MIT.txt",
+          "url": "https://raw.githubusercontent.com/spdx/license-list-data/31ba1a50e5397e00a304dbadc76531740e89ee48/text/MIT.txt",
+          "sha256": "b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5"
+        }
+      ],
+      "reason": "upstream revision has no standalone license file; original Cargo.toml explicitly declares MIT and identifies author Steven Sheldon; include that exact evidence with unmodified canonical SPDX MIT template, without guessing copyright text or year or asserting sole ownership; package source contains no copyright headers"
+    },
+    "ecolor@0.36.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-APACHE",
+          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-MIT",
+          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "egui-wgpu@0.36.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-APACHE",
+          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-MIT",
+          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "egui-winit@0.36.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-APACHE",
+          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-MIT",
+          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "egui@0.36.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-APACHE",
+          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-MIT",
+          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "emath@0.36.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-APACHE",
+          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-MIT",
+          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "epaint@0.36.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-APACHE",
+          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-MIT",
+          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "epaint_default_fonts@0.36.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-APACHE",
+          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/emilk--egui-49682f8baa05/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-MIT",
+          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "gl_generator@0.14.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/brendanzab--gl-rs-ea503e8d5fb6/LICENSE",
+          "url": "https://raw.githubusercontent.com/brendanzab/gl-rs/ea503e8d5fb6d73c6030e6191ce738cd3bf3433e/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "jni-macros@0.22.4": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/jni-rs--jni-rs-33045a124105/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/jni-rs--jni-rs-33045a124105/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-MIT",
+          "sha256": "fea1d5bf3dd71605ce5d7d2ff695c1837e914c77195e523a86b5391716477960"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "jni-sys-macros@0.4.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/jni-rs--jni-sys-64d77b7a5f11/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-sys/64d77b7a5f119d7b55b4e2c169a4668067ff59e6/LICENSE-APACHE",
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/jni-rs--jni-sys-64d77b7a5f11/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-sys/64d77b7a5f119d7b55b4e2c169a4668067ff59e6/LICENSE-MIT",
+          "sha256": "1d85bd754b04ceec93e98e890edd1fa3c6a22e81bcb32135806beeccefa51cd1"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "jni@0.22.4": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/jni-rs--jni-rs-5ae9458a4ec4/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/jni-rs--jni-rs-5ae9458a4ec4/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-MIT",
+          "sha256": "fea1d5bf3dd71605ce5d7d2ff695c1837e914c77195e523a86b5391716477960"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "khronos_api@3.1.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/brendanzab--gl-rs-f150967b1c44/LICENSE",
+          "url": "https://raw.githubusercontent.com/brendanzab/gl-rs/f150967b1c44ae888e6676f93f639ebc82771bdc/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "mongocrypt-sys@0.1.6+1.18.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/mongodb--libmongocrypt-rust-025292bb68e7/LICENSE",
+          "url": "https://raw.githubusercontent.com/mongodb/libmongocrypt-rust/025292bb68e7d702497ac7564b79ca78403edca3/LICENSE",
+          "sha256": "0d6fc0c55c9aa03692171f5373ba6d878aca44a77438ab4fafd3e63f43b816ca"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "mongocrypt@0.4.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/mongodb--libmongocrypt-rust-025292bb68e7/LICENSE",
+          "url": "https://raw.githubusercontent.com/mongodb/libmongocrypt-rust/025292bb68e7d702497ac7564b79ca78403edca3/LICENSE",
+          "sha256": "0d6fc0c55c9aa03692171f5373ba6d878aca44a77438ab4fafd3e63f43b816ca"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "mongodb-internal-macros@3.9.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/mongodb--mongo-rust-driver-16bc932cf4d8/LICENSE",
+          "url": "https://raw.githubusercontent.com/mongodb/mongo-rust-driver/16bc932cf4d8a161a49e8161b2158228a6ca8956/LICENSE",
+          "sha256": "0d6fc0c55c9aa03692171f5373ba6d878aca44a77438ab4fafd3e63f43b816ca"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "mongodb@3.9.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/mongodb--mongo-rust-driver-16bc932cf4d8/LICENSE",
+          "url": "https://raw.githubusercontent.com/mongodb/mongo-rust-driver/16bc932cf4d8a161a49e8161b2158228a6ca8956/LICENSE",
+          "sha256": "0d6fc0c55c9aa03692171f5373ba6d878aca44a77438ab4fafd3e63f43b816ca"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "ndk-context@0.1.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/rust-windowing--android-ndk-rs-10f2ba388fca/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/rust-windowing/android-ndk-rs/10f2ba388fca20f7349996ebae26ccda7a6fda5c/LICENSE-APACHE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/rust-windowing--android-ndk-rs-10f2ba388fca/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/rust-windowing/android-ndk-rs/10f2ba388fca20f7349996ebae26ccda7a6fda5c/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "ndk-sys@0.6.0+11769913": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/rust-mobile--ndk-49bbbba16c58/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-APACHE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/rust-mobile--ndk-49bbbba16c58/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "ndk@0.9.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/rust-mobile--ndk-49bbbba16c58/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-APACHE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/rust-mobile--ndk-49bbbba16c58/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc-sys@0.3.5": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-4fc083f1c6d6/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/4fc083f1c6d6784577e38b0ee8dbd344481e2fd2/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-app-kit@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-app-kit@0.3.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-7b1abfd750a2/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-cloud-kit@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-contacts@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-core-data@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-core-foundation@0.3.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-7b1abfd750a2/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-core-graphics@0.3.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-7b1abfd750a2/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-core-image@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-core-location@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-encode@4.1.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-8d214f547736/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/8d214f5477365ffcbcbb7de058c86ed9a518efb7/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-exception-helper@0.1.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-8d214f547736/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/8d214f5477365ffcbcbb7de058c86ed9a518efb7/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-io-surface@0.3.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-7b1abfd750a2/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-link-presentation@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-metal@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-quartz-core@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-symbols@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-ui-kit@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-ui-kit@0.3.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-7b1abfd750a2/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-uniform-type-identifiers@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-user-notifications@0.2.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-e282618be4c3/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2-web-kit@0.3.2": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-7b1abfd750a2/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2@0.5.3": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-5237cbf081d0/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/5237cbf081d04ef75a1f6a207b4018e7c1ae7438/LICENSE.txt",
+          "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "objc2@0.6.5": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/madsmtm--objc2-d7d2fa23ceaa/LICENSE.md",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/d7d2fa23ceaa5e6096c923b081040e5d81b3b9df/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "profiling@1.0.18": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/aclysma--profiling-8271551172eb/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/aclysma/profiling/8271551172eb6fa4cba47369aedd93790c623df9/LICENSE-APACHE",
+          "sha256": "10d30a673cd5e9349bdc02aeb48f14b3386d27d0da32df8f0a555d4aa16aa551"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/aclysma--profiling-8271551172eb/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/aclysma/profiling/8271551172eb6fa4cba47369aedd93790c623df9/LICENSE-MIT",
+          "sha256": "c8167fdeeed46d3f244d3f85c5bf998ce889343691c32be2c61a8bc4b5c08333"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "r-efi@5.3.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/r-efi--r-efi-97b55bed1c2c/AUTHORS",
+          "url": "https://raw.githubusercontent.com/r-efi/r-efi/97b55bed1c2c91dcbf787674849f05337ff80b33/AUTHORS",
+          "sha256": "ff92bed461f50338dd703a9ba9aee496a425957873df1d91192776e4bdf5dda7"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "r-efi@6.0.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/r-efi--r-efi-7e1b0322d31d/AUTHORS",
+          "url": "https://raw.githubusercontent.com/r-efi/r-efi/7e1b0322d31d625f81a5656096330934f9cd835d/AUTHORS",
+          "sha256": "d027e91dbc9cdbb2f1190068e498bd6b61cff022b6a032b191021ba658d96111"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "selectors@0.38.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/servo--stylo-572ecba2d160/MPL-2.0.txt",
+          "url": "https://www.mozilla.org/media/MPL/2.0/index.txt",
+          "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/servo--stylo-572ecba2d160/selectors/lib.rs",
+          "url": "https://raw.githubusercontent.com/servo/stylo/572ecba2d1600e7c3d490586692a209faf703baa/selectors/lib.rs",
+          "sha256": "d54c6e13e9e952dac17d209171df8657e3cae93beaddace4906150cdec8d02e9"
+        }
+      ],
+      "reason": "all selectors source headers explicitly license source under MPL 2.0 and link https://mozilla.org/MPL/2.0/; upstream revision omits license text, so retain official canonical MPL 2.0 text"
+    },
+    "small_btree@0.1.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-ad8739f5e0b5/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/ad8739f5e0b51d20faf7a2cce98afa5c40121438/LICENSE-MIT",
+          "sha256": "60d7cf4b66cef6bab24701e25f87829c4ce01fb734def53c41e5ed79ab434cb3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-ad8739f5e0b5/LICENSE-UNLICENSE",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/ad8739f5e0b51d20faf7a2cce98afa5c40121438/LICENSE-UNLICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "tag_ptr@0.1.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-ad8739f5e0b5/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/ad8739f5e0b51d20faf7a2cce98afa5c40121438/LICENSE-MIT",
+          "sha256": "60d7cf4b66cef6bab24701e25f87829c4ce01fb734def53c41e5ed79ab434cb3"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/boa-dev--boa-ad8739f5e0b5/LICENSE-UNLICENSE",
+          "url": "https://raw.githubusercontent.com/boa-dev/boa/ad8739f5e0b51d20faf7a2cce98afa5c40121438/LICENSE-UNLICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "uuid-simd@0.8.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/Nugine--simd-d74c030d9dc4/LICENSE",
+          "url": "https://raw.githubusercontent.com/Nugine/simd/d74c030d9dc4f3cae02146d1f497ff62726ef09a/LICENSE",
+          "sha256": "71674605ec4c087fe9eb534e3e4f9e26eb2e4aabcd76a29fd156c6a844d44b3d"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "vsimd@0.8.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/Nugine--simd-d74c030d9dc4/LICENSE",
+          "url": "https://raw.githubusercontent.com/Nugine/simd/d74c030d9dc4f3cae02146d1f497ff62726ef09a/LICENSE",
+          "sha256": "71674605ec4c087fe9eb534e3e4f9e26eb2e4aabcd76a29fd156c6a844d44b3d"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "wasmi@0.40.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/wasmi-labs--wasmi-f384f288a149/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/wasmi-labs/wasmi/f384f288a149625dc7fc29bcd686f8bca3ee71c0/LICENSE-APACHE",
+          "sha256": "f031c1608e4a19e8cbcc3394cdba838067e79189610227459e8ffcd669e6f52d"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/wasmi-labs--wasmi-f384f288a149/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/wasmi-labs/wasmi/f384f288a149625dc7fc29bcd686f8bca3ee71c0/LICENSE-MIT",
+          "sha256": "172bc1497507c1c363496bc23b0f16de8fa8e94befa85db6c8d9fa790e0a8657"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "wasmi_collections@0.40.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/wasmi-labs--wasmi-f384f288a149/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/wasmi-labs/wasmi/f384f288a149625dc7fc29bcd686f8bca3ee71c0/LICENSE-APACHE",
+          "sha256": "f031c1608e4a19e8cbcc3394cdba838067e79189610227459e8ffcd669e6f52d"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/wasmi-labs--wasmi-f384f288a149/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/wasmi-labs/wasmi/f384f288a149625dc7fc29bcd686f8bca3ee71c0/LICENSE-MIT",
+          "sha256": "172bc1497507c1c363496bc23b0f16de8fa8e94befa85db6c8d9fa790e0a8657"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "wasmi_core@0.40.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/wasmi-labs--wasmi-f384f288a149/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/wasmi-labs/wasmi/f384f288a149625dc7fc29bcd686f8bca3ee71c0/LICENSE-APACHE",
+          "sha256": "f031c1608e4a19e8cbcc3394cdba838067e79189610227459e8ffcd669e6f52d"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/wasmi-labs--wasmi-f384f288a149/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/wasmi-labs/wasmi/f384f288a149625dc7fc29bcd686f8bca3ee71c0/LICENSE-MIT",
+          "sha256": "172bc1497507c1c363496bc23b0f16de8fa8e94befa85db6c8d9fa790e0a8657"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "wasmi_ir@0.40.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/wasmi-labs--wasmi-f384f288a149/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/wasmi-labs/wasmi/f384f288a149625dc7fc29bcd686f8bca3ee71c0/LICENSE-APACHE",
+          "sha256": "f031c1608e4a19e8cbcc3394cdba838067e79189610227459e8ffcd669e6f52d"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/wasmi-labs--wasmi-f384f288a149/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/wasmi-labs/wasmi/f384f288a149625dc7fc29bcd686f8bca3ee71c0/LICENSE-MIT",
+          "sha256": "172bc1497507c1c363496bc23b0f16de8fa8e94befa85db6c8d9fa790e0a8657"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "wasmparser@0.221.3": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/bytecodealliance--wasm-tools-1b2c8585415d/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/bytecodealliance/wasm-tools/1b2c8585415dde926134e57b0d1e6a4c9438abe3/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/bytecodealliance--wasm-tools-1b2c8585415d/LICENSE-Apache-2.0_WITH_LLVM-exception",
+          "url": "https://raw.githubusercontent.com/bytecodealliance/wasm-tools/1b2c8585415dde926134e57b0d1e6a4c9438abe3/LICENSE-Apache-2.0_WITH_LLVM-exception",
+          "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/bytecodealliance--wasm-tools-1b2c8585415d/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/bytecodealliance/wasm-tools/1b2c8585415dde926134e57b0d1e6a4c9438abe3/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "webview2-com-macros@0.8.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/wravery--webview2-rs-dffa41a8a46d/LICENSE",
+          "url": "https://raw.githubusercontent.com/wravery/webview2-rs/dffa41a8a46d3f5565eefbff2de57d38d399f158/LICENSE",
+          "sha256": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "webview2-com-sys@0.39.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/wravery--webview2-rs-edc2caf88617/LICENSE",
+          "url": "https://raw.githubusercontent.com/wravery/webview2-rs/edc2caf886175ccaebe86078c9cfe1ae2a187328/LICENSE",
+          "sha256": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "webview2-com@0.39.1": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/wravery--webview2-rs-edc2caf88617/LICENSE",
+          "url": "https://raw.githubusercontent.com/wravery/webview2-rs/edc2caf886175ccaebe86078c9cfe1ae2a187328/LICENSE",
+          "sha256": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73"
+        }
+      ],
+      "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+    },
+    "winapi-i686-pc-windows-gnu@0.4.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/retep998--winapi-rs-4ac6c90e4ab9/i686/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/retep998/winapi-rs/4ac6c90e4ab92850c78b6103137290fe4ab9d273/i686/LICENSE-APACHE",
+          "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/retep998--winapi-rs-4ac6c90e4ab9/i686/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/retep998/winapi-rs/4ac6c90e4ab92850c78b6103137290fe4ab9d273/i686/LICENSE-MIT",
+          "sha256": "ce7bc3499fee93d5022ef430d5e4201e79a6d9154f3974e42f41349f0569e09b"
+        }
+      ],
+      "reason": "published crate has no VCS metadata; all source/build/import-library files byte-match tag 0.3.6 at this revision (target package 0.4.0); only manifest include patterns differ to add omitted license files"
+    },
+    "winapi-x86_64-pc-windows-gnu@0.4.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/retep998--winapi-rs-4ac6c90e4ab9/x86_64/LICENSE-APACHE",
+          "url": "https://raw.githubusercontent.com/retep998/winapi-rs/4ac6c90e4ab92850c78b6103137290fe4ab9d273/x86_64/LICENSE-APACHE",
+          "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/retep998--winapi-rs-4ac6c90e4ab9/x86_64/LICENSE-MIT",
+          "url": "https://raw.githubusercontent.com/retep998/winapi-rs/4ac6c90e4ab92850c78b6103137290fe4ab9d273/x86_64/LICENSE-MIT",
+          "sha256": "ce7bc3499fee93d5022ef430d5e4201e79a6d9154f3974e42f41349f0569e09b"
+        }
+      ],
+      "reason": "published crate has no VCS metadata; all source/build/import-library files byte-match tag 0.3.6 at this revision (target package 0.4.0); only manifest include patterns differ to add omitted license files"
+    },
+    "yaml-rust2@0.13.0": {
+      "files": [
+        {
+          "path": "packaging/cargo-license-overrides/Ethiraric--yaml-rust2-e12069447073/Apache-LICENSE",
+          "url": "https://raw.githubusercontent.com/Ethiraric/yaml-rust2/e12069447073e0c8dd9ceab415159c4c92927534/Apache-LICENSE",
+          "sha256": "278f0e5c23f023a2f1af8d528dd5c29dc3a5ea2dd63558aa8d4f077c09e037c7"
+        },
+        {
+          "path": "packaging/cargo-license-overrides/Ethiraric--yaml-rust2-e12069447073/MIT-LICENSE",
+          "url": "https://raw.githubusercontent.com/Ethiraric/yaml-rust2/e12069447073e0c8dd9ceab415159c4c92927534/MIT-LICENSE",
+          "sha256": "3dd30063cdb4a378736348c215cb84b78b0711ba7e39903162cae5ce71dc9757"
+        }
+      ],
+      "reason": "upstream license files omitted from published crate; retrieved at packaged VCS revision"
+    }
+  }
+}

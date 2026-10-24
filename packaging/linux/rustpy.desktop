@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=RustPy
+GenericName=Python IDE
+Comment=Python IDE written in Rust
+Exec=rustpy %f
+TryExec=rustpy
+Icon=rustpy
+Terminal=false
+Categories=Development;IDE;
+Keywords=Python;IDE;Editor;Debugger;Jupyter;Rust;
+MimeType=text/x-python;text/x-python3;application/x-ipynb+json;
+StartupNotify=true
+StartupWMClass=rustpy
+Actions=new-empty-window;
+
+[Desktop Action new-empty-window]
+Name=New Empty Window
+Exec=rustpy --welcome

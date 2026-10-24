@@ -1,0 +1,30 @@
+[package]
+name = "rustpy-project"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: project model, interpreter discovery and run configurations"
+
+[dependencies]
+rustpy-syntax.workspace = true
+toml.workspace = true
+url.workspace = true
+rustpy-core.workspace = true
+rustpy-net.workspace = true
+ignore.workspace = true
+crossbeam-channel.workspace = true
+rustpy-settings.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+log.workspace = true
+which.workspace = true
+dirs.workspace = true
+anyhow.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+libc.workspace = true

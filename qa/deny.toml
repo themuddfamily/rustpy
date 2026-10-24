@@ -1,0 +1,36 @@
+# Run from repository root: cargo deny --config qa/deny.toml check
+# No advisory/license exception is pre-approved; resolve findings explicitly.
+[advisories]
+yanked = "deny"
+[licenses]
+confidence-threshold = 0.93
+allow = ["Apache-2.0", "Apache-2.0 WITH LLVM-exception", "MIT", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Zlib", "Unicode-3.0", "Unicode-DFS-2016", "CC0-1.0", "BSL-1.0", "MPL-2.0"]
+# Dependency-specific review; exact texts/provenance are retained by
+# packaging/update-notices.py and shipped in THIRD-PARTY-NOTICES.txt.
+[[licenses.exceptions]]
+name = "borrow-or-share"
+version = "=0.2.4"
+allow = ["MIT-0"] # Upstream permits redistribution without attribution.
+[[licenses.exceptions]]
+name = "epaint_default_fonts"
+version = "=0.36.2"
+# Font-only terms permit application embedding; retain font names, copyright
+# and license notices. No font modifications or standalone font sales.
+allow = ["OFL-1.1", "Ubuntu-font-1.0"]
+[[licenses.exceptions]]
+name = "webpki-roots"
+version = "=1.0.9"
+# CDLA §2.1: distribute the agreement with the embedded root-certificate data.
+allow = ["CDLA-Permissive-2.0"]
+[[licenses.exceptions]]
+name = "webpki-roots"
+version = "=0.26.11"
+# Compatibility re-export of v1 root data; identical retained CDLA agreement.
+allow = ["CDLA-Permissive-2.0"]
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

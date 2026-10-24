@@ -1,0 +1,17 @@
+[package]
+name = "rustpy-quality"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "Apache-2.0"
+# Kept separate so normal IDE builds do not pull benchmark/fuzzer tooling.
+[workspace]
+[dependencies]
+rustpy-syntax = { path = "../crates/rustpy-syntax" }
+rustpy-semantic = { path = "../crates/rustpy-semantic" }
+rustpy-format = { path = "../crates/rustpy-format" }
+[dev-dependencies]
+criterion = "0.5"
+[[bench]]
+name = "editor_pipeline"
+harness = false

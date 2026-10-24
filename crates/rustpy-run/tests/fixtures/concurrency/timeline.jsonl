@@ -1,0 +1,14 @@
+{"kind":"lane","time":0.0,"lane":"thread:1","name":"MainThread","lane_kind":"thread"}
+{"kind":"lane","time":0.001,"lane":"thread:2","name":"worker","lane_kind":"thread"}
+{"kind":"begin","time":0.002,"lane":"thread:2","span":1,"name":"worker","phase":"execution","file":"/project/main.py","line":12}
+{"kind":"begin","time":0.003,"lane":"thread:2","span":2,"name":"lock.acquire","phase":"lock_wait","file":"/project/main.py","line":13,"resource":"lock:42"}
+{"kind":"lane","time":0.004,"lane":"task:3","name":"consumer","lane_kind":"task","parent":"thread:1"}
+{"kind":"begin","time":0.005,"lane":"task:3","span":3,"name":"consume","phase":"execution","file":"/project/main.py","line":20}
+{"kind":"end","time":0.006,"lane":"task:3","span":3}
+{"kind":"begin","time":0.006,"lane":"task:3","span":4,"name":"await in consume","phase":"await","file":"/project/main.py","line":21}
+{"kind":"end","time":0.030,"lane":"thread:2","span":2}
+{"kind":"end","time":0.035,"lane":"task:3","span":4}
+{"kind":"end","time":0.040,"lane":"thread:2","span":1}
+{"kind":"begin","time":0.041,"lane":"task:3","span":5,"name":"cancelled","phase":"await","file":"/project/main.py","line":22}
+{"kind":"truncated","time":0.042,"dropped":1}
+{"kind":"finish","time":0.050,"dropped":12,"terminated":true}

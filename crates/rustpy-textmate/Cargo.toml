@@ -1,0 +1,16 @@
+[package]
+name = "rustpy-textmate"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: TextMate grammar support (tmLanguage JSON / XML plist loading, Oniguruma-to-regex translation, line tokenizer, scope-to-highlight mapping)"
+
+[dependencies]
+regex.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+rustpy-highlight.workspace = true

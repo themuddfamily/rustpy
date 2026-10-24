@@ -1,0 +1,27 @@
+{
+  "name": "Visual Studio",
+  "source": "https://learn.microsoft.com/en-us/visualstudio/ide/default-keyboard-shortcuts-in-visual-studio",
+  "bindings": {
+    "CommentByLineComment": [
+      "Ctrl+K, Ctrl+C"
+    ],
+    "ReformatCode": [
+      "Ctrl+K, Ctrl+D"
+    ],
+    "Run": [
+      "Ctrl+F5"
+    ],
+    "Debug": [
+      "F5"
+    ],
+    "GotoDeclaration": [
+      "F12"
+    ],
+    "GotoFile": [
+      "Ctrl+Comma"
+    ],
+    "FindInPath": [
+      "Ctrl+Shift+F"
+    ]
+  }
+}

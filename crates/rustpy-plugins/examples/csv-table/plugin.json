@@ -1,0 +1,18 @@
+{
+  "id": "org.rustpy.csv-table",
+  "name": "CSV Table",
+  "version": "1.0.0",
+  "description": "Read-only CSV table with source editing fallback",
+  "vendor": "RustPy",
+  "contributes": {
+    "table_editors": [
+      {
+        "name": "CSV Table",
+        "extensions": [
+          "csv"
+        ],
+        "kind": "Csv"
+      }
+    ]
+  }
+}

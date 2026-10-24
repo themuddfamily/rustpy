@@ -1,0 +1,29 @@
+[package]
+name = "rustpy-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: core"
+
+[dependencies]
+cpu-time = "=1.0.0"
+anyhow.workspace = true
+thiserror.workspace = true
+log.workspace = true
+serde.workspace = true
+parking_lot.workspace = true
+crossbeam-channel.workspace = true
+portable-pty.workspace = true
+rustc-hash.workspace = true
+smol_str.workspace = true
+text-size = { version = "1", features = ["serde"] }
+rayon = "1"
+
+blake3 = "1"
+
+[target.'cfg(unix)'.dependencies]
+libc.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_JobObjects", "Win32_System_Threading", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Console", "Win32_Security"] }

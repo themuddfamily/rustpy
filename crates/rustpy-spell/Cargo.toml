@@ -1,0 +1,15 @@
+[package]
+name = "rustpy-spell"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: spell checking of identifiers, comments, strings and plain text (bundled English dictionary, user dictionaries, camel-case splitting, suggestions)"
+
+[dependencies]
+rustpy-core.workspace = true
+rustpy-syntax.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

@@ -1,0 +1,129 @@
+[
+{
+  "elements": [
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:3",
+      "name": "Hook explodes",
+      "status": "failed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/edge.feature:4",
+          "name": "a step",
+          "step_type": "given"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:6",
+      "name": "Pending step",
+      "status": "failed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/edge.feature:7",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/edge_steps.py:15"
+          },
+          "name": "a pending step",
+          "result": {
+            "duration": 0.0004532337188720703,
+            "error_message": [
+              "Traceback (most recent call last):",
+              "  File \"/home/user/.venv-behave126/lib/python3.12/site-packages/behave/model.py\", line 1329, in run",
+              "    match.run(runner.context)",
+              "  File \"/home/user/.venv-behave126/lib/python3.12/site-packages/behave/matchers.py\", line 98, in run",
+              "    self.func(context, *args, **kwargs)",
+              "  File \"features/steps/edge_steps.py\", line 17, in step_pending",
+              "    raise StepNotImplementedError(\"later\")",
+              "NotImplementedError: later"
+            ],
+            "status": "failed"
+          },
+          "step_type": "given"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:9",
+      "name": "Noisy failure",
+      "status": "failed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/edge.feature:10",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/edge_steps.py:20"
+          },
+          "name": "a noisy failing step",
+          "result": {
+            "duration": 0.00011086463928222656,
+            "error_message": [
+              "Assertion Failed: noisy failed",
+              "Captured stdout:",
+              "to stdout",
+              "",
+              "Captured stderr:",
+              "to stderr",
+              "",
+              "Captured logging:",
+              "WARNING:x:logged warning"
+            ],
+            "status": "failed"
+          },
+          "step_type": "given"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:12",
+      "name": "Empty scenario",
+      "status": "passed",
+      "steps": [],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/edge.feature:14",
+      "name": "Fine",
+      "status": "passed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/edge.feature:15",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/edge_steps.py:10"
+          },
+          "name": "a step",
+          "result": {
+            "duration": 2.9325485229492188e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    }
+  ],
+  "keyword": "Feature",
+  "location": "features/edge.feature:1",
+  "name": "Edge cases",
+  "status": "failed",
+  "tags": []
+}
+]

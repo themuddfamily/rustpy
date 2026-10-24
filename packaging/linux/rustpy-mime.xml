@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Jupyter notebooks for the shared MIME database. shared-mime-info 2.2 and later define
+     this type already; older systems (Ubuntu 22.04) need it so that file managers offer
+     "Open With RustPy" for .ipynb files. Installed as /usr/share/mime/packages/rustpy.xml
+     (dev.rustpy.RustPy.xml in the Flatpak). -->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-ipynb+json">
+    <comment>Jupyter Notebook</comment>
+    <sub-class-of type="application/json"/>
+    <glob pattern="*.ipynb"/>
+  </mime-type>
+</mime-info>

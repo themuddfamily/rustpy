@@ -1,0 +1,34 @@
+[package]
+name = "rustpy-analysis"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: inspections, quick fixes and code intentions"
+
+[dependencies]
+rustpy-search.workspace = true
+rustpy-core.workspace = true
+rustpy-project.workspace = true
+rustpy-http.workspace = true
+rustpy-settings.workspace = true
+serde_json.workspace = true
+jsonschema = { version = "0.33", default-features = false }
+toml.workspace = true
+rustpy-syntax.workspace = true
+rustpy-semantic.workspace = true
+rustpy-format.workspace = true
+rustpy-refactor.workspace = true
+rustpy-packages.workspace = true
+rustpy-grammar.workspace = true
+rustpy-spell.workspace = true
+rustpy-regex.workspace = true
+smol_str.workspace = true
+rustc-hash.workspace = true
+once_cell.workspace = true
+rayon = "1"
+regex.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+tempfile.workspace = true

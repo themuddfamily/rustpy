@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "state": "source authored; all execution deferred",
+  "resource_policy": {
+    "affinity_cores": "--cores (default 10, the shared PC's current cap)",
+    "cargo_jobs": "--cores",
+    "rayon_workers": "--cores",
+    "rust_test_threads": "--cores",
+    "background_analysis_workers": "--workers (default cores-1)",
+    "minimum_nice": 10,
+    "target": "existing shared CARGO_TARGET_DIR",
+    "temporary": "existing isolated nested TMPDIR"
+  },
+  "native_stages": [
+    "native10k --renderer software --profile both --seconds 90",
+    "memory100k --renderer software --profile both --seconds 110",
+    "largefile --renderer software --profile both --seconds 90"
+  ],
+  "roadmap_target_profile": "release",
+  "targets": {
+    "cold_start": {
+      "consumer": "verified trace PID executable plus Linux process birth to first completed FreezeDetector frame; wrapper/Xvfb start recorded separately",
+      "limit_ms_exclusive": 2000,
+      "required_runs": 5,
+      "cache_boundary": "fresh process/config/system directory; OS page cache retained and recorded"
+    },
+    "project_indexing": {
+      "files": 10000,
+      "consumer": "real symbol-index membership and busy intervals overlapping completed native frames",
+      "require": "finish indexing without blocking all UI frames; Smart/Dumb status visible in screenshot"
+    },
+    "typing_highlighting": {
+      "document_lines": 5000,
+      "samples_min": 20,
+      "p95_ms_exclusive": 16,
+      "consumer": "raw typed text arrival through completed native frame, including highlighter/layout"
+    },
+    "completion": {
+      "samples_min": 20,
+      "p95_ms_exclusive": 100,
+      "consumer": "real request to drawn nonempty popup"
+    },
+    "memory": {
+      "files": 100000,
+      "sampling_ms": 50,
+      "consumer": "Linux /proc verified RustPy PID and descendants; wrapper/Xvfb RSS retained only as separate whole-tree safety evidence",
+      "peak_app_tree_rss_bytes_exclusive": 1000000000
+    },
+    "cancellation": {
+      "p95_ms_exclusive": 100,
+      "consumer": "superseded scheduler request ID through actual cancelled worker return; request-only timing forbidden"
+    },
+    "cache": {
+      "source_gate": "results_are_cached_by_content_and_invalidated_by_other_changes; cached_payload_limit_counts_nested_fixes_and_preserves_recent_small_results",
+      "consumer": "existing analysis cache plus analysis_cache_hit native events"
+    },
+    "million_line_analysis": {
+      "driver": "million",
+      "minimum_lines": 1000000,
+      "minimum_nonblank_python_lines": 900000,
+      "consumer": "existing ignored 128-file project diagnostic/cache/identity assertions; no single giant file surrogate",
+      "build": "release test binary built outside the memory watchdog (or --test-binary); only the binary runs under it"
+    },
+    "parallel_analysis": {
+      "source_gate": "parallel_project_inspection_matches_file_by_file_inspection",
+      "boundary": "roadmap asks for parallel analysis across cores without a core count; measured at --cores (default 10) with cores-1 workers; a 2-core run leaves one worker and is diagnostic only"
+    },
+    "power_save": {
+      "consumer": "real action toggles, mode transitions and absence of analysis_start while active, then resume"
+    },
+    "invalidate_caches": {
+      "consumer": "actual cache replacement/index rebuild admission event and subsequent full membership"
+    },
+    "shared_indexes": {
+      "source_gate": "bundles_export_and_import; verified_download_reuses_only_identical_local_library_content; unaccepted_staged_download_keeps_previous_cache_and_future_formats_are_rejected",
+      "require": "explicit final controlled local HTTPS endpoint download/cancel/checksum/trust evidence; normal native performance runs never access a mirror"
+    },
+    "watchers": {
+      "consumer": "recursive registration plus exact externally written sentinel delivery",
+      "limit_ms_exclusive": 2000,
+      "error_gate": "the_list_is_not_trusted_when_changes_may_be_missed",
+      "require": "central regression fixture plus native inotify limits warning and safe user-invoked fix inspection; do not alter host sysctls automatically"
+    },
+    "large_file": {
+      "document_lines_min": 100000,
+      "bytes_min": 4194305,
+      "consumer": "real is_large_file() and bounded viewport layouts while navigating start/end"
+    },
+    "virtualization": {
+      "consumer": "actual layouts.len(), visible range and clip geometry",
+      "overscan_rows_max": 3
+    },
+    "gpu_and_fallback": {
+      "consumer": "actual current GL_VENDOR/GL_RENDERER/GL_VERSION, native screenshot",
+      "require": "one hardware adapter run and one llvmpipe/softpipe/software renderer run; requested environment is not adapter evidence"
+    },
+    "freeze_detector": {
+      "consumer": "existing watchdog/report UI; native frame JSONL includes submillisecond durations",
+      "require": "controlled final stall fixture and actual freeze warning/UI evidence, not an ordinary fast-frame assertion"
+    },
+    "memory_indicator_reduce_memory": {
+      "consumer": "existing native memory indicator",
+      "require": "native screenshot and displayed RSS cross-check against sampled process RSS",
+      "optional_boundary": "Reduce IDE memory is a question-mark roadmap suggestion; no such action exists and none is claimed"
+    }
+  },
+  "platform_boundaries": [
+    "Linux native driver only; no Windows/macOS latency, memory, GPU, watcher or presentation claim",
+    "GUI checks only via scripts/smoke.sh with its private Xvfb; forced software rendering leaves hardware acceptance unavailable",
+    "frame end measures CPU layout completion, not compositor/display presentation",
+    "whole acceptance requires all native stages, five cold starts, existing targeted source suites and the explicit remaining controlled UI/network/platform evidence"
+  ],
+  "native_execution": {
+    "route": "scripts/smoke.sh only (RUSTPY_SMOKE_PROFILE selects debug/release)",
+    "display": "private Xvfb created by wrapper; real DISPLAY removed",
+    "trust": "RUSTPY_SMOKE_UNTRUSTED=1; only generated canonical project trusted via isolated settings",
+    "binary": "actual ./target/<profile>/rustpy SHA must match --binary/--release-binary and verified /proc trace-PID executable",
+    "native_seconds": "60..900 wrapper timeout; capture after min(seconds-20,90)s once the input script finished, deadline seconds-5; unreached mark steps fail",
+    "million_seconds": "separate nonGUI 30..3600, default 300",
+    "trace": "--trace-max-rows (default 1000000) with explicit trace_truncated failure; --trace-count-only kinds (default frame) are counted only",
+    "hardware": "unavailable: smoke.sh forces software GL",
+    "memory": "app PID and app-tree RSS separately from entire wrapper/Xvfb owned-tree safety watchdog",
+    "whole_owned_tree_safety_abort_bytes": 1000000000
+  }
+}

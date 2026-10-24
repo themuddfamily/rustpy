@@ -1,0 +1,29 @@
+[package]
+name = "rustpy-http"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: HTTP Client for .http/.rest files (parser, environments, execution, history)"
+
+[dependencies]
+rustpy-core.workspace = true
+anyhow.workspace = true
+log.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde-saphyr = { version = "2.0", default-features = false, features = ["deserialize"] }
+crossbeam-channel.workspace = true
+ureq = { version = "2", default-features = false, features = ["tls", "gzip", "cookies"] }
+# Proxy (Settings › HTTP Proxy) and certificate trust (Server Certificates).
+rustpy-net.workspace = true
+url.workspace = true
+sha2.workspace = true
+chrono.workspace = true
+base64 = "0.22"
+hmac = "0.12"
+md-5 = "0.10"
+tungstenite = {version="0.26",default-features=false,features=["handshake","rustls-tls-native-roots"]}
+
+[dev-dependencies]
+tempfile.workspace = true

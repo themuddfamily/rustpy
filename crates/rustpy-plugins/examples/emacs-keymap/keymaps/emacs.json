@@ -1,0 +1,33 @@
+{
+  "name": "Emacs",
+  "bindings": {
+    "EditorLineStart": ["Home", "Ctrl+A"],
+    "EditorLineEnd": ["End", "Ctrl+E"],
+    "EditorNextWord": ["Ctrl+ArrowRight", "Alt+F"],
+    "EditorPreviousWord": ["Ctrl+ArrowLeft", "Alt+B"],
+    "EditorTextStart": ["Ctrl+Home", "Alt+Shift+Comma"],
+    "EditorTextEnd": ["Ctrl+End", "Alt+Shift+Period"],
+    "EditorEscape": ["Escape", "Ctrl+G"],
+    "$Copy": ["Ctrl+C", "Ctrl+Insert"],
+    "$Paste": ["Ctrl+V", "Shift+Insert"],
+    "PasteMultiple": ["Ctrl+Shift+V"],
+    "$Undo": ["Ctrl+Z", "Ctrl+Slash"],
+    "$SelectAll": ["Ctrl+Alt+A"],
+    "CommentByLineComment": ["Alt+Semicolon"],
+    "EditorDeleteLine": ["Ctrl+Shift+Y"],
+    "GotoLine": ["Alt+G"],
+    "GotoAction": ["Ctrl+Shift+A", "Alt+X"],
+    "RecentFiles": ["Ctrl+Alt+E"],
+    "CheckinProject": ["Ctrl+Alt+K"],
+    "EditorEmacsKillLine": ["Ctrl+K"],
+    "EditorEmacsKillWordForward": ["Alt+D"],
+    "EditorEmacsKillWordBackward": ["Alt+Backspace"],
+    "EditorEmacsYank": ["Ctrl+Y"],
+    "EditorEmacsYankPop": ["Alt+Y"],
+    "EditorEmacsTranspose": ["Ctrl+T"],
+    "EditorEmacsKillRegion": ["Ctrl+W"],
+    "EditorEmacsCopyRegion": ["Alt+W"],
+    "EditorDeleteToWordEnd": ["Ctrl+Delete"],
+    "EditorDeleteToWordStart": ["Ctrl+Backspace"]
+  }
+}

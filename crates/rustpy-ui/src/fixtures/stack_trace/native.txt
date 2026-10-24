@@ -1,0 +1,6 @@
+Thread 1 (Thread 0x00007f (LWP 1234)):
+#0  0x0000ffff in read_value () at /build/src/worker.c:44
+#1  0x0000eeee in process_value () at C:\work\app.cpp:19:3
+* thread #2, name = 'worker', stop reason = breakpoint 1.1
+  frame #0: 0x0000dddd library`run_value at /build/My Project/lib.rs:8:2
+0   libsystem.dylib  0x0000aaaa native_wait + 3

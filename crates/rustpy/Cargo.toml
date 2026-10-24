@@ -1,0 +1,87 @@
+[package]
+name = "rustpy"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy: a full-featured Python IDE written in Rust"
+default-run = "rustpy"
+
+[[bin]]
+name = "rustpy"
+path = "src/main.rs"
+
+[features]
+native-web-preview = ["rustpy-ui/native-web-preview"]
+
+[dependencies]
+rustpy-ui.workspace = true
+rustpy-lsp.workspace = true
+rustpy-settings.workspace = true
+rustpy-core.workspace = true
+anyhow.workspace = true
+rustpy-cli.workspace = true
+log.workspace = true
+
+# Debian package built by cargo-deb (packaging/linux/build-deb.sh runs `cargo deb -p rustpy`).
+# Asset sources are relative to this crate directory; cargo-deb maps `target/release/` to the
+# real target directory (CARGO_TARGET_DIR, --target). Cargo itself ignores this section.
+[package.metadata.deb]
+maintainer = "RustPy maintainers <contact@adammudd.co.uk>"
+copyright = "2026 RustPy contributors"
+extended-description = """\
+RustPy is a full-featured Python IDE written in Rust: an editor with Python \
+language intelligence (completion, navigation, inspections, refactorings), \
+run/debug/test tool windows, Git integration, a terminal and a Python console."""
+section = "devel"
+priority = "optional"
+# $auto: linked libraries via dpkg-shlibdeps. unixODBC is also explicit so a missing
+# automatic dependency scan cannot omit its mandatory runtime. The windowing libraries
+# are loaded at run time (xkbcommon, X11/xcb, Wayland, EGL/GL), so they are listed by hand.
+depends = "$auto, libgtk-3-0 | libxkbcommon0, libodbc2"
+recommends = "python3, libxkbcommon-x11-0, libegl1 | libgl1"
+assets = [
+    ["target/release/rustpy", "usr/bin/", "755"],
+    ["../../packaging/generated/Native-Licenses.zip", "usr/share/doc/rustpy/", "644"],
+    ["../../LICENSE", "usr/share/doc/rustpy/", "644"],
+    ["../../THIRD-PARTY-NOTICES.txt", "usr/share/doc/rustpy/", "644"],
+    ["../../packaging/linux/rustpy.desktop", "usr/share/applications/", "644"],
+    ["../../packaging/linux/rustpy.svg", "usr/share/icons/hicolor/scalable/apps/", "644"],
+    ["../../packaging/linux/dev.rustpy.RustPy.metainfo.xml", "usr/share/metainfo/", "644"],
+    ["../../packaging/linux/rustpy-mime.xml", "usr/share/mime/packages/rustpy.xml", "644"],
+]
+
+# RPM package built by cargo-generate-rpm (packaging/linux/build-rpm.sh runs
+# `cargo generate-rpm -p crates/rustpy`, with `target/release/` mapped to a stripped staging copy).
+# Other asset sources are relative to this crate directory. Pre-release versions are
+# rewritten (0.3.0-eap.1 -> 0.3.0~eap.1) by the script, since RPM versions cannot hold "-".
+[package.metadata.generate-rpm]
+summary = "Full-featured Python IDE written in Rust"
+url = "https://github.com/themuddfamily/rustpy"
+release = "1"
+assets = [
+    { source = "target/release/rustpy", dest = "/usr/bin/rustpy", mode = "755" },
+    { source = "../../packaging/generated/Native-Licenses.zip", dest = "/usr/share/doc/rustpy/Native-Licenses.zip", mode = "644" },
+    { source = "../../LICENSE", dest = "/usr/share/doc/rustpy/LICENSE", mode = "644" },
+    { source = "../../THIRD-PARTY-NOTICES.txt", dest = "/usr/share/doc/rustpy/THIRD-PARTY-NOTICES.txt", mode = "644" },
+    { source = "../../packaging/linux/rustpy.desktop", dest = "/usr/share/applications/rustpy.desktop", mode = "644" },
+    { source = "../../packaging/linux/rustpy.svg", dest = "/usr/share/icons/hicolor/scalable/apps/rustpy.svg", mode = "644" },
+    { source = "../../packaging/linux/dev.rustpy.RustPy.metainfo.xml", dest = "/usr/share/metainfo/dev.rustpy.RustPy.metainfo.xml", mode = "644" },
+    { source = "../../packaging/linux/rustpy-mime.xml", dest = "/usr/share/mime/packages/rustpy.xml", mode = "644" },
+]
+
+# The linked libraries (libc, libz, ...) are found automatically. The windowing libraries are
+# loaded at run time, so they are listed by shared-library name (Fedora, openSUSE, RHEL).
+[package.metadata.generate-rpm.requires]
+"libxkbcommon.so.0()(64bit)" = "*"
+"libodbc.so.2()(64bit)" = "*"
+
+[package.metadata.generate-rpm.recommends]
+python3 = "*"
+"libxkbcommon-x11.so.0()(64bit)" = "*"
+"(libEGL.so.1()(64bit) or libGL.so.1()(64bit))" = ""
+
+[dev-dependencies]
+rustpy-run.workspace = true
+tempfile.workspace = true
+which.workspace = true

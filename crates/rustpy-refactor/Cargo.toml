@@ -1,0 +1,18 @@
+[package]
+name = "rustpy-refactor"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: extraction, inlining, class, module and signature refactorings"
+
+[dependencies]
+rustpy-core.workspace = true
+rustpy-syntax.workspace = true
+rustpy-semantic.workspace = true
+rustpy-search.workspace = true
+
+[dev-dependencies]
+rustpy-text.workspace = true
+pretty_assertions.workspace = true
+tempfile.workspace = true

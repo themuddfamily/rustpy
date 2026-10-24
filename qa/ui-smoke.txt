@@ -1,0 +1,9 @@
+# Authored, UNEXECUTED. Start in a fixture project with a Python file open.
+# No Run, terminal, package, network or destructive file actions.
+wait 1
+key A ctrl shift
+wait 0.5
+typefast Settings
+wait 0.5
+key Enter
+wait 1

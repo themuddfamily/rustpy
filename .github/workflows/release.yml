@@ -1,0 +1,214 @@
+name: Release builds
+# Manual release workflow: dispatching it builds the Linux, Windows and macOS artifacts.
+# Publishing a GitHub release and building the Flatpak/Snap packages are opt-in inputs.
+# The Microsoft Store (MSIX) steps stay disabled until the package identity in
+# packaging/windows/msix/identity.env is replaced with real Partner Center values.
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Tag the commit and publish a GitHub release with the Windows assets
+        type: boolean
+        default: false
+      sandbox_packages:
+        description: Build Flatpak and Snap packages (needs preprovisioned runners)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: release
+  cancel-in-progress: false
+env:
+  CARGO_BUILD_JOBS: '2'
+  RAYON_NUM_THREADS: '2'
+  RUST_TEST_THREADS: '2'
+jobs:
+  linux:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+          - runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Native graphics and embedded WebKitGTK dependencies
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgtk-3-dev unixodbc-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf rpm dpkg-dev
+      - run: cargo build --locked --release -p rustpy --target ${{ matrix.target }} --features native-web-preview
+      - name: Linux archive and native packages
+        env:
+          RUSTPY_NO_BUILD: '1'
+        run: |
+          packaging/linux/build-tar.sh '${{ matrix.target }}'
+          packaging/linux/build-appimage.sh --no-build --target '${{ matrix.target }}'
+          packaging/linux/build-deb.sh --no-build --target '${{ matrix.target }}' -o target/debian
+          packaging/linux/build-rpm.sh --no-build --target '${{ matrix.target }}'
+      - name: Checksums
+        run: python3 scripts/release-checksums.py target/dist target/appimage target/debian target/generate-rpm --output target/SHA256SUMS
+  windows:
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            target: x86_64-pc-windows-msvc
+          - runner: windows-11-arm
+            target: aarch64-pc-windows-msvc
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.target }}
+      - name: Check Inno Setup 6
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path -LiteralPath $iscc)) { throw "Inno Setup 6 is required" }
+          "ISCC=$iscc" >> $env:GITHUB_ENV
+      # Provision the pinned WiX tool and matching UI extension explicitly.
+      - name: WiX 5.0.2 and its UI extension (MSI feature selection)
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          if ($LASTEXITCODE) { throw "WiX installation failed" }
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          if ($LASTEXITCODE) { throw "WiX UI extension installation failed" }
+      - shell: pwsh
+        run: |
+          packaging/windows/build.ps1 -Target '${{ matrix.target }}'
+          packaging/windows/build-msi.ps1 -Target '${{ matrix.target }}' -NoBuild
+          $version = (Select-String -Path Cargo.toml -Pattern '^version = "([^"]+)"' | Select-Object -First 1).Matches.Groups[1].Value
+          $arch = if ('${{ matrix.target }}' -like 'aarch64-*') { 'arm64' } else { 'x86_64' }
+          $msiArch = if ($arch -eq 'arm64') { 'arm64' } else { 'x64' }
+          foreach ($name in @("rustpy-$version-windows-$arch-portable.zip", "rustpy-$version-windows-$arch-setup.exe", "rustpy-$version-windows-$msiArch.msi")) {
+            if (-not (Test-Path -LiteralPath "target/windows/$name")) { throw "Missing release asset: $name" }
+          }
+          Get-ChildItem target/windows -File | Where-Object Extension -in '.exe','.msi','.zip' | ForEach-Object { $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); "$h  $($_.Name)" } | Set-Content target/windows/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.target }}
+          path: |
+            target/windows/*.zip
+            target/windows/*-setup.exe
+            target/windows/*.msi
+          if-no-files-found: error
+      # Microsoft Store package: unsigned (the Store signs it), identity placeholders from
+      # packaging/windows/msix/identity.env unless the RUSTPY_MSIX_* variables are set
+      # from the Partner Center product identity. makeappx comes with the runner's SDK.
+      - name: MSIX package (Microsoft Store)
+        if: ${{ false }}
+        shell: pwsh
+        run: packaging/windows/build-msix.ps1 -Target '${{ matrix.target }}' -NoBuild
+      - uses: actions/upload-artifact@v4
+        if: ${{ false }}
+        with:
+          name: msix-${{ matrix.target }}
+          path: target/msix/*.msix
+          if-no-files-found: error
+  msix-bundle:
+    if: ${{ false }}
+    needs: windows
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: msix-*
+          path: target/msix
+          merge-multiple: true
+      # x64 + arm64 in one .msixbundle, uploaded unsigned to Partner Center.
+      - shell: pwsh
+        run: packaging/windows/build-msix.ps1 -Bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: msixbundle
+          path: target/msix/*.msixbundle
+          if-no-files-found: error
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - name: Universal bundle and DMG
+        run: packaging/macos/build-app.sh --universal
+      # Signing/notary credentials are injected only by an authorized release operator.
+      - run: cd target/macos && shasum -a 256 *.dmg > SHA256SUMS
+  sandbox-packages:
+    if: ${{ inputs.sandbox_packages }}
+    strategy:
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      # flatpak-builder, snapcraft and the pinned SDK/runtime must be preprovisioned.
+      - run: packaging/linux/flatpak/build-flatpak.sh --no-install --bundle
+      - run: packaging/linux/build-snap.sh
+  publish:
+    if: ${{ inputs.publish }}
+    needs: windows
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: windows-*
+          path: target/release-assets
+          merge-multiple: true
+      - name: Prepare version and checksums
+        shell: bash
+        run: |
+          python3 - <<'PYTHON'
+          import os
+          import tomllib
+          from pathlib import Path
+          version = tomllib.loads(Path('Cargo.toml').read_text())['workspace']['package']['version']
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              print(f'RELEASE_TAG=v{version}', file=env)
+          PYTHON
+          python3 scripts/release-checksums.py target/release-assets --output target/release-assets/SHA256SUMS
+          (cd target/release-assets && sha256sum --check SHA256SUMS)
+      - name: Create tag and publish complete release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG"; then
+            echo "Refusing to replace existing tag $RELEASE_TAG" >&2
+            exit 1
+          else
+            status=$?
+            if [ "$status" -ne 2 ]; then exit "$status"; fi
+          fi
+          gh release create "$RELEASE_TAG" target/release-assets/* \
+            --target "$RELEASE_SHA" --title "RustPy $RELEASE_TAG" \
+            --draft --generate-notes
+          gh release view "$RELEASE_TAG" --json body --jq .body > target/release-notes.md
+          cat >> target/release-notes.md <<'NOTES'
+
+          Windows x64 and ARM64 packages include portable ZIPs, setup executables and MSI installers. SHA256SUMS contains the download checksums.
+
+          These packages are unsigned. Native GUI and install/upgrade/uninstall acceptance checks have not been completed for this release. Linux, macOS and Microsoft Store packages are not included.
+          NOTES
+          gh release edit "$RELEASE_TAG" --notes-file target/release-notes.md --draft=false --latest

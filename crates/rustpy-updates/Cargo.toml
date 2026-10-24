@@ -1,0 +1,21 @@
+[package]
+name = "rustpy-updates"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: update checks against GitHub Releases (versions, release channels, platform downloads, CHANGELOG sections, daily scheduling)"
+
+[dependencies]
+log.workspace = true
+sha2.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rustpy-net.workspace = true
+url = "2"
+# Declared like rustpy-packages / rustpy-ai do (ureq is not in [workspace.dependencies]).
+ureq = { version = "2", default-features = false, features = ["tls", "gzip"] }
+
+[target.'cfg(windows)'.dependencies]
+# GetCurrentPackageFullName: MSIX package identity (Microsoft Store installs).
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Storage_Packaging_Appx"] }

@@ -1,0 +1,13 @@
+/target
+**/*.rs.bk
+*.pdb
+/.rustpy/
+*.swp
+.DS_Store
+.claude/
+/packaging/linux/flatpak/cargo-sources.json
+/qa/target
+/qa/fuzz/target
+
+# Release-generated license and corresponding-source archive.
+/packaging/generated/

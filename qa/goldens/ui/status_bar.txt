@@ -1,0 +1,38 @@
+# rustpy ui snapshot: status_bar
+# screen 1000x120 @1x, theme "Dark"
+clip [0,94 1000,120]
+rect [0,95 1000,120] fill=#3c3f41
+clip [8,97 228,115]
+text (8,99) ~x15 "$PROJECT" elided
+  [0..48] Proportional 13 #8c8c8c
+clip [232,97 332,115]
+text (232,99) 18x15 "1:1"
+  [0..3] Proportional 13 #b4b4b4
+clip [336,97 394,115]
+rect [336,97 365,118] fill=#3c3c3c radius=3,3,3,3
+text (344,100) 13x15 "LF"
+  [0..2] Proportional 13 #bbbbbb
+clip [398,97 480,115]
+rect [398,97 448,118] fill=#3c3c3c radius=3,3,3,3
+text (406,100) 34x15 "UTF-8"
+  [0..5] Proportional 13 #bbbbbb
+clip [484,97 574,115]
+rect [484,97 612,118] fill=#3c3c3c radius=3,3,3,3
+text (492,100) 112x15 "4 spaces (detected)"
+  [0..19] Proportional 13 #bbbbbb
+clip [578,97 688,115]
+text (578,99) 67x15 "🔓 writable"
+  [0..13] Proportional 13 #b4b4b4
+clip [692,97 802,115]
+text (692,99) 41x15 "Python"
+  [0..6] Proportional 13 #bbbbbb
+clip [806,97 870,115]
+rect [806,97 855,118] fill=#3c3c3c radius=3,3,3,3
+text (814,100) 33x15 "100%"
+  [0..4] Proportional 13 #bbbbbb
+clip [0,94 1000,120]
+rect [874,97 907,118] fill=#3c3c3c radius=3,3,3,3
+text (882,100) 17x15 "⋯"
+  [0..3] Proportional 13 #bbbbbb
+clip [0,0 1000,120]
+line (0,95)-(1000,95) stroke=1#323232

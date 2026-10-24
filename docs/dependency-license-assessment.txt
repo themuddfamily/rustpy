@@ -1,0 +1,142 @@
+RustPy dependency license assessment — remediation, 22 October 2026
+=================================================================
+
+The repository findings from the initial audit have been addressed. RustPy's
+original code is Apache-2.0; dependencies retain their own licenses. A source
+release has the retained grants and provenance described below. Binary release
+recipes now require matching native license/source evidence and package it
+alongside the executable. They deliberately reject missing evidence rather
+than treating a Cargo allowlist pass as distribution clearance.
+
+This is an engineering assessment. It cannot establish ownership of every
+contribution or provide a legal guarantee. No release was published, CI enabled,
+or signing credentials used. Platform installers still need native validation.
+
+Dependency coverage
+-------------------
+The dependency CSV covers all 890 package/version/source records across the
+main, QA and fuzz lockfiles: 43 RustPy packages, 844 registry packages and three
+locally patched upstream GUI packages. There are 847 third-party records in all,
+including optional, development, build and target-specific dependencies.
+
+packaging/CARGO-THIRD-PARTY-NOTICES.txt retains exact license/notice files from
+checksum-verified registry archives, deduplicated by content SHA-256. Its manifest
+records every registry package's version, declared terms, selected terms, source
+URL/checksum, license text references, and lockfile membership. Pinned upstream
+supplements cover 84 packages whose crate archives omitted license files.
+
+The selected OR alternative is recorded explicitly; every AND obligation is
+preserved. Retained alternative texts do not elect those alternatives. Wrapper
+licenses do not replace embedded native code licenses. The root aggregate also
+includes the three vendored GUI packages and embedded-resource/native supplements.
+The inventory is intentionally conservative, not an artifact-specific binary SBOM.
+
+Resolved findings
+-----------------
+1. Project license: LICENSE now contains Apache-2.0; README explains the scope.
+   QA/fuzz manifests also declare Apache-2.0. All authored artifact recipes ship
+   LICENSE and THIRD-PARTY-NOTICES.txt.
+2. Cargo attribution: all registry packages have retained text evidence and exact
+   source locations. Overrides include upstream commit/URL and SHA-256; exceptional
+   dispatch/selectors/winapi provenance is explicitly documented without fabricated
+   copyright claims. Notice checks detect changed locks, inputs and output text.
+3. MPL: all six packages (cssparser, cssparser-macros, dtoa-short, option-ext,
+   selectors, version-ranges) have notices and exact covered source. Binary recipes
+   package them in Native-Licenses.zip under Native-Licenses/cargo-covered-sources.tar.gz, retaining MPL
+   terms and build instructions. This does not require relicensing separate RustPy
+   source files. See https://www.mozilla.org/en-US/MPL/2.0/FAQ/.
+4. AccessKit/vendored modifications: exact AccessKit license files restored;
+   modified upstream GUI source files identify RustPy changes and patch notes
+   document provenance. MIT/Apache texts are in the aggregate notice.
+5. Protobuf/TensorFlow: original embedded typeshed stub copyright and license
+   headers now appear in the binary notice supplement, including Google's full
+   BSD-3-Clause conditions/disclaimer.
+6. Coverage archive: deterministic runtime-only subset retains every runtime file
+   byte, LICENSE and NOTICE. Unused upstream tests and their jQuery fixture were
+   removed. Original/runtime hashes, member hashes and repackaging changes are
+   documented beside the archive. An offline verifier checks the retained contents.
+7. Unicode/CPython tables: adjacent full historical Unicode and CPython terms,
+   known source versions, hashes and transformation descriptions are retained.
+   A pinned CPython 3.12.3 reconstruction script verifies the names/codec data.
+   The original missing generation command is not invented.
+8. OSV fixtures: full GitHub/PyPA CC-BY-4.0 terms and per-file source attribution,
+   unchanged-content statements and hashes are beside the source-only fixtures.
+9. Native code: exact embedded libgit2 GPLv2/linking exception and third-party
+   terms, libssh2/zlib terms, SQLite dedication and complete matching crate sources
+   are retained. System/toolchain libraries require separate actual-build evidence.
+10. unixODBC, MinGW and GTK/WebKit: artifact staging rejects native runtime files
+   without exact component/version, notices, corresponding source archive hashes,
+   build instructions and replacement instructions. This includes static system
+   code such as OpenSSL, whose license cannot be inferred from openssl-sys.
+   Native-Licenses.zip carries all supplied evidence. Host libraries that are
+   required but not copied are distinguished from redistributed native code.
+11. AppImage: a supplied reviewed runtime is required, retained and explicitly
+   injected; it cannot be silently downloaded outside the notice/source inventory.
+12. Artifacts: all authored tar/AppImage/Deb/RPM/Snap/Flatpak, Windows ZIP/Inno/
+   MSI/MSIX and macOS bundle recipes include the terms and covered-source archive.
+   Debian/RPM collect evidence after stripping. macOS explicitly records pre-sign
+   executable provenance because the resource seal makes embedding its final signed
+   hash self-referential; final signed container checksums remain a separate gate.
+
+Release operation
+-----------------
+For source/notice updates (requires populated, authenticated Cargo archive cache):
+  python3 scripts/audit-dependency-licenses.py
+  python3 scripts/generate-cargo-notices.py
+  python3 packaging/update-notices.py
+
+For routine committed-evidence checks (no dependency downloads or compilation):
+  python3 scripts/generate-cargo-notices.py --check
+  python3 packaging/update-notices.py --check
+
+For complete reproduction from cached original archives:
+  python3 scripts/generate-cargo-notices.py --check --verify-cache
+
+For binary packaging, prepare an artifact-specific native evidence manifest and
+set RUSTPY_NATIVE_RUNTIME_MANIFEST. Its binary_sha256 binds the declaration to the
+staged executable. It must explicitly list system_static_components, even when
+empty. An empty list is the producer's assertion, not an automatically inferred
+absence of static code. Use the exact binary after stripping; do not substitute
+another build/version. See packaging/native-license-evidence.md for the schema,
+source acquisition, build and library replacement requirements. The gate checks
+integrity and coverage, not the legal truth of a producer's supplied declarations.
+
+APPIMAGETOOL_RUNTIME_FILE is required for AppImage builds. Offline vendor builds
+also need the checksum-verified original native/covered .crate archives through
+Cargo cache or RUSTPY_NATIVE_CRATE_CACHE; self-authored vendor checksums alone
+are not accepted. Covered modifications require a renewed source review rather
+than exporting the unmodified upstream source as if it matched.
+
+Remaining release-specific work
+------------------------------
+Generate native evidence from the actual toolchain and copied libraries for each
+release target. Inspect and smoke-test final platform archives/installers. No
+engineering change can pre-certify future producer-supplied binaries, source
+correspondence, or author rights. These are enforced/documented release steps,
+not unresolved missing notices in the repository. External Python/debugpy packages,
+database servers and vendor ODBC drivers need their own review if later bundled.
+
+Final targeted verification
+---------------------------
+PASS: full cached reproduction of all 844 registry notice records and their
+      selected license routes; aggregate notice drift check.
+PASS: all 890 CSV records reconcile to the three unchanged lockfiles, with no
+      unclassified external declarations.
+PASS: 12 license/native-evidence/packaging regression tests, including rejecting
+      stale inputs, missing source, undeclared extensionless runtimes, absent
+      static linkage declarations and malformed binary hashes.
+PASS: coverage runtime member inventory/hash/license checks and an isolated
+      bootstrap smoke run collecting branch coverage and producing JSON and HTML.
+PASS: CPython 3.12.3 names/codec reconstruction compares exactly to frozen data.
+PASS: cargo-deny offline all-features main-workspace license check; only the
+      existing unused Unicode-DFS-2016 allowance warning remains.
+PASS: fixture Linux tar recipe, including inspection of LICENSE and aggregate
+      notices plus four native and eight covered source archives with locked hashes.
+      The executable is a test fixture; this is not a native application release.
+PASS: changed Python/shell/XML syntax and Git whitespace checks. Verbatim retained
+      legal texts preserve upstream whitespace and byte identities via attributes.
+
+No application compilation, performance workloads, GUI/native installer runs,
+signing, pushes or publication were performed. Checks ran serially with at most
+two CPU cores, two Cargo jobs, two Rayon workers and two Rust test threads at
+reduced priority. Unrelated user files were left untouched.

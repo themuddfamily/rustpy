@@ -1,0 +1,38 @@
+@host = https://example.invalid
+### Create record
+# @name createRecord
+# @no-redirect
+# @no-cookie-jar
+# @no-log
+# @timeout 1200
+# @connection-timeout 300
+< {%
+request.variables.set("record", "42");
+client.global.set("trace", "fixture");
+%}
+POST {{host}}/records/{{record}}
+Content-Type: application/json
+
+{"record": "{{record}}"}
+> {%
+client.test("created", function () { client.assert(response.status === 201); });
+client.test("header", function () { client.assert(response.headers.valueOf("content-type")); });
+client.global.set("recordId", response.body.id);
+%}
+>>! record-response.json
+### Graph query
+GRAPHQL {{host}}/graphql
+
+{ viewer { id } }
+### Socket
+WEBSOCKET ws://example.invalid/events
+
+{"subscribe":"records"}
+===
+{"ping":true}
+### RPC
+# @proto records.proto
+# @import-path proto
+GRPC grpc://example.invalid:50051/records.RecordService/Get
+
+{"id":"42"}

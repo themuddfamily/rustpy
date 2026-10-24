@@ -1,0 +1,9 @@
+[package]
+name = "rustpy-grammar"
+description = "Rule-based English grammar checks for comments, docstrings, Markdown and commit messages"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rustpy-syntax.workspace = true

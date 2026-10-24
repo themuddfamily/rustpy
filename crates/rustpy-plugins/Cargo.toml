@@ -1,0 +1,27 @@
+[package]
+name = "rustpy-plugins"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: declarative plugins (manifests, install/enable/disable/uninstall, contributed live templates, color schemes, keymaps, TextMate grammars, external tools and file templates) and the Marketplace catalog"
+# `examples/` holds example plugin directories (data), not Rust example programs.
+autoexamples = false
+
+[dependencies]
+rustpy-highlight.workspace = true
+rustpy-settings.workspace = true
+rustpy-net.workspace = true
+url = "2"
+rustpy-templates.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+wasmi = { version = "=0.40.0", default-features = false, features = ["std"] }
+ed25519-dalek = { version = "=2.2.0", default-features = false, features = ["std"] }
+base64 = "=0.22.1"
+# Declared like rustpy-packages does (ureq is not in [workspace.dependencies]).
+ureq = { version = "2", default-features = false, features = ["tls", "gzip"] }
+
+[dev-dependencies]
+tempfile.workspace = true

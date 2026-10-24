@@ -1,0 +1,29 @@
+[package]
+name = "rustpy-semantic"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: scopes, name resolution, module index, type inference"
+build = "build.rs"
+
+[dependencies]
+rustpy-core.workspace = true
+rustpy-syntax.workspace = true
+rustpy-text.workspace = true
+rustpy-index.workspace = true
+smol_str.workspace = true
+rustc-hash.workspace = true
+indexmap.workspace = true
+parking_lot.workspace = true
+log.workspace = true
+serde.workspace = true
+once_cell.workspace = true
+regex.workspace = true
+serde_json.workspace = true
+rayon = "1"
+unicode-normalization = "=0.1.22"
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+tempfile.workspace = true

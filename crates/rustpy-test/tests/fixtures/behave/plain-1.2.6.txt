@@ -1,0 +1,75 @@
+Feature: Calculator
+  Background: 
+
+  Scenario: Add two numbers
+    Given a fresh calculator ... passed in 0.000s
+    When I add 2 and 3 ... passed in 0.000s
+    Then the result is 5 ... passed in 0.000s
+
+  Scenario: Failing addition
+    Given a fresh calculator ... passed in 0.000s
+    When I add 2 and 2 ... passed in 0.000s
+    Then the result is 5 ... failed in 0.000s
+Assertion Failed: expected 5 but got 4
+Captured stdout:
+adding 2 2
+
+  Scenario: Exploding step
+    Given a fresh calculator ... passed in 0.000s
+    When I divide 1 by 0 ... failed in 0.001s
+Traceback (most recent call last):
+  File "/home/user/.venv-behave126/lib/python3.12/site-packages/behave/model.py", line 1329, in run
+    match.run(runner.context)
+  File "/home/user/.venv-behave126/lib/python3.12/site-packages/behave/matchers.py", line 98, in run
+    self.func(context, *args, **kwargs)
+  File "features/steps/calc_steps.py", line 17, in step_divide
+    context.result = a / b
+                     ~~^~~
+ZeroDivisionError: division by zero
+
+
+  Scenario: Skipped scenario
+
+  Scenario: Undefined step
+    Given a fresh calculator ... passed in 0.000s
+    When I multiply 2 by 3 ... undefined in 0.000s
+
+  Scenario Outline: Add 1 and 2 -- @1.1 Small numbers
+    Given a fresh calculator ... passed in 0.000s
+    When I add 1 and 2 ... passed in 0.000s
+    Then the result is 3 ... passed in 0.000s
+
+  Scenario Outline: Add 2 and 2 -- @1.2 Small numbers
+    Given a fresh calculator ... passed in 0.000s
+    When I add 2 and 2 ... passed in 0.000s
+    Then the result is 5 ... failed in 0.000s
+Assertion Failed: expected 5 but got 4
+Captured stdout:
+adding 2 2
+
+  Scenario: Data table and doc string
+    Given a fresh calculator ... passed in 0.000s
+    Given the following numbers ... undefined in 0.000s
+      | value |
+      | 1     |
+      | 2     |
+
+Feature: Rules
+
+  Scenario: Positive
+    Given a fresh calculator ... passed in 0.000s
+    When I add 1 and 2 ... passed in 0.000s
+    Then the result is 3 ... passed in 0.000s
+
+
+Failing scenarios:
+  features/calculator.feature:12  Failing addition
+  features/calculator.feature:16  Exploding step
+  features/calculator.feature:25  Undefined step
+  features/calculator.feature:36  Add 2 and 2 -- @1.2 Small numbers
+  features/calculator.feature:38  Data table and doc string
+
+1 feature passed, 1 failed, 0 skipped
+3 scenarios passed, 5 failed, 1 skipped
+16 steps passed, 3 failed, 7 skipped, 3 undefined
+Took 0m0.004s

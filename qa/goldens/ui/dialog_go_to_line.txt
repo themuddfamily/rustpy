@@ -1,0 +1,25 @@
+# rustpy ui snapshot: dialog_go_to_line
+# screen 800x500 @1x, theme "Dark"
+clip [0,0 800,500]
+rect [240,215 580,326] fill=#00000060 radius=4,4,4,4
+rect [230,195 570,306] fill=#3c3f41 stroke=1#323232 radius=4,4,4,4
+clip [231,196 569,500]
+rect [230,195 570,230] fill=#2d2d2d stroke=1#323232 radius=4,4,0,0
+text (313,202) 148x21 "Go to Line:Column"
+  [0..17] Proportional 18 #bbbbbb
+line (548,208)-(558,218) stroke=1#b4b4b4
+line (558,208)-(548,218) stroke=1#b4b4b4
+text (237,236) 89x15 "[Line] [:column]"
+  [0..16] Proportional 13 #bbbbbb
+rect [237,255 437,274] fill=#2b2b2b stroke=1#bbbbbb radius=3,3,3,3
+clip [240,256 267,273]
+text (241,257) 25x15 "12:5"
+  [0..4] Proportional 13 #bbbbbb
+line (266,256)-(266,274) stroke=2#c0deff
+clip [231,196 569,500]
+rect [237,278 271,299] fill=#3c3c3c radius=3,3,3,3
+text (245,281) 18x15 "OK"
+  [0..2] Proportional 13 #bbbbbb
+rect [277,278 331,299] fill=#3c3c3c radius=3,3,3,3
+text (285,281) 38x15 "Cancel"
+  [0..6] Proportional 13 #bbbbbb

@@ -1,0 +1,1 @@
+{"name":"rustpy-web-source-fixture","private":true,"type":"module","scripts":{"build":"tsc --noEmit","dev":"vite --host 127.0.0.1"},"dependencies":{"react":"*","vue":"*","svelte":"*"},"devDependencies":{"typescript":"*","vite":"*"}}

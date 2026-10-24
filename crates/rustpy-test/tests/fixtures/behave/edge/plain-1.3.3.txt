@@ -1,0 +1,41 @@
+USING RUNNER: behave.runner:Runner
+Feature: Edge cases
+
+  Scenario: Hook explodes
+----
+CAPTURED STDOUT: before_scenario
+HOOK-ERROR in before_scenario: RuntimeError: hook boom
+----
+
+  Scenario: Pending step
+    Given a pending step ... pending in 0.000s
+ERROR: StepNotImplementedError: later
+
+  Scenario: Noisy failure
+    Given a noisy failing step ... failed in 0.000s
+ASSERT FAILED: noisy failed
+----
+CAPTURED STDOUT: scenario
+to stdout
+
+CAPTURED STDERR: scenario
+to stderr
+---- CAPTURED_SCENARIO_OUTPUT_END ----
+
+  Scenario: Empty scenario
+
+  Scenario: Fine
+    Given a step ... passed in 0.000s
+
+
+Failing scenarios:
+  features/edge.feature:9  Noisy failure
+
+Errored scenarios:
+  features/edge.feature:3  Hook explodes
+  features/edge.feature:6  Pending step
+
+0 features passed, 0 failed, 1 error, 0 skipped
+2 scenarios passed, 1 failed, 1 error, 1 hook_error, 0 skipped
+1 step passed, 1 failed, 0 skipped, 1 pending, 1 untested
+Took 0min 0.000s

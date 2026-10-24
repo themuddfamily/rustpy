@@ -1,0 +1,19 @@
+[package]
+name = "rustpy-ai"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: AI Assistant backend (Anthropic Messages API client with SSE streaming, prompt builders, code block extraction)"
+
+[dependencies]
+anyhow.workspace = true
+log.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+crossbeam-channel.workspace = true
+pulldown-cmark.workspace = true
+# Proxy (Settings › HTTP Proxy) and certificate trust (Server Certificates).
+rustpy-net.workspace = true
+# Declared like rustpy-http / rustpy-packages do (ureq is not in [workspace.dependencies]).
+ureq = { version = "2", default-features = false, features = ["tls", "gzip"] }

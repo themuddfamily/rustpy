@@ -1,0 +1,612 @@
+[
+{
+  "description": [
+    "As a user I want to add numbers."
+  ],
+  "elements": [
+    {
+      "keyword": "Background",
+      "location": "features/calculator.feature:5",
+      "name": "",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "name": "a fresh calculator",
+          "step_type": "given"
+        }
+      ],
+      "type": "background"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/calculator.feature:8",
+      "name": "Add two numbers",
+      "status": "passed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 0.00010991096496582031,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:9",
+          "match": {
+            "arguments": [
+              {
+                "name": "a",
+                "original": "2",
+                "value": 2
+              },
+              {
+                "name": "b",
+                "original": "3",
+                "value": 3
+              }
+            ],
+            "location": "features/steps/calc_steps.py:9"
+          },
+          "name": "I add 2 and 3",
+          "result": {
+            "duration": 5.7697296142578125e-05,
+            "status": "passed"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:10",
+          "match": {
+            "arguments": [
+              {
+                "name": "expected",
+                "original": "5",
+                "value": 5
+              }
+            ],
+            "location": "features/steps/calc_steps.py:20"
+          },
+          "name": "the result is 5",
+          "result": {
+            "duration": 4.458427429199219e-05,
+            "status": "passed"
+          },
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/calculator.feature:12",
+      "name": "Failing addition",
+      "status": "failed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 4.220008850097656e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:13",
+          "match": {
+            "arguments": [
+              {
+                "name": "a",
+                "original": "2",
+                "value": 2
+              },
+              {
+                "name": "b",
+                "original": "2",
+                "value": 2
+              }
+            ],
+            "location": "features/steps/calc_steps.py:9"
+          },
+          "name": "I add 2 and 2",
+          "result": {
+            "duration": 4.506111145019531e-05,
+            "status": "passed"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:14",
+          "match": {
+            "arguments": [
+              {
+                "name": "expected",
+                "original": "5",
+                "value": 5
+              }
+            ],
+            "location": "features/steps/calc_steps.py:20"
+          },
+          "name": "the result is 5",
+          "result": {
+            "duration": 5.626678466796875e-05,
+            "error_message": "ASSERT FAILED: expected 5 but got 4",
+            "status": "failed"
+          },
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/calculator.feature:16",
+      "name": "Exploding step",
+      "status": "error",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 6.389617919921875e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:17",
+          "match": {
+            "arguments": [
+              {
+                "name": "a",
+                "original": "1",
+                "value": 1
+              },
+              {
+                "name": "b",
+                "original": "0",
+                "value": 0
+              }
+            ],
+            "location": "features/steps/calc_steps.py:15"
+          },
+          "name": "I divide 1 by 0",
+          "result": {
+            "duration": 0.00046634674072265625,
+            "status": "error"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:18",
+          "name": "the result is 0",
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/calculator.feature:21",
+      "name": "Skipped scenario",
+      "status": "skipped",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "name": "a fresh calculator",
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:22",
+          "name": "I add 1 and 1",
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:23",
+          "name": "the result is 2",
+          "step_type": "then"
+        }
+      ],
+      "tags": [
+        "skip"
+      ],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/calculator.feature:25",
+      "name": "Undefined step",
+      "status": "error",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 4.696846008300781e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:26",
+          "name": "I multiply 2 by 3",
+          "result": {
+            "duration": 0,
+            "status": "undefined"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:27",
+          "name": "the result is 6",
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario Outline",
+      "location": "features/calculator.feature:35",
+      "name": "Add 1 and 2 -- @1.1 Small numbers",
+      "status": "passed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 6.866455078125e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:30",
+          "match": {
+            "arguments": [
+              {
+                "name": "a",
+                "original": "1",
+                "value": 1
+              },
+              {
+                "name": "b",
+                "original": "2",
+                "value": 2
+              }
+            ],
+            "location": "features/steps/calc_steps.py:9"
+          },
+          "name": "I add 1 and 2",
+          "result": {
+            "duration": 4.410743713378906e-05,
+            "status": "passed"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:31",
+          "match": {
+            "arguments": [
+              {
+                "name": "expected",
+                "original": "3",
+                "value": 3
+              }
+            ],
+            "location": "features/steps/calc_steps.py:20"
+          },
+          "name": "the result is 3",
+          "result": {
+            "duration": 3.409385681152344e-05,
+            "status": "passed"
+          },
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario Outline",
+      "location": "features/calculator.feature:36",
+      "name": "Add 2 and 2 -- @1.2 Small numbers",
+      "status": "failed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 5.0067901611328125e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:30",
+          "match": {
+            "arguments": [
+              {
+                "name": "a",
+                "original": "2",
+                "value": 2
+              },
+              {
+                "name": "b",
+                "original": "2",
+                "value": 2
+              }
+            ],
+            "location": "features/steps/calc_steps.py:9"
+          },
+          "name": "I add 2 and 2",
+          "result": {
+            "duration": 4.6253204345703125e-05,
+            "status": "passed"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:31",
+          "match": {
+            "arguments": [
+              {
+                "name": "expected",
+                "original": "5",
+                "value": 5
+              }
+            ],
+            "location": "features/steps/calc_steps.py:20"
+          },
+          "name": "the result is 5",
+          "result": {
+            "duration": 6.365776062011719e-05,
+            "error_message": "ASSERT FAILED: expected 5 but got 4",
+            "status": "failed"
+          },
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    },
+    {
+      "keyword": "Scenario",
+      "location": "features/calculator.feature:38",
+      "name": "Data table and doc string",
+      "status": "passed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:6",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 4.506111145019531e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "Given",
+          "location": "features/calculator.feature:39",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:25"
+          },
+          "name": "the following numbers:",
+          "result": {
+            "duration": 4.38690185546875e-05,
+            "status": "passed"
+          },
+          "step_type": "given",
+          "table": {
+            "headings": [
+              "value"
+            ],
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          }
+        },
+        {
+          "keyword": "When",
+          "location": "features/calculator.feature:43",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:33"
+          },
+          "name": "I sum them",
+          "result": {
+            "duration": 5.6743621826171875e-05,
+            "status": "passed"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/calculator.feature:44",
+          "match": {
+            "arguments": [
+              {
+                "name": "expected",
+                "original": "3",
+                "value": 3
+              }
+            ],
+            "location": "features/steps/calc_steps.py:20"
+          },
+          "name": "the result is 3",
+          "result": {
+            "duration": 3.4332275390625e-05,
+            "status": "passed"
+          },
+          "step_type": "then"
+        },
+        {
+          "keyword": "And",
+          "location": "features/calculator.feature:45",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:38"
+          },
+          "name": "the report says:",
+          "result": {
+            "duration": 4.887580871582031e-05,
+            "status": "passed"
+          },
+          "step_type": "then",
+          "text": "total: 3"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    }
+  ],
+  "keyword": "Feature",
+  "location": "features/calculator.feature:2",
+  "name": "Calculator",
+  "status": "failed",
+  "tags": [
+    "calc"
+  ]
+},
+
+{
+  "elements": [
+    {
+      "keyword": "Scenario",
+      "location": "features/rules.feature:3",
+      "name": "Positive",
+      "status": "passed",
+      "steps": [
+        {
+          "keyword": "Given",
+          "location": "features/rules.feature:4",
+          "match": {
+            "arguments": [],
+            "location": "features/steps/calc_steps.py:4"
+          },
+          "name": "a fresh calculator",
+          "result": {
+            "duration": 5.0067901611328125e-05,
+            "status": "passed"
+          },
+          "step_type": "given"
+        },
+        {
+          "keyword": "When",
+          "location": "features/rules.feature:5",
+          "match": {
+            "arguments": [
+              {
+                "name": "a",
+                "original": "1",
+                "value": 1
+              },
+              {
+                "name": "b",
+                "original": "2",
+                "value": 2
+              }
+            ],
+            "location": "features/steps/calc_steps.py:9"
+          },
+          "name": "I add 1 and 2",
+          "result": {
+            "duration": 4.267692565917969e-05,
+            "status": "passed"
+          },
+          "step_type": "when"
+        },
+        {
+          "keyword": "Then",
+          "location": "features/rules.feature:6",
+          "match": {
+            "arguments": [
+              {
+                "name": "expected",
+                "original": "3",
+                "value": 3
+              }
+            ],
+            "location": "features/steps/calc_steps.py:20"
+          },
+          "name": "the result is 3",
+          "result": {
+            "duration": 2.7894973754882812e-05,
+            "status": "passed"
+          },
+          "step_type": "then"
+        }
+      ],
+      "tags": [],
+      "type": "scenario"
+    }
+  ],
+  "keyword": "Feature",
+  "location": "features/rules.feature:1",
+  "name": "Rules",
+  "status": "passed",
+  "tags": []
+}
+]

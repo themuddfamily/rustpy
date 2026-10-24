@@ -1,0 +1,208 @@
+# source.toy: tokens of sample.toy produced by vscode-textmate 10.0.2 (Shiki fork) with Oniguruma.
+# One `@ <line number>` header per line, then `start end scope scope …` (byte offsets).
+@ 0
+0 1 source.toy
+1 2 source.toy keyword.operator.toy
+2 3 source.toy keyword.operator.toy
+3 6 source.toy variable.other.toy
+6 7 source.toy keyword.operator.toy
+7 10 source.toy variable.other.toy
+10 11 source.toy keyword.operator.toy
+11 14 source.toy variable.other.toy
+14 15 source.toy
+15 18 source.toy variable.other.toy
+@ 1
+0 6 source.toy keyword.control.import.toy
+6 7 source.toy
+7 10 source.toy meta.path.toy entity.name.namespace.toy
+10 11 source.toy meta.path.toy punctuation.separator.namespace.toy
+11 13 source.toy meta.path.toy entity.name.namespace.toy
+13 14 source.toy meta.path.toy punctuation.separator.namespace.toy
+14 18 source.toy meta.path.toy entity.name.namespace.toy
+@ 2
+0 2 source.toy comment.line.double-slash.toy punctuation.definition.comment.toy
+2 17 source.toy comment.line.double-slash.toy
+@ 3
+0 2 source.toy comment.block.toy punctuation.definition.comment.begin.toy
+2 9 source.toy comment.block.toy
+9 13 source.toy comment.block.toy keyword.other.todo.toy
+@ 4
+0 17 source.toy comment.block.toy
+17 19 source.toy comment.block.toy punctuation.definition.comment.end.toy
+19 20 source.toy
+20 23 source.toy keyword.control.let.toy
+23 24 source.toy
+24 29 source.toy variable.other.toy
+29 30 source.toy
+30 31 source.toy keyword.operator.toy
+31 32 source.toy
+32 33 source.toy constant.numeric.decimal.toy
+@ 5
+0 1 source.toy meta.decorator.toy punctuation.definition.decorator.toy
+1 7 source.toy meta.decorator.toy
+@ 6
+0 2 source.toy storage.type.function.toy
+2 3 source.toy
+3 6 source.toy entity.name.function.toy
+6 7 source.toy
+7 8 source.toy variable.other.toy
+8 9 source.toy meta.type.annotation.toy punctuation.separator.annotation.toy
+9 10 source.toy meta.type.annotation.toy
+10 13 source.toy meta.type.annotation.toy entity.name.type.toy
+13 15 source.toy
+15 16 source.toy variable.other.toy
+16 17 source.toy meta.type.annotation.toy punctuation.separator.annotation.toy
+17 21 source.toy meta.type.annotation.toy
+21 23 source.toy
+23 24 source.toy meta.block.toy punctuation.section.block.begin.toy
+@ 7
+0 4 source.toy meta.block.toy
+4 7 source.toy meta.block.toy keyword.control.let.toy
+7 8 source.toy meta.block.toy
+8 9 source.toy meta.block.toy variable.other.toy
+9 10 source.toy meta.block.toy
+10 11 source.toy meta.block.toy keyword.operator.toy
+11 12 source.toy meta.block.toy
+12 16 source.toy meta.block.toy constant.numeric.hex.toy
+16 17 source.toy meta.block.toy
+17 18 source.toy meta.block.toy keyword.operator.toy
+18 19 source.toy meta.block.toy
+19 21 source.toy meta.block.toy constant.numeric.decimal.toy
+21 22 source.toy meta.block.toy
+22 23 source.toy meta.block.toy keyword.operator.toy
+23 24 source.toy meta.block.toy
+24 27 source.toy meta.block.toy constant.numeric.decimal.toy
+27 28 source.toy meta.block.toy
+@ 8
+0 4 source.toy meta.block.toy
+4 6 source.toy meta.block.toy keyword.control.if.toy
+6 7 source.toy meta.block.toy
+7 8 source.toy meta.block.toy variable.other.toy
+8 9 source.toy meta.block.toy
+9 11 source.toy meta.block.toy keyword.operator.toy
+11 12 source.toy meta.block.toy
+12 14 source.toy meta.block.toy constant.numeric.decimal.toy
+14 15 source.toy meta.block.toy
+15 16 source.toy meta.block.toy meta.block.toy punctuation.section.block.begin.toy
+16 17 source.toy meta.block.toy meta.block.toy
+17 23 source.toy meta.block.toy meta.block.toy keyword.control.return.toy
+23 24 source.toy meta.block.toy meta.block.toy
+24 25 source.toy meta.block.toy meta.block.toy string.quoted.double.toy punctuation.definition.string.begin.toy
+25 30 source.toy meta.block.toy meta.block.toy string.quoted.double.toy
+30 32 source.toy meta.block.toy meta.block.toy string.quoted.double.toy meta.interpolation.toy punctuation.section.interpolation.begin.toy
+32 33 source.toy meta.block.toy meta.block.toy string.quoted.double.toy meta.interpolation.toy source.toy.embedded variable.other.toy
+33 34 source.toy meta.block.toy meta.block.toy string.quoted.double.toy meta.interpolation.toy source.toy.embedded
+34 35 source.toy meta.block.toy meta.block.toy string.quoted.double.toy meta.interpolation.toy source.toy.embedded keyword.operator.toy
+35 36 source.toy meta.block.toy meta.block.toy string.quoted.double.toy meta.interpolation.toy source.toy.embedded
+36 37 source.toy meta.block.toy meta.block.toy string.quoted.double.toy meta.interpolation.toy source.toy.embedded constant.numeric.decimal.toy
+37 38 source.toy meta.block.toy meta.block.toy string.quoted.double.toy meta.interpolation.toy punctuation.section.interpolation.end.toy
+38 40 source.toy meta.block.toy meta.block.toy string.quoted.double.toy constant.character.escape.toy
+40 41 source.toy meta.block.toy meta.block.toy string.quoted.double.toy punctuation.definition.string.end.toy
+41 43 source.toy meta.block.toy meta.block.toy
+43 44 source.toy meta.block.toy meta.block.toy punctuation.section.block.end.toy
+44 45 source.toy meta.block.toy
+45 49 source.toy meta.block.toy keyword.control.else.toy
+49 50 source.toy meta.block.toy
+50 51 source.toy meta.block.toy meta.block.toy punctuation.section.block.begin.toy
+51 52 source.toy meta.block.toy meta.block.toy
+52 58 source.toy meta.block.toy meta.block.toy keyword.control.return.toy
+58 59 source.toy meta.block.toy meta.block.toy
+59 62 source.toy meta.block.toy meta.block.toy string.quoted.single.toy
+62 64 source.toy meta.block.toy meta.block.toy
+64 65 source.toy meta.block.toy meta.block.toy punctuation.section.block.end.toy
+@ 9
+0 1 source.toy meta.block.toy punctuation.section.block.end.toy
+@ 10
+0 5 source.toy storage.type.class.toy
+5 6 source.toy
+6 11 source.toy entity.name.type.class.toy
+11 12 source.toy
+12 13 source.toy meta.block.toy punctuation.section.block.begin.toy
+@ 11
+0 4 source.toy meta.block.toy
+4 7 source.toy meta.block.toy keyword.control.let.toy
+7 8 source.toy meta.block.toy
+8 9 source.toy meta.block.toy variable.other.toy
+9 10 source.toy meta.block.toy meta.type.annotation.toy punctuation.separator.annotation.toy
+10 11 source.toy meta.block.toy meta.type.annotation.toy
+11 16 source.toy meta.block.toy meta.type.annotation.toy entity.name.type.toy
+16 17 source.toy meta.block.toy meta.type.annotation.toy
+17 18 source.toy meta.block.toy keyword.operator.toy
+18 19 source.toy meta.block.toy
+19 20 source.toy meta.block.toy string.quoted.double.raw.rust-lite storage.type.string.rust-lite
+20 22 source.toy meta.block.toy string.quoted.double.raw.rust-lite
+22 39 source.toy meta.block.toy string.quoted.double.raw.rust-lite
+39 41 source.toy meta.block.toy string.quoted.double.raw.rust-lite
+41 42 source.toy meta.block.toy
+@ 12
+0 1 source.toy meta.block.toy punctuation.section.block.end.toy
+@ 13
+0 4 source.toy variable.other.toy
+4 5 source.toy
+5 6 source.toy keyword.operator.toy
+6 7 source.toy
+7 9 source.toy string.unquoted.heredoc.toy keyword.operator.heredoc.toy
+9 12 source.toy string.unquoted.heredoc.toy entity.name.tag.heredoc.toy
+@ 14
+0 21 source.toy string.unquoted.heredoc.toy string.unquoted.heredoc.body.toy
+@ 15
+0 4 source.toy string.unquoted.heredoc.toy string.unquoted.heredoc.body.toy
+@ 16
+0 3 source.toy string.unquoted.heredoc.toy entity.name.tag.heredoc.toy
+@ 17
+0 1 source.toy markup.quote.toy punctuation.definition.quote.toy
+1 2 source.toy markup.quote.toy
+2 9 source.toy markup.quote.toy
+9 15 source.toy markup.quote.toy markup.bold.toy
+15 20 source.toy markup.quote.toy
+@ 18
+0 1 source.toy markup.quote.toy punctuation.definition.quote.toy
+1 2 source.toy markup.quote.toy
+2 8 source.toy markup.quote.toy
+@ 19
+0 5 source.toy variable.other.toy
+@ 20
+0 2 source.toy meta.brackets.escaped.toy
+2 3 source.toy meta.brackets.escaped.toy
+3 5 source.toy meta.brackets.escaped.toy constant.character.escape.bracket.toy
+5 6 source.toy meta.brackets.escaped.toy
+6 7 source.toy meta.brackets.escaped.toy
+7 8 source.toy
+8 9 source.toy meta.brackets.toy
+9 10 source.toy meta.brackets.toy variable.other.toy
+10 11 source.toy meta.brackets.toy
+11 12 source.toy
+12 13 source.toy variable.other.toy
+13 14 source.toy
+@ 21
+0 4 source.toy keyword.other.embedded.toy
+4 5 source.toy
+5 6 source.toy punctuation.section.embedded.begin.toy
+@ 22
+0 4 source.toy meta.embedded.block.rust-lite
+4 6 source.toy meta.embedded.block.rust-lite storage.type.fn.rust-lite
+6 7 source.toy meta.embedded.block.rust-lite
+7 11 source.toy meta.embedded.block.rust-lite entity.name.function.rust-lite
+11 14 source.toy meta.embedded.block.rust-lite
+14 15 source.toy meta.embedded.block.rust-lite meta.block.rust-lite
+15 16 source.toy meta.embedded.block.rust-lite meta.block.rust-lite
+16 19 source.toy meta.embedded.block.rust-lite meta.block.rust-lite keyword.control.let.toy
+19 20 source.toy meta.embedded.block.rust-lite meta.block.rust-lite
+20 21 source.toy meta.embedded.block.rust-lite meta.block.rust-lite variable.other.toy
+21 22 source.toy meta.embedded.block.rust-lite meta.block.rust-lite
+22 23 source.toy meta.embedded.block.rust-lite meta.block.rust-lite keyword.operator.toy
+23 24 source.toy meta.embedded.block.rust-lite meta.block.rust-lite
+24 25 source.toy meta.embedded.block.rust-lite meta.block.rust-lite constant.numeric.decimal.toy
+25 27 source.toy meta.embedded.block.rust-lite meta.block.rust-lite
+27 28 source.toy meta.embedded.block.rust-lite meta.block.rust-lite
+@ 23
+0 1 source.toy punctuation.section.embedded.end.toy
+@ 24
+0 4 source.toy support.function.call.toy
+4 5 source.toy
+5 6 source.toy string.quoted.double.raw.rust-lite storage.type.string.rust-lite
+6 7 source.toy string.quoted.double.raw.rust-lite
+7 8 source.toy string.quoted.double.raw.rust-lite
+8 9 source.toy string.quoted.double.raw.rust-lite
+9 10 source.toy
+@ 25

@@ -1,0 +1,9 @@
+[package]
+name = "rustpy-emmet"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: Emmet abbreviation expansion for HTML and CSS (abbreviation parser, snippets, lorem ipsum, CSS vocabulary, caret-side extraction)"
+
+[dependencies]

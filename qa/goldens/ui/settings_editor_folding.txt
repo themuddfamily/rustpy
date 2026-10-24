@@ -1,0 +1,124 @@
+# rustpy ui snapshot: settings_editor_folding
+# screen 1200x860 @1x, theme "Dark"
+clip [0,0 1200,860]
+rect [160,150 1060,750] fill=#00000060 radius=4,4,4,4
+rect [150,130 1050,730] fill=#3c3f41 stroke=1#323232 radius=4,4,4,4
+clip [151,131 1049,729]
+rect [150,130 1050,165] fill=#2d2d2d stroke=1#323232 radius=4,4,0,0
+text (554,137) 66x21 "Settings"
+  [0..8] Proportional 18 #bbbbbb
+line (1028,143)-(1038,153) stroke=1#b4b4b4
+line (1038,143)-(1028,153) stroke=1#b4b4b4
+rect [157,171 377,190] fill=#2b2b2b stroke=1#bbbbbb radius=3,3,3,3
+text (161,173) 107x15 "🔍 Search settings"
+  [0..20] Proportional 13 #70707099
+clip [160,172 269,189]
+line (161,172)-(161,190) stroke=2#c0deff
+clip [151,131 1049,729]
+text (1043,173) 175x15 "Editor › General › Code Folding"
+  [0..35] Proportional 13 #ffffff
+line (157,197)-(1043,197) stroke=1#323232
+clip [157,204 396,723]
+rect [157,204 395,723] fill=#3c3f41
+clip [157,206 396,721]
+text (165,206) 135x15 "Appearance & Behavior"
+  [0..21] Proportional 13 #bbbbbb
+text (187,228) 69x15 "Appearance"
+  [0..10] Proportional 13 #bbbbbb
+text (187,253) 170x15 "Menus, Toolbars and Window"
+  [0..26] Proportional 13 #bbbbbb
+text (187,278) 128x15 "Scopes and File Colors"
+  [0..22] Proportional 13 #bbbbbb
+text (187,302) 92x15 "System Settings"
+  [0..15] Proportional 13 #bbbbbb
+text (201,325) 67x15 "HTTP Proxy"
+  [0..10] Proportional 13 #bbbbbb
+text (201,350) 61x15 "Passwords"
+  [0..9] Proportional 13 #bbbbbb
+text (201,375) 48x15 "Updates"
+  [0..7] Proportional 13 #bbbbbb
+text (201,400) 74x15 "Data Sharing"
+  [0..12] Proportional 13 #bbbbbb
+text (187,425) 74x15 "Notifications"
+  [0..13] Proportional 13 #bbbbbb
+text (187,450) 70x15 "Accessibility"
+  [0..13] Proportional 13 #bbbbbb
+text (187,475) 116x15 "Menus and Toolbars"
+  [0..18] Proportional 13 #bbbbbb
+text (187,500) 82x15 "Path Variables"
+  [0..14] Proportional 13 #bbbbbb
+text (173,525) 46x15 "Keymap"
+  [0..6] Proportional 13 #ffffff
+text (165,547) 35x15 "Editor"
+  [0..6] Proportional 13 #bbbbbb
+text (187,569) 45x15 "General"
+  [0..7] Proportional 13 #bbbbbb
+text (187,594) 74x15 "Code Editing"
+  [0..12] Proportional 13 #bbbbbb
+text (187,618) 45x15 "General"
+  [0..7] Proportional 13 #bbbbbb
+rect [193,638 285,659] fill=#2f65ca radius=3,3,3,3
+text (201,641) 76x15 "Code Folding"
+  [0..12] Proportional 13 #bbbbbb
+text (187,665) 80x15 "Color Scheme"
+  [0..12] Proportional 13 #bbbbbb
+text (201,688) 45x15 "General"
+  [0..7] Proportional 13 #bbbbbb
+text (201,713) 109x15 "Language Defaults"
+  [0..17] Proportional 13 #bbbbbb
+clip [157,204 396,723]
+mesh [165,701 387,721] vertices=4 texture=font
+clip [151,131 1049,729]
+line (396,204)-(396,723) stroke=1#323232
+clip [396,697 1043,723]
+rect [396,698 1043,723] fill=#3c3f41
+rect [1001,700 1035,721] fill=#3c3c3c radius=3,3,3,3
+text (1009,703) 18x15 "OK"
+  [0..2] Proportional 13 #bbbbbb
+rect [946,700 995,721] fill=#1e1e1e80 radius=3,3,3,3
+text (954,703) 33x15 "Apply"
+  [0..5] Proportional 13 #bbbbbb
+rect [886,700 940,721] fill=#3c3c3c radius=3,3,3,3
+text (894,703) 38x15 "Cancel"
+  [0..6] Proportional 13 #bbbbbb
+clip [151,131 1049,729]
+line (396,698)-(1043,698) stroke=1#323232
+clip [151,204 1049,697]
+text (396,208) 35x18 "Editor"
+  [0..6] Proportional 13 #bbbbbb
+text (396,208) 45x18 "›"
+  [0..3] Proportional 13 #bbbbbb
+text (396,208) 96x18 "General"
+  [0..7] Proportional 13 #bbbbbb
+text (396,208) 105x18 "›"
+  [0..3] Proportional 13 #bbbbbb
+text (396,208) 188x18 "Code Folding"
+  [0..12] Proportional 13 #bbbbbb
+text (396,208) 207x18 "IDE"
+  [0..3] Proportional 9 #8c8c8c
+rect [609,210 652,225] fill=#3c3c3c radius=3,3,3,3
+text (617,210) 27x15 "Help"
+  [0..4] Proportional 13 #bbbbbb
+rect [658,210 707,225] fill=#3c3c3c radius=3,3,3,3
+text (666,210) 33x15 "Reset"
+  [0..5] Proportional 13 #bbbbbb
+rect [713,210 830,225] fill=#3c3c3c radius=3,3,3,3
+text (721,210) 100x15 "Reset to Defaults"
+  [0..17] Proportional 13 #bbbbbb
+rect [836,210 948,225] fill=#3c3c3c radius=3,3,3,3
+text (844,210) 97x15 "Dialog options…"
+  [0..17] Proportional 13 #bbbbbb
+text (414,232) 115x15 "Enable code folding"
+  [0..19] Proportional 13 #bbbbbb
+rect [396,232 410,246] fill=#4c5052 radius=3,3,3,3
+path [399,235 408,244] points=3 fill=none stroke=1#b4b4b4
+text (414,254) 158x15 "Collapse imports by default"
+  [0..27] Proportional 13 #bbbbbb
+rect [396,254 410,268] fill=#4c5052 radius=3,3,3,3
+text (414,276) 244x15 "Collapse documentation strings by default"
+  [0..41] Proportional 13 #bbbbbb
+rect [396,276 410,290] fill=#4c5052 radius=3,3,3,3
+clip [0,0 1200,860]
+line (1045,727)-(1047,725) stroke=1#323232
+line (1041,727)-(1047,721) stroke=1#323232
+line (1037,727)-(1047,717) stroke=1#323232

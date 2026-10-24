@@ -1,0 +1,25 @@
+{
+  "id": "com.example.pytest-kit",
+  "name": "Pytest Kit",
+  "version": "2.1.0",
+  "description": "File templates for pytest modules and conftest.py, live templates for fixtures, parametrize and raises, and a \"pytest current file\" external tool.",
+  "vendor": "RustPy Examples",
+  "homepage": "https://example.com/rustpy-plugins/pytest-kit",
+  "contributes": {
+    "live_templates": ["templates/pytest.json"],
+    "file_templates": [
+      { "name": "Pytest Module", "extension": "py", "path": "file-templates/test_module.py" },
+      { "name": "Pytest conftest.py", "extension": "py", "path": "file-templates/conftest.py" }
+    ],
+    "external_tools": [
+      {
+        "name": "pytest current file",
+        "program": "python3",
+        "arguments": "-m pytest -q \"$FilePath$\"",
+        "working_dir": "$ProjectFileDir$",
+        "group": "Pytest",
+        "show_console": true
+      }
+    ]
+  }
+}

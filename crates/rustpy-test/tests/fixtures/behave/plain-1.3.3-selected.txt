@@ -1,0 +1,35 @@
+USING RUNNER: behave.runner:Runner
+Feature: Calculator
+  Background: 
+
+  Scenario: Failing addition
+    Given a fresh calculator ... passed in 0.000s
+    When I add 2 and 2 ... passed in 0.000s
+    Then the result is 5 ... failed in 0.000s
+ASSERT FAILED: expected 5 but got 4
+----
+CAPTURED STDOUT: scenario
+adding 2 2
+---- CAPTURED_SCENARIO_OUTPUT_END ----
+
+  Scenario: Skipped scenario
+
+  Scenario Outline: Add 2 and 2 -- @1.2 Small numbers
+    Given a fresh calculator ... passed in 0.000s
+    When I add 2 and 2 ... passed in 0.000s
+    Then the result is 5 ... failed in 0.000s
+ASSERT FAILED: expected 5 but got 4
+----
+CAPTURED STDOUT: scenario
+adding 2 2
+---- CAPTURED_SCENARIO_OUTPUT_END ----
+
+
+Failing scenarios:
+  features/calculator.feature:12  Failing addition
+  features/calculator.feature:36  Add 2 and 2 -- @1.2 Small numbers
+
+0 features passed, 1 failed, 0 skipped
+0 scenarios passed, 2 failed, 6 skipped
+4 steps passed, 2 failed, 20 skipped
+Took 0min 0.000s

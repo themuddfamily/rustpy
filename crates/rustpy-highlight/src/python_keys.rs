@@ -1,0 +1,58 @@
+//! External Python text-attribute keys (`PY.*`) as they appear in `.icls` colour scheme files,
+//! mapped to highlight tags.
+use crate::HighlightTag;
+pub const PYTHON_ATTRIBUTE_KEYS: &[(&str, HighlightTag)] = &[
+    ("PY.KEYWORD", HighlightTag::Keyword),
+    ("PY.STRING.B", HighlightTag::Bytes),
+    ("PY.STRING.U", HighlightTag::String),
+    ("PY.NUMBER", HighlightTag::Number),
+    ("PY.OPERATION_SIGN", HighlightTag::Operator),
+    ("PY.PARENTHS", HighlightTag::Parenthesis),
+    ("PY.BRACKETS", HighlightTag::Bracket),
+    ("PY.BRACES", HighlightTag::Brace),
+    ("PY.COMMA", HighlightTag::Comma),
+    ("PY.DOT", HighlightTag::Dot),
+    ("PY.LINE_COMMENT", HighlightTag::Comment),
+    ("PY.DOC_COMMENT", HighlightTag::Docstring),
+    ("PY.DOC_COMMENT_TAG", HighlightTag::DocCommentTag),
+    ("PY.DECORATOR", HighlightTag::Decorator),
+    ("PY.CLASS_DEFINITION", HighlightTag::ClassDefinition),
+    ("PY.FUNC_DEFINITION", HighlightTag::FunctionDefinition),
+    (
+        "PY.NESTED_FUNC_DEFINITION",
+        HighlightTag::NestedFunctionDefinition,
+    ),
+    (
+        "PY.PREDEFINED_DEFINITION",
+        HighlightTag::PredefinedDefinition,
+    ),
+    ("PY.PREDEFINED_USAGE", HighlightTag::PredefinedUsage),
+    ("PY.BUILTIN_NAME", HighlightTag::Builtin),
+    ("PY.PARAMETER", HighlightTag::Parameter),
+    ("PY.SELF_PARAMETER", HighlightTag::SelfParameter),
+    ("PY.KEYWORD_ARGUMENT", HighlightTag::KeywordArgument),
+    ("PY.FUNCTION_CALL", HighlightTag::FunctionCall),
+    ("PY.METHOD_CALL", HighlightTag::MethodCall),
+    ("PY.ANNOTATION", HighlightTag::TypeAnnotation),
+    ("PY.VALID_STRING_ESCAPE", HighlightTag::EscapeSequence),
+    (
+        "PY.INVALID_STRING_ESCAPE",
+        HighlightTag::InvalidEscapeSequence,
+    ),
+    ("PY.FSTRING_FRAGMENT_BRACES", HighlightTag::FStringBrace),
+    ("PY.FSTRING_FRAGMENT_COLON", HighlightTag::FStringColon),
+    (
+        "PY.FSTRING_FRAGMENT_TYPE_CONVERSION",
+        HighlightTag::FStringConversion,
+    ),
+    (
+        "PY.FSTRING_FORMAT_SPEC_SPECIAL_CHAR",
+        HighlightTag::FStringFormatCharacter,
+    ),
+    (
+        "PY.FSTRING_FORMAT_SPEC_NUMBER",
+        HighlightTag::FStringFormatNumber,
+    ),
+    ("PY.LOCAL_VARIABLE", HighlightTag::LocalVariable),
+    ("PY.TYPE_PARAMETER", HighlightTag::TypeParameter),
+];

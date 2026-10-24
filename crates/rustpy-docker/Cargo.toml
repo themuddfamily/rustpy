@@ -1,0 +1,14 @@
+[package]
+name = "rustpy-docker"
+description = "Docker CLI integration for the Services tool window"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rustpy-core.workspace = true
+rustpy-run.workspace = true
+rustpy-settings.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true

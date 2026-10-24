@@ -1,0 +1,19 @@
+[package]
+name = "rustpy-fuzz"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "Apache-2.0"
+[package.metadata]
+cargo-fuzz = true
+[workspace]
+[dependencies]
+libfuzzer-sys = "0.4"
+rustpy-syntax = { path = "../../crates/rustpy-syntax" }
+rustpy-format = { path = "../../crates/rustpy-format" }
+[[bin]]
+name = "python"
+path = "fuzz_targets/python.rs"
+test = false
+doc = false
+bench = false

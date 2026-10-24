@@ -1,0 +1,159 @@
+# rustpy ui snapshot: editor_python
+# screen 900x520 @1x, theme "Dark"
+clip [0,0 900,520]
+rect [0,0 900,520] fill=#3c3f41
+rect [8,8 892,38] fill=#3c3f41
+line (8,38)-(892,38) stroke=1#323232
+clip [8,0 892,520]
+rect [8,8 95,38] fill=#4e5254
+rect [8,36 95,38] fill=#4a88c7
+text (18,16) 47x15 "Untitled"
+  [0..8] Proportional 13 #bbbbbb
+text (77,15) 8x17 "×"
+  [0..2] Proportional 15 #8c8c8c
+line (95,8)-(95,38) stroke=1#323232
+clip [8,487 892,512]
+rect [8,487 892,512] fill=#3c3f41
+clip [16,487 884,512]
+rect [16,489 79,510] fill=#1e1e1e80 radius=3,3,3,3
+text (24,492) 47x15 "Untitled"
+  [0..8] Proportional 13 #bbbbbb
+clip [538,50 864,74]
+rect [538,50 864,74] fill=#3c3f41 radius=3,3,3,3
+text (576,55) 251x14 "Current findings · 0 errors · 0 warnings · 0 other"
+  [0..53] Proportional 12 #bbbbbb
+clip [0,0 900,520]
+rect [8,78 892,487] fill=#2b2b2b
+clip [8,78 892,487]
+rect [8,80 892,98] fill=#323232
+line (58,189)-(58,207) stroke=1#373737
+line (58,207)-(58,225) stroke=1#373737
+line (58,225)-(58,243) stroke=1#373737
+line (58,243)-(58,262) stroke=1#373737
+line (58,262)-(58,280) stroke=1#373737
+line (58,280)-(58,298) stroke=1#373737
+line (58,298)-(58,316) stroke=1#373737
+line (89,298)-(89,316) stroke=1#373737
+line (58,316)-(58,334) stroke=1#373737
+line (89,316)-(89,334) stroke=1#373737
+line (58,389)-(58,407) stroke=1#373737
+text (58,80) 141x18 "import dataclasses"
+  [0..6] Name("Hack") 13 #cc7832
+  [6..18] Name("Hack") 13 #a9b7c6
+text (58,98) 211x18 "from typing import Iterable"
+  [0..4] Name("Hack") 13 #cc7832
+  [4..12] Name("Hack") 13 #a9b7c6
+  [12..18] Name("Hack") 13 #cc7832
+  [18..27] Name("Hack") 13 #a9b7c6
+text (58,134) 235x18 "# Totals are rounded to cents."
+  [0..30] Name("Hack") 13 #808080
+text (58,153) 172x18 "@dataclasses.dataclass"
+  [0..22] Name("Hack") 13 #bbb529
+text (58,171) 110x18 "class Invoice:"
+  [0..5] Name("Hack") 13 #cc7832
+  [5..14] Name("Hack") 13 #a9b7c6
+text (58,189) 227x18 "    \"\"\"A customer invoice.\"\"\""
+  [0..4] Name("Hack") 13 #a9b7c6
+  [4..29] Name("Hack") 13 #629755 italic
+text (58,225) 117x18 "    number: int"
+  [0..15] Name("Hack") 13 #a9b7c6
+text (58,243) 172x18 "    lines: list[float]"
+  [0..22] Name("Hack") 13 #a9b7c6
+text (58,280) 407x18 "    def total(self, discount: float = 0.0) -> float:"
+  [0..4] Name("Hack") 13 #a9b7c6
+  [4..7] Name("Hack") 13 #cc7832
+  [7..8] Name("Hack") 13 #a9b7c6
+  [8..13] Name("Hack") 13 #ffc66d
+  [13..18] Name("Hack") 13 #a9b7c6
+  [18..19] Name("Hack") 13 #cc7832
+  [19..38] Name("Hack") 13 #a9b7c6
+  [38..41] Name("Hack") 13 #6897bb
+  [41..52] Name("Hack") 13 #a9b7c6
+text (58,298) 384x18 "        amount = sum(self.lines) * (1 - discount)"
+  [0..17] Name("Hack") 13 #a9b7c6
+  [17..20] Name("Hack") 13 #a9b7c6 italic
+  [20..36] Name("Hack") 13 #a9b7c6
+  [36..37] Name("Hack") 13 #6897bb
+  [37..49] Name("Hack") 13 #a9b7c6
+text (58,316) 243x18 "        return round(amount, 2)"
+  [0..8] Name("Hack") 13 #a9b7c6
+  [8..14] Name("Hack") 13 #cc7832
+  [14..15] Name("Hack") 13 #a9b7c6
+  [15..20] Name("Hack") 13 #a9b7c6 italic
+  [20..27] Name("Hack") 13 #a9b7c6
+  [27..28] Name("Hack") 13 #cc7832
+  [28..29] Name("Hack") 13 #a9b7c6
+  [29..30] Name("Hack") 13 #6897bb
+  [30..31] Name("Hack") 13 #a9b7c6
+text (58,370) 384x18 "def describe(invoices: Iterable[Invoice]) -> str:"
+  [0..3] Name("Hack") 13 #cc7832
+  [3..4] Name("Hack") 13 #a9b7c6
+  [4..12] Name("Hack") 13 #ffc66d
+  [12..49] Name("Hack") 13 #a9b7c6
+text (58,389) 556x18 "    return \", \".join(f\"#{i.number}: {i.total():.2f}\" for i in invoices)"
+  [0..4] Name("Hack") 13 #a9b7c6
+  [4..10] Name("Hack") 13 #cc7832
+  [10..11] Name("Hack") 13 #a9b7c6
+  [11..15] Name("Hack") 13 #6a8759
+  [15..21] Name("Hack") 13 #a9b7c6
+  [21..24] Name("Hack") 13 #6a8759
+  [24..25] Name("Hack") 13 #cc7832
+  [25..33] Name("Hack") 13 #a9b7c6
+  [33..34] Name("Hack") 13 #cc7832
+  [34..36] Name("Hack") 13 #6a8759
+  [36..37] Name("Hack") 13 #cc7832
+  [37..46] Name("Hack") 13 #a9b7c6
+  [46..48] Name("Hack") 13 #cc7832
+  [48..49] Name("Hack") 13 #6897bb
+  [49..50] Name("Hack") 13 #6a8759
+  [50..51] Name("Hack") 13 #cc7832
+  [51..52] Name("Hack") 13 #6a8759
+  [52..53] Name("Hack") 13 #a9b7c6
+  [53..56] Name("Hack") 13 #cc7832
+  [56..59] Name("Hack") 13 #a9b7c6
+  [59..61] Name("Hack") 13 #cc7832
+  [61..71] Name("Hack") 13 #a9b7c6
+rect [57,80 59,98] fill=#bbbbbb
+rect [8,78 52,487] fill=#313335
+line (52,78)-(52,487) stroke=1#3c3f41
+text (26,82) 7x14 "1"
+  [0..1] Name("Hack") 12 #a4a3a3
+path [13,84 22,94] points=3 closed fill=#59a869 stroke=0none
+text (26,100) 7x14 "2"
+  [0..1] Name("Hack") 12 #606366
+text (26,118) 7x14 "3"
+  [0..1] Name("Hack") 12 #606366
+text (26,137) 7x14 "4"
+  [0..1] Name("Hack") 12 #606366
+text (26,155) 7x14 "5"
+  [0..1] Name("Hack") 12 #606366
+text (26,173) 7x14 "6"
+  [0..1] Name("Hack") 12 #606366
+text (26,191) 7x14 "7"
+  [0..1] Name("Hack") 12 #606366
+text (26,209) 7x14 "8"
+  [0..1] Name("Hack") 12 #606366
+text (26,227) 7x14 "9"
+  [0..1] Name("Hack") 12 #606366
+text (19,245) 15x14 "10"
+  [0..2] Name("Hack") 12 #606366
+text (19,264) 15x14 "11"
+  [0..2] Name("Hack") 12 #606366
+text (19,282) 15x14 "12"
+  [0..2] Name("Hack") 12 #606366
+text (19,300) 15x14 "13"
+  [0..2] Name("Hack") 12 #606366
+text (19,318) 15x14 "14"
+  [0..2] Name("Hack") 12 #606366
+text (19,336) 15x14 "15"
+  [0..2] Name("Hack") 12 #606366
+text (19,354) 15x14 "16"
+  [0..2] Name("Hack") 12 #606366
+text (19,372) 15x14 "17"
+  [0..2] Name("Hack") 12 #606366
+text (19,391) 15x14 "18"
+  [0..2] Name("Hack") 12 #606366
+text (19,409) 15x14 "19"
+  [0..2] Name("Hack") 12 #606366
+clip [0,0 900,520]
+mesh [8,467 892,487] vertices=4 texture=font

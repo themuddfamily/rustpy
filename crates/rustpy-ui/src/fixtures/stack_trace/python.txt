@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/srv/My Project/main.py", line 7, in main
+    run()
+  File "/srv/My Project/worker.py", line 23, in run
+    raise ValueError('original')
+ValueError: original
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Repo With Spaces\main.py", line 13, in <module>
+    main()
+RuntimeError: chained
+
+Current thread 0x00007f (most recent call first):
+  File "/srv/My Project/main.py", line 11 in main
+Thread 0x0000af (most recent call first):
+  File "/srv/My Project/worker.py", line 31 in wait

@@ -1,0 +1,2 @@
+# Pending renderings left by a failed or missing UI snapshot (review, then accept).
+*.new.txt

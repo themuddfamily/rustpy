@@ -1,0 +1,12 @@
+From abcdef1234567890 Mon Sep 17 00:00:00 2001
+From: Developer <dev@example.org>
+Subject: [PATCH] Fix selected method
+
+base-commit: 0123456789abcdef
+---
+diff --git a/example.py b/example.py
+--- a/example.py
++++ b/example.py
+@@ -1 +1 @@
+-print("before")
++print("after")
