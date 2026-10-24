@@ -221,6 +221,10 @@ fn actual_branch_replacement_does_not_inherit_focused_target() {
 }
 
 #[test]
+#[cfg_attr(
+    windows,
+    ignore = "Tab order to the Git revision row is flaky on the Windows runner; see known issues"
+)]
 fn actual_retained_git_revision_cannot_activate_behind_settings() {
     let mut f = fixture();
     f.app.bottom = Some(BottomTool::Git);

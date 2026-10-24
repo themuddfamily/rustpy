@@ -237,7 +237,7 @@ fn write_impl(
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => None,
         Err(e) => return Err(e),
     };
-    let mut _original = None;
+    let mut _original: Option<std::fs::File> = None;
     if let Some(meta) = &meta {
         if !meta.is_file() {
             return Err(std::io::Error::new(
@@ -251,7 +251,12 @@ fn write_impl(
                 "file is read-only",
             ));
         }
-        _original = Some(rustpy_core::vfs::open_regular_file_for_write(&target)?);
+        // Only the Unix hard-link path writes through the original; on Windows an
+        // open would race another process's atomic replacement (Access is denied).
+        #[cfg(unix)]
+        {
+            _original = Some(rustpy_core::vfs::open_regular_file_for_write(&target)?);
+        }
     }
     #[cfg(unix)]
     {
