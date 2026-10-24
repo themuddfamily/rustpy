@@ -24,6 +24,8 @@ const MAX_WINDOWS: usize = 64;
 const QUEUE: usize = 64;
 #[cfg(target_os = "macos")]
 #[derive(Debug)]
+// A bounded mailbox of 64 entries; boxing `OpenArgs` would buy nothing.
+#[allow(clippy::large_enum_variant)]
 enum Command {
     Open {
         args: OpenArgs,
@@ -56,11 +58,11 @@ impl Binding {
     }
     pub(crate) fn close(&self, ctx: &egui::Context) {
         ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-        if !self.closing.swap(true, Ordering::AcqRel) {
-            if self.sender.try_send(Command::Close(self.viewport)).is_err() {
-                self.closing.store(false, Ordering::Release);
-                ctx.request_repaint();
-            }
+        if !self.closing.swap(true, Ordering::AcqRel)
+            && self.sender.try_send(Command::Close(self.viewport)).is_err()
+        {
+            self.closing.store(false, Ordering::Release);
+            ctx.request_repaint();
         }
         ctx.request_repaint_of(egui::ViewportId::ROOT);
     }

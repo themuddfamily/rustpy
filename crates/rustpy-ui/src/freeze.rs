@@ -280,6 +280,7 @@ fn linux_threads() -> Option<String> {
 
 /// `name[state]` per thread; threads of a pool (same name up to a numeric
 /// suffix, same state) are counted: `llvmpipe-*[S]×32 rustpy[R] task-7[D]`.
+#[cfg(any(target_os = "linux", test))]
 fn summarize_threads(threads: Vec<(String, String)>) -> String {
     let mut groups: std::collections::BTreeMap<(String, String), Vec<String>> =
         std::collections::BTreeMap::new();

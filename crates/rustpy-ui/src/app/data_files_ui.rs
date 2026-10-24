@@ -23,7 +23,7 @@ pub(super) struct State {
     retired: bool,
 }
 impl State {
-    #[cfg(test)]
+    #[cfg(all(test, target_os = "linux"))]
     pub(super) fn acceptance_details(&self) -> String {
         format!(
             "message={:?}; owner={:?}; selected_tab={}",

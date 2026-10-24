@@ -629,6 +629,7 @@ mod configured_execution_tests {
         }
         assert!(app.plugin_script_jobs().is_empty());
     }
+    #[cfg(target_os = "linux")]
     fn wait_file(app: &mut IdeApp, path: &Path) {
         let deadline = Instant::now() + Duration::from_secs(5);
         while !path.is_file() {
