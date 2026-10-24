@@ -371,6 +371,7 @@ fn configured_managed_kernel_session_roundtrip_and_retirement() {
 }
 
 #[test]
+#[cfg(target_os = "linux")]
 #[ignore = "requires explicit admitted real ipykernel/debugpy SDK and kernelspec; run alone on Linux"]
 fn configured_local_debug_cell_hits_real_breakpoint_stack_continue_and_result() {
     use rustpy_debug::{Breakpoint, DebugOptions, DebugSession, DebugState};
