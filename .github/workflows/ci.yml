@@ -74,6 +74,14 @@ jobs:
           echo "TMPDIR=${RUNNER_TEMP}" >> "$GITHUB_ENV"
           # The keyboard tests are written against the Windows/Linux keymap semantics.
           echo "RUSTPY_KEYMAP_PLATFORM=default" >> "$GITHUB_ENV"
+      # The runner's TEMP uses an 8.3 short name (C:\Users\RUNNER~1\...), which never
+      # compares equal to the long canonical path; RUNNER_TEMP is a plain long path.
+      - name: Windows long-name temporary directory
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          "TMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
+          "TEMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
       # Interpreter/debugpy/pytest/coverage, fuzz/nightly and cargo-deny are
       # provisioned separately; this recipe never installs Python packages.
       - if: matrix.shard == 'ui'
