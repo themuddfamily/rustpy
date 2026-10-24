@@ -2170,7 +2170,7 @@ mod tests {
     #[test]
     fn trusted_projects_and_locations() {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let project = root.join("project");
         std::fs::create_dir(&project).unwrap();
         let mut settings = Settings::default();

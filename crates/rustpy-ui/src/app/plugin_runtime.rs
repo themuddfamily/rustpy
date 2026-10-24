@@ -936,7 +936,7 @@ mod configured_execution_tests {
             Ok("1")
         );
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let source = root.join("plugin");
         std::fs::create_dir(&source).unwrap();
         let base = serde_json::json!({"api_version":1,

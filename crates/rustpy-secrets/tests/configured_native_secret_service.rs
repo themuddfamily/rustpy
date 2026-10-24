@@ -42,9 +42,7 @@ fn private_bus(root: &Path) -> Connection {
     );
     let socket = Path::new(socket);
     assert!(socket.is_absolute());
-    let resolved = socket
-        .canonicalize()
-        .expect("private bus socket must exist");
+    let resolved = dunce::canonicalize(socket).expect("private bus socket must exist");
     assert!(
         resolved.starts_with(root) && resolved != root,
         "refuse a bus socket outside the owned root"
@@ -145,7 +143,7 @@ fn configured_private_secret_service_native_roundtrip_delete_without_fallback() 
     assert_eq!(required("RUSTPY_NATIVE_KEYRING_ADMITTED"), "1");
     let root = PathBuf::from(required("RUSTPY_TEST_NATIVE_KEYRING_ROOT"));
     assert!(root.is_absolute() && root.is_dir());
-    let root = root.canonicalize().unwrap();
+    let root = dunce::canonicalize(&root).unwrap();
     assert_ne!(root, Path::new("/"));
     let metadata = std::fs::metadata(&root).unwrap();
     assert_eq!(

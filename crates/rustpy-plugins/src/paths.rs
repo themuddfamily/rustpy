@@ -119,8 +119,8 @@ pub(crate) fn existing_file_inside(dir: &Path, raw: &str) -> Result<PathBuf, Str
     if !meta.is_file() {
         return Err(format!("`{raw}` is not a regular file"));
     }
-    let real_dir = fs::canonicalize(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
-    let real = fs::canonicalize(&path).map_err(|e| format!("`{raw}`: {e}"))?;
+    let real_dir = dunce::canonicalize(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+    let real = dunce::canonicalize(&path).map_err(|e| format!("`{raw}`: {e}"))?;
     if !real.starts_with(&real_dir) {
         return Err(format!(
             "`{raw}` is a link to a file outside the plugin directory"

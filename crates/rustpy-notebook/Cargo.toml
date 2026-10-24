@@ -7,6 +7,7 @@ rust-version.workspace = true
 description = "RustPy IDE: Jupyter notebook support (.ipynb model, .py conversion, cell execution through the console backend)"
 
 [dependencies]
+dunce.workspace = true
 rustpy-core.workspace = true
 rustpy-console.workspace = true
 crossbeam-channel.workspace = true

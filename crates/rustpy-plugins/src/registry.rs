@@ -199,9 +199,10 @@ impl PluginRegistry {
                 src.display()
             )));
         }
-        if let (Ok(real_src), Ok(real_plugins)) =
-            (fs::canonicalize(&src), fs::canonicalize(self.plugins_dir()))
-        {
+        if let (Ok(real_src), Ok(real_plugins)) = (
+            dunce::canonicalize(&src),
+            dunce::canonicalize(self.plugins_dir()),
+        ) {
             if real_src.starts_with(&real_plugins) {
                 return Err(PluginError::invalid(format!(
                     "{} is inside the plugins directory already",

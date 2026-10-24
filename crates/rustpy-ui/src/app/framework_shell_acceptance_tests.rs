@@ -97,15 +97,8 @@ fn execute_snapshot(fixture: &mut ShellFixture, name: &str, code: &str) -> serde
                 fixture.interpreter.to_str().unwrap()
             );
             assert_eq!(
-                PathBuf::from(result["cwd"].as_str().unwrap())
-                    .canonicalize()
-                    .unwrap(),
-                fixture
-                    .root
-                    .path()
-                    .join("working directory")
-                    .canonicalize()
-                    .unwrap()
+                dunce::canonicalize(PathBuf::from(result["cwd"].as_str().unwrap())).unwrap(),
+                dunce::canonicalize(fixture.root.path().join("working directory")).unwrap()
             );
             assert_eq!(result["environment"], "selected-environment-π");
             assert_eq!(result["startup"], "captured-startup");

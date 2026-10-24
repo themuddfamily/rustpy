@@ -507,7 +507,7 @@ impl IdeApp {
                 Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => (),
                 Err(error) => return Err(error),
             }
-            if !metadata.canonicalize()?.starts_with(root.canonicalize()?) {
+            if !dunce::canonicalize(&metadata)?.starts_with(dunce::canonicalize(&root)?) {
                 return Err(std::io::Error::other(
                     "Debugger metadata directory escapes the project",
                 ));
@@ -518,7 +518,7 @@ impl IdeApp {
                 Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => (),
                 Err(error) => return Err(error),
             }
-            if !directory.canonicalize()?.starts_with(root.canonicalize()?) {
+            if !dunce::canonicalize(&directory)?.starts_with(dunce::canonicalize(&root)?) {
                 return Err(std::io::Error::other(
                     "Debugger snapshot directory escapes the project",
                 ));

@@ -25,7 +25,7 @@ impl IdeApp {
         let mut opened = Vec::new();
         let mut folders = 0;
         for t in targets {
-            let path = t.path.canonicalize().unwrap_or_else(|_| t.path.clone());
+            let path = dunce::canonicalize(&t.path).unwrap_or_else(|_| t.path.clone());
             if path.is_dir() {
                 let current = self.project.as_ref().map(|p| p.root.clone());
                 if current.as_deref() != Some(path.as_path()) {
@@ -128,7 +128,7 @@ mod tests {
             ],
             false,
         );
-        let canonical = file.canonicalize().unwrap();
+        let canonical = dunce::canonicalize(&file).unwrap();
         assert_eq!(opened, vec![canonical.clone()]);
         assert!(ide.cli_target_is_open(&canonical));
         let tab = &ide.tabs[ide.active.unwrap()];

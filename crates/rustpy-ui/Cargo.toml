@@ -11,6 +11,7 @@ description = "RustPy IDE: ui"
 native-web-preview = ["dep:wry", "dep:gtk"]
 
 [dependencies]
+dunce.workspace = true
 wry = { version = "0.57", optional = true }
 flate2 = "1"
 roxmltree = "=0.20.0"

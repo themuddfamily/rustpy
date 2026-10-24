@@ -329,7 +329,9 @@ pub fn resolve(
     matches.dedup();
     // Distinct lexical paths to the same actual file are one exact source.
     let mut canonical = std::collections::BTreeSet::new();
-    matches.retain(|path| canonical.insert(path.canonicalize().unwrap_or_else(|_| path.clone())));
+    matches.retain(|path| {
+        canonical.insert(dunce::canonicalize(path).unwrap_or_else(|_| path.clone()))
+    });
     match matches.len() {
         0 => Resolution::Unavailable,
         1 => Resolution::Exact(matches.remove(0)),

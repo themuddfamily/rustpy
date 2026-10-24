@@ -105,7 +105,7 @@ fn bare_app() -> IdeApp {
 fn harness(name: &str, size: Vec2, app: &IdeApp, fixture: Option<&ProjectFixture>) -> Harness {
     let mut harness = Harness::new(name, size, &app.theme);
     if let Some(fixture) = fixture {
-        if let Ok(canonical) = fixture.root.canonicalize() {
+        if let Ok(canonical) = dunce::canonicalize(&fixture.root) {
             harness.replace(canonical.to_string_lossy(), "$PROJECT");
         }
         harness.replace(fixture.root.to_string_lossy(), "$PROJECT");

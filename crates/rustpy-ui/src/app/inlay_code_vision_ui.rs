@@ -563,7 +563,7 @@ mod tests {
     use rustpy_core::{TextRange, TextSize};
     fn fixture() -> (tempfile::TempDir, IdeApp, Runtime, egui::Context) {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let path = root.join("main.py");
         let source = "def π():\n    return 42\n\nπ()\n";
         std::fs::write(&path, source).unwrap();

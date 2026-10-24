@@ -42,7 +42,7 @@ const FILES: &[(&str, &str)] = &[
 
 fn project() -> (tempfile::TempDir, PathBuf) {
     let dir = tempfile::tempdir().unwrap();
-    let root = dir.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(dir.path()).unwrap();
     for (rel, text) in FILES {
         let path = root.join(rel);
         std::fs::create_dir_all(path.parent().unwrap()).unwrap();

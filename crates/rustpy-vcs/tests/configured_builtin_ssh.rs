@@ -26,7 +26,7 @@ fn required(name: &str) -> String {
 fn file(name: &str, root: &Path) -> PathBuf {
     let value = PathBuf::from(required(name));
     assert!(value.is_absolute() && value.is_file());
-    let value = value.canonicalize().unwrap();
+    let value = dunce::canonicalize(&value).unwrap();
     assert!(
         value.starts_with(root),
         "fixture identity must be privately owned"
@@ -240,7 +240,7 @@ fn configured_builtin_ssh_refuses_unknown_then_clones_fetches_pushes_with_encryp
     assert_eq!(required("RUSTPY_BUILTIN_SSH_ADMITTED"), "yes");
     let root = PathBuf::from(required("RUSTPY_BUILTIN_SSH_ROOT"));
     assert!(root.is_absolute() && root.is_dir());
-    let root = root.canonicalize().unwrap();
+    let root = dunce::canonicalize(&root).unwrap();
     let marker: serde_json::Value =
         serde_json::from_slice(&std::fs::read(root.join("owner.json")).unwrap()).unwrap();
     assert_eq!(marker["root"], root.to_str().unwrap());

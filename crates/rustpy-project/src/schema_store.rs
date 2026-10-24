@@ -307,7 +307,10 @@ pub fn request_resource(resource: &str, trusted: bool) {
 }
 
 fn local_references(path: &std::path::Path, source: &str) -> Vec<(String, String)> {
-    let Some(directory) = path.parent().and_then(|path| path.canonicalize().ok()) else {
+    let Some(directory) = path
+        .parent()
+        .and_then(|path| dunce::canonicalize(path).ok())
+    else {
         return Vec::new();
     };
     let mut pending = vec![(path.to_path_buf(), source.to_owned())];
@@ -333,7 +336,7 @@ fn local_references(path: &std::path::Path, source: &str) -> Vec<(String, String
                 let Some(path) = base
                     .parent()
                     .map(|parent| parent.join(reference.split('#').next().unwrap_or_default()))
-                    .and_then(|path| path.canonicalize().ok())
+                    .and_then(|path| dunce::canonicalize(&path).ok())
                     .filter(|path| path.starts_with(&directory))
                 else {
                     continue;

@@ -16,7 +16,7 @@ fn selected(name: &str) -> PathBuf {
         path.is_absolute() && path.is_file(),
         "{name}: absolute installed executable required"
     );
-    std::fs::canonicalize(path).unwrap()
+    dunce::canonicalize(path).unwrap()
 }
 
 fn identity(pid: u32) -> Option<u64> {

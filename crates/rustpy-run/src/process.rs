@@ -1644,7 +1644,7 @@ mod tests {
         };
         for package in [false, true] {
             let dir = tempfile::tempdir().unwrap();
-            let root = dir.path().canonicalize().unwrap();
+            let root = dunce::canonicalize(dir.path()).unwrap();
             std::fs::create_dir_all(root.join("tests")).unwrap();
             if package {
                 std::fs::write(root.join("tests/__init__.py"), "").unwrap();

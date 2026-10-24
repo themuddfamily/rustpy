@@ -85,7 +85,7 @@ fn copy_distribution(distribution: &Distribution, destination: &Path) {
     assert!(distribution.root.is_absolute() && distribution.root.is_dir());
     assert!(!distribution.version.trim().is_empty());
     assert!(!distribution.files.is_empty() && distribution.files.len() < 4096);
-    let root = distribution.root.canonicalize().unwrap();
+    let root = dunce::canonicalize(&distribution.root).unwrap();
     let mut bytes = 0;
     for (name, hash) in &distribution.files {
         let relative = Path::new(name);
@@ -94,7 +94,7 @@ fn copy_distribution(distribution: &Distribution, destination: &Path) {
             .all(|part| matches!(part, std::path::Component::Normal(_))));
         let input = root.join(relative);
         assert!(!input.is_symlink() && input.is_file());
-        assert!(input.canonicalize().unwrap().starts_with(&root));
+        assert!(dunce::canonicalize(&input).unwrap().starts_with(&root));
         assert_eq!(
             digest(&input),
             *hash,
@@ -270,12 +270,12 @@ fn configured_enhanced_markdown_renders_real_katex_fonts_and_mermaid_svg() {
         .keys()
         .any(|p| p.starts_with("fonts/") && p.ends_with(".woff2")));
     assert!(assets.mermaid.files.contains_key("mermaid.esm.min.mjs"));
-    let temporary = PathBuf::from(required("TMPDIR")).canonicalize().unwrap();
+    let temporary = dunce::canonicalize(PathBuf::from(required("TMPDIR"))).unwrap();
     for name in ["RUSTPY_CONFIG_DIR", "RUSTPY_SYSTEM_DIR", "RUSTPY_LOG_DIR"] {
         let path = PathBuf::from(required(name));
         assert!(path.is_absolute() && path.starts_with(&temporary));
         std::fs::create_dir_all(&path).unwrap();
-        assert!(path.canonicalize().unwrap().starts_with(&temporary));
+        assert!(dunce::canonicalize(&path).unwrap().starts_with(&temporary));
     }
     let directory = tempfile::Builder::new()
         .prefix("enhanced-markdown-")
@@ -397,8 +397,8 @@ fn configured_enhanced_markdown_renders_real_katex_fonts_and_mermaid_svg() {
         .process_id()
         .unwrap();
     assert_eq!(
-        std::fs::canonicalize(format!("/proc/{pid}/exe")).unwrap(),
-        chrome.canonicalize().unwrap()
+        dunce::canonicalize(format!("/proc/{pid}/exe")).unwrap(),
+        dunce::canonicalize(&chrome).unwrap()
     );
     let expression = r#"(()=>{const math=document.querySelector('.math .katex');const svg=document.querySelector('.mermaid svg');const bounds=e=>e?{width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}:null;return {url:location.href,heading:document.querySelector('h1')?.textContent,math:bounds(math),mathml:!!math?.querySelector('.katex-mathml math'),tex:math?.querySelector('annotation[encoding="application/x-tex"]')?.textContent,errors:document.querySelectorAll('.katex-error').length,fonts:Array.from(document.fonts).filter(f=>f.status==='loaded').map(f=>f.family),svg:bounds(svg),nodes:svg?.querySelectorAll('g.node').length??0,edgeLengths:svg?Array.from(svg.querySelectorAll('path.flowchart-link')).map(p=>p.getTotalLength()):[],diagram:svg?.textContent}})()"#;
     let deadline = Instant::now() + Duration::from_secs(60);

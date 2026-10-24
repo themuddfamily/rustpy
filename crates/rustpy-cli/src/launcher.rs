@@ -56,7 +56,7 @@ pub fn target_executable() -> Result<PathBuf, String> {
     }
     let exe =
         std::env::current_exe().map_err(|e| format!("cannot find the RustPy executable: {e}"))?;
-    Ok(exe.canonicalize().unwrap_or(exe))
+    Ok(dunce::canonicalize(&exe).unwrap_or(exe))
 }
 
 /// `'…'` for POSIX shells.
@@ -128,7 +128,7 @@ impl Installed {
 }
 
 fn same_file(a: &Path, b: &Path) -> bool {
-    match (a.canonicalize(), b.canonicalize()) {
+    match (dunce::canonicalize(a), dunce::canonicalize(b)) {
         (Ok(x), Ok(y)) if x == y => return true,
         _ => {}
     }
@@ -146,8 +146,9 @@ fn dir_on_path(dir: &Path) -> bool {
     let Some(path) = std::env::var_os("PATH") else {
         return false;
     };
-    let dir_c = dir.canonicalize().unwrap_or_else(|_| dir.to_path_buf());
-    std::env::split_paths(&path).any(|p| p == dir || p.canonicalize().is_ok_and(|c| c == dir_c))
+    let dir_c = dunce::canonicalize(dir).unwrap_or_else(|_| dir.to_path_buf());
+    std::env::split_paths(&path)
+        .any(|p| p == dir || dunce::canonicalize(&p).is_ok_and(|c| c == dir_c))
 }
 
 /// Writes the launcher at `given` (see [`script_path`]) for `target` (see

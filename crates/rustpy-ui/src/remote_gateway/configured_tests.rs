@@ -129,7 +129,11 @@ fn remote_identity(
         if (actual.dev(), actual.ino()) != (executable.dev(), executable.ino()) {
             continue;
         }
-        if fs::canonicalize(entry.path().join("cwd")).ok().as_deref() != Some(root) {
+        if dunce::canonicalize(entry.path().join("cwd"))
+            .ok()
+            .as_deref()
+            != Some(root)
+        {
             continue;
         }
         let Ok(command) = fs::read(entry.path().join("cmdline")) else {
@@ -376,7 +380,10 @@ fn server_identity(client: &Client, binary: &Path, root: &Path) -> (u32, String)
         (executable.dev(), executable.ino()),
         (admitted.dev(), admitted.ino())
     );
-    assert_eq!(fs::canonicalize(format!("/proc/{pid}/cwd")).unwrap(), root);
+    assert_eq!(
+        dunce::canonicalize(format!("/proc/{pid}/cwd")).unwrap(),
+        root
+    );
     let command = fs::read(format!("/proc/{pid}/cmdline")).unwrap();
     let args = command
         .split(|byte| *byte == 0)
@@ -436,7 +443,7 @@ fn configured_local_gateway_server_checked_files_analysis_forward_stop_and_drop(
         .prefix("gateway-λ-")
         .tempdir()
         .unwrap();
-    let root = files.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(files.path()).unwrap();
     let path = "main π.py";
     let initial = "value = 1\n";
     let current = "from model import RemoteWidget\nvalue = 42\nRemoteWidget\n";
@@ -611,7 +618,7 @@ fn configured_ssh_gateway_checked_files_analysis_forward_and_remote_retirement()
     );
     let root = fixture.directory.path().join("Gateway project π");
     fs::create_dir(&root).unwrap();
-    let root = root.canonicalize().unwrap();
+    let root = dunce::canonicalize(&root).unwrap();
     let path = "main π.py";
     fs::write(root.join(path), "value = 1\n").unwrap();
     fs::write(root.join("model.py"), "class RemoteWidget:\n    pass\n").unwrap();

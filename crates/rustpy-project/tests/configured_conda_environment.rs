@@ -246,10 +246,9 @@ fn configured_conda_creates_probes_reuses_registers_and_consumes_environment_yam
         return;
     }
     assert!(
-        cache
-            .canonicalize()
+        dunce::canonicalize(&cache)
             .unwrap()
-            .starts_with(temporary.canonicalize().unwrap()),
+            .starts_with(dunce::canonicalize(&temporary).unwrap()),
         "Root must admit an exclusive private offline cache below TMPDIR"
     );
     let private = tempfile::Builder::new()

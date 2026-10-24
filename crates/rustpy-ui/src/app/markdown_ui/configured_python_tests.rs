@@ -109,12 +109,12 @@ fn configured_markdown_fenced_python_runs_selected_sdk_and_current_snapshot() {
         .map(|b| format!("{b:02x}"))
         .collect::<String>();
     assert_eq!(hash, required("RUSTPY_MARKDOWN_PYTHON_SHA256"));
-    let temporary = PathBuf::from(required("TMPDIR")).canonicalize().unwrap();
+    let temporary = dunce::canonicalize(PathBuf::from(required("TMPDIR"))).unwrap();
     for name in ["RUSTPY_CONFIG_DIR", "RUSTPY_SYSTEM_DIR", "RUSTPY_LOG_DIR"] {
         let path = PathBuf::from(required(name));
         assert!(path.is_absolute() && path.starts_with(&temporary));
         std::fs::create_dir_all(&path).unwrap();
-        assert!(path.canonicalize().unwrap().starts_with(&temporary));
+        assert!(dunce::canonicalize(&path).unwrap().starts_with(&temporary));
     }
     let directory = tempfile::Builder::new()
         .prefix("markdown python π ")

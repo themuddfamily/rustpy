@@ -121,7 +121,7 @@ fn configured_real_docker_lifecycle_and_both_sdk_consumers_enforce_daemon_side_l
         mount_root.is_absolute() && mount_root.is_dir(),
         "admit an existing host directory that the selected daemon sees at the same path"
     );
-    let mount_root = mount_root.canonicalize().unwrap();
+    let mount_root = dunce::canonicalize(&mount_root).unwrap();
     assert!(python.starts_with('/') && nice.starts_with('/'));
     let cpus = inherited_cpus();
     // This check fails if the admitted image is absent. Nothing pulls it.

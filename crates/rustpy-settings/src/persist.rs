@@ -459,7 +459,7 @@ mod tests {
         );
         assert_eq!(
             merged.trusted_projects,
-            vec![std::fs::canonicalize(&trusted).unwrap()]
+            vec![dunce::canonicalize(&trusted).unwrap()]
         );
 
         // A saves again without new changes: B's values are not reverted.

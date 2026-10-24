@@ -33,7 +33,7 @@ fn scratch(base_key: &str, prefix: &str) -> PathBuf {
     assert!(base.is_absolute() && base.is_dir(), "{base_key} must exist");
     let root = base.join(format!("{prefix}-{}", unique()));
     std::fs::create_dir_all(&root).unwrap();
-    root.canonicalize().unwrap()
+    dunce::canonicalize(&root).unwrap()
 }
 fn tool(cli: &str, args: &[&str], cwd: &Path) -> String {
     let out = Command::new(cli)

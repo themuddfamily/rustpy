@@ -85,7 +85,7 @@ fn started_before_result(events: &[TestEvent], id: &str) {
 #[ignore = "requires explicitly admitted real pytest/Hypothesis SDK"]
 fn configured_hypothesis_real_success_failure_and_falsifying_example_metadata() {
     let directory = tempfile::tempdir().unwrap();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     std::fs::write(
         root.join("test_properties.py"),
         r#"from hypothesis import given, settings, strategies as st
@@ -146,7 +146,7 @@ def test_actual_failure(value):
 #[ignore = "requires explicit admitted Python; actual stdlib unittest subTest producer"]
 fn configured_unittest_subtests_report_actual_children_and_failed_parent() {
     let directory = tempfile::tempdir().unwrap();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     std::fs::write(
         root.join("test_subcases.py"),
         r#"import unittest
@@ -204,7 +204,7 @@ class Cases(unittest.TestCase):
 
 fn actual_legacy_unittest(framework: Framework) {
     let directory = tempfile::tempdir().unwrap();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     std::fs::write(
         root.join("test_legacy.py"),
         r#"import unittest
@@ -266,7 +266,7 @@ fn configured_nose_native_entrypoint_reports_real_success_and_failure() {
 #[ignore = "requires explicitly admitted Lettuce-compatible Python; legacy distribution may not support modern Python"]
 fn configured_lettuce_native_entrypoint_reports_real_scenarios() {
     let directory = tempfile::tempdir().unwrap();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     std::fs::create_dir_all(root.join("features/steps")).unwrap();
     std::fs::write(root.join("features/actual.feature"), "Feature: Actual Lettuce\n  Scenario: passes\n    Given the value is 1\n    Then the value equals 1\n  Scenario: fails\n    Given the value is 1\n    Then the value equals 2\n").unwrap();
     std::fs::write(

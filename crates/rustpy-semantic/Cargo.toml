@@ -8,6 +8,7 @@ description = "RustPy IDE: scopes, name resolution, module index, type inference
 build = "build.rs"
 
 [dependencies]
+dunce.workspace = true
 rustpy-core.workspace = true
 rustpy-syntax.workspace = true
 rustpy-text.workspace = true

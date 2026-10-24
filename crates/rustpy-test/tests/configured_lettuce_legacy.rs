@@ -97,7 +97,7 @@ fn verdict(events: &[TestEvent]) -> (usize, usize, usize, Option<i32>) {
 #[ignore = "requires RUSTPY_REQUIRE_PROVIDER_TESTS=1 and real RUSTPY_LETTUCE_PYTHON pointing to Python2.7 SDK with untouched Lettuce0.2.23"]
 fn configured_python2_lettuce_actual_failures_selection_tags_and_process_entry() {
     let directory = project();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     let events = execute(&root, &["features/actual.feature".into()], &[]);
     assert_eq!(verdict(&events), (2, 1, 0, Some(1)), "{events:#?}");
     let failed = events
@@ -192,7 +192,7 @@ fn configured_python2_lettuce_failfast_preserves_scenario_and_feature_hook_error
         ("each_feature", true),
     ] {
         let directory = project();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let registration = if late {
             format!(
                 "@before.all\ndef register_late_hook():\n    after.{hook}(actual_broken_hook)\n"
@@ -220,7 +220,7 @@ fn configured_python2_lettuce_failfast_preserves_scenario_and_feature_hook_error
 #[ignore = "requires actual Python2.7/Lettuce SDK; stops a real running native scenario and descendant"]
 fn configured_python2_lettuce_stop_retires_owned_scenario_and_descendant() {
     let directory = tempfile::tempdir().unwrap();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     std::fs::create_dir_all(root.join("features/steps")).unwrap();
     std::fs::write(
         root.join("features/wait.feature"),
@@ -285,7 +285,7 @@ def actual_wait(step):
 #[ignore = "requires actual admitted Python2.7 SDK; verifies missing provider under isolated -S execution"]
 fn configured_python2_lettuce_missing_provider_is_an_explicit_failure() {
     let directory = tempfile::tempdir().unwrap();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     let options = TestRunOptions {
         inherit_environment: false,
         interpreter_options: vec!["-S".into()],

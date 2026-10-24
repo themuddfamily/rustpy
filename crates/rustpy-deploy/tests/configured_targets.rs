@@ -47,7 +47,7 @@ fn scratch(mount_key: &str, prefix: &str) -> PathBuf {
         .unwrap_or_else(|_| std::env::temp_dir());
     let root = base.join(format!("{prefix}-{}", unique()));
     std::fs::create_dir_all(&root).unwrap();
-    root.canonicalize().unwrap()
+    dunce::canonicalize(&root).unwrap()
 }
 
 // ---------------------------------------------------------------- Docker / Compose
@@ -640,9 +640,7 @@ fn configured_vagrant_machine_lifecycle_ssh_and_interpreter_adapter() {
     assert_eq!(required("RUSTPY_VAGRANT_ADMITTED"), "1");
     let vagrant = required("RUSTPY_VAGRANT");
     assert!(Path::new(&vagrant).is_absolute());
-    let root = PathBuf::from(required("RUSTPY_VAGRANT_PROJECT"))
-        .canonicalize()
-        .unwrap();
+    let root = dunce::canonicalize(PathBuf::from(required("RUSTPY_VAGRANT_PROJECT"))).unwrap();
     assert!(root.join("Vagrantfile").is_file());
     let machine = required("RUSTPY_VAGRANT_MACHINE");
     let command = |operation: &str| {

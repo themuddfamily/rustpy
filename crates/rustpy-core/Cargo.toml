@@ -7,6 +7,7 @@ rust-version.workspace = true
 description = "RustPy IDE: core"
 
 [dependencies]
+dunce.workspace = true
 cpu-time = "=1.0.0"
 anyhow.workspace = true
 thiserror.workspace = true

@@ -852,11 +852,8 @@ fn plugin_details(
             .button(format!("View screenshot {}", index + 1))
             .clicked()
         {
-            if let Ok(path) = p.dir.join(screenshot).canonicalize() {
-                if p.dir
-                    .canonicalize()
-                    .is_ok_and(|root| path.starts_with(root))
-                {
+            if let Ok(path) = dunce::canonicalize(p.dir.join(screenshot)) {
+                if dunce::canonicalize(&p.dir).is_ok_and(|root| path.starts_with(root)) {
                     requests.push(Request::OpenScreenshot(path));
                 }
             }

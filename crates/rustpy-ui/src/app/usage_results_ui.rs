@@ -173,7 +173,7 @@ impl IdeApp {
                     } else {
                         root.join(path)
                     };
-                    path.canonicalize().unwrap_or(path)
+                    dunce::canonicalize(&path).unwrap_or(path)
                 })
                 .collect::<Vec<_>>()
         };
@@ -913,7 +913,7 @@ mod tests {
     fn named_scope_choice_filters_usages_and_is_remembered_by_pins() {
         use rustpy_settings::scopes::NamedScope;
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let source = root.join("a.py");
         let inside = root.join("uses.py");
         let outside = root.join("other.py");

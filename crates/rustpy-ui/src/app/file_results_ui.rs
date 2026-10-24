@@ -484,7 +484,7 @@ mod tests {
     #[test]
     fn per_frame_scope_filter_refresh_is_skipped_while_its_inputs_are_unchanged() {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         std::fs::write(root.join("main.py"), "x = 1\n").unwrap();
         let mut app = IdeApp::new(Settings::default(), Some(root.clone()));
         app.refresh_find_scope_filters();

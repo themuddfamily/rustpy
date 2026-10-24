@@ -522,7 +522,7 @@ mod tests {
                 N.fetch_add(1, Ordering::Relaxed)
             ));
             std::fs::create_dir_all(&p).unwrap();
-            Self(p.canonicalize().unwrap())
+            Self(dunce::canonicalize(&p).unwrap())
         }
         fn app(&self) -> IdeApp {
             // An explicit fresh project prevents CWD/recent-project workspace restoration.

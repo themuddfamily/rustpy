@@ -57,7 +57,7 @@ impl WindowAdmission {
     pub fn new(config: &Path) -> Result<Self, AdmissionError> {
         std::fs::create_dir_all(config)?;
         Ok(Self {
-            config: std::fs::canonicalize(config)?,
+            config: dunce::canonicalize(config)?,
         })
     }
     pub fn acquire_shared(&self, deadline: Instant) -> Result<AdmissionLease, AdmissionError> {
@@ -155,7 +155,7 @@ struct Lease {
 }
 impl Lease {
     fn validate(&self) -> Result<(), AdmissionError> {
-        if std::fs::canonicalize(&self.config)? != self.config {
+        if dunce::canonicalize(&self.config)? != self.config {
             return Err(AdmissionError::IdentityChanged);
         }
         let current = std::fs::symlink_metadata(&self.path)?;

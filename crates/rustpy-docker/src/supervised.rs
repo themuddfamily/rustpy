@@ -37,9 +37,7 @@ impl Capture {
             !program.trim().is_empty() && !program.chars().any(char::is_control),
             "Choose a Docker CLI executable"
         );
-        let cwd = cwd
-            .canonicalize()
-            .context("Docker working directory is unavailable")?;
+        let cwd = dunce::canonicalize(cwd).context("Docker working directory is unavailable")?;
         let identity = DirectoryIdentity::capture(&cwd)?;
         let mut environment = std::env::vars_os().collect::<Vec<_>>();
         environment.sort_by(|a, b| a.0.cmp(&b.0));

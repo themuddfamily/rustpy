@@ -263,12 +263,12 @@ fn excluded_dirs(dir: &Path) -> Result<Vec<PathBuf>, String> {
 /// The files to look at under `dir`.
 fn walk(dir: &Path, recursive: bool, resolver: &mut StyleResolver) -> Result<Vec<PathBuf>, String> {
     let mut files = if recursive {
-        let canonical = dir.canonicalize().unwrap_or_else(|_| dir.to_path_buf());
+        let canonical = dunce::canonicalize(dir).unwrap_or_else(|_| dir.to_path_buf());
         let excluded = excluded_dirs(&canonical)?;
         rustpy_search::project_files_excluding(dir, &excluded)
             .into_iter()
             .filter(|f| {
-                let c = f.canonicalize().unwrap_or_else(|_| f.clone());
+                let c = dunce::canonicalize(f).unwrap_or_else(|_| f.clone());
                 !excluded.iter().any(|x| c.starts_with(x))
             })
             .collect::<Vec<_>>()
@@ -388,7 +388,7 @@ pub fn run(args: &FormatArgs, settings: Settings, out: &mut dyn Write, err: &mut
             continue;
         };
         for (file, explicit) in files {
-            if !seen.insert(file.canonicalize().unwrap_or_else(|_| file.clone())) {
+            if !seen.insert(dunce::canonicalize(&file).unwrap_or_else(|_| file.clone())) {
                 continue;
             }
             if explicit && !mask_matches(&masks, file.parent().unwrap_or(Path::new("")), &file) {
@@ -600,7 +600,7 @@ mod tests {
     #[test]
     fn excluded_folders_are_skipped() {
         let dir = project();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::create_dir_all(root.join("gen")).unwrap();
         std::fs::write(root.join("gen/g.py"), UGLY).unwrap();
         std::fs::write(root.join("m.py"), UGLY).unwrap();

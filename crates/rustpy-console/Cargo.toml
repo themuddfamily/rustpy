@@ -7,6 +7,7 @@ rust-version.workspace = true
 description = "RustPy IDE: Python Console backend (interactive helper process speaking a JSON-lines protocol)"
 
 [dependencies]
+dunce.workspace = true
 rustpy-core.workspace = true
 anyhow.workspace = true
 log.workspace = true

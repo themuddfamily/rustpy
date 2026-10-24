@@ -28,7 +28,7 @@ fn imported(owner: &str, main: &str, member: &str, result: &str) {
     let source = db.file(reference.file).unwrap();
     assert_eq!(
         source.path,
-        std::fs::canonicalize(directory.path().join("owner.py")).unwrap()
+        dunce::canonicalize(directory.path().join("owner.py")).unwrap()
     );
     assert_eq!(source.text.as_ref(), owner);
     let old = inferer.lookup_member(&receiver, member).unwrap();

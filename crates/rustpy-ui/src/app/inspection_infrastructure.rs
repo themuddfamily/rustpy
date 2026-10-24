@@ -487,11 +487,9 @@ impl IdeApp {
             };
             if let Some(path) = file {
                 if self.project.as_ref().is_some_and(|project| {
-                    path.canonicalize().ok().is_some_and(|path| {
+                    dunce::canonicalize(&path).ok().is_some_and(|path| {
                         path.starts_with(
-                            project
-                                .root
-                                .canonicalize()
+                            dunce::canonicalize(&project.root)
                                 .unwrap_or_else(|_| project.root.clone()),
                         )
                     })

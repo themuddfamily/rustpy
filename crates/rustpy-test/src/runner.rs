@@ -1301,7 +1301,7 @@ class SampleCase(unittest.TestCase):
             return;
         };
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("test_sample.py"), SAMPLE).unwrap();
         let mut run = TestRun::start(1, Framework::Unittest, &py, &root, &[], &[], &[]).unwrap();
         assert!(run.is_running());
@@ -1383,7 +1383,7 @@ class SampleCase(unittest.TestCase):
             return;
         }
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("test_sample.py"), SAMPLE).unwrap();
         // Absolute file target: ids must still be relative to the root.
         let target = root.join("test_sample.py").to_string_lossy().into_owned();
@@ -1477,7 +1477,7 @@ class SampleCase(unittest.TestCase):
             return;
         }
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("test_sample.py"), SAMPLE).unwrap();
         let mut run = TestRun::start(
             3,
@@ -1505,7 +1505,7 @@ class SampleCase(unittest.TestCase):
     fn unittest_selects_single_test_by_node_id() {
         let Some(py) = python() else { return };
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::create_dir_all(root.join("tests")).unwrap();
         std::fs::write(root.join("tests/test_sample.py"), SAMPLE).unwrap();
         let mut run = TestRun::start(
@@ -1564,7 +1564,7 @@ def test_never_runs_with_x():
 
     fn options_project() -> (tempfile::TempDir, PathBuf) {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::create_dir_all(root.join("src/mypkg")).unwrap();
         std::fs::write(root.join("src/mypkg/__init__.py"), "VALUE = 42\n").unwrap();
         std::fs::create_dir_all(root.join("tests")).unwrap();
@@ -1650,7 +1650,7 @@ def test_never_runs_with_x():
     fn unittest_honours_run_options() {
         let Some(py) = python() else { return };
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::create_dir_all(root.join("src/mypkg")).unwrap();
         std::fs::write(root.join("src/mypkg/__init__.py"), "VALUE = 42\n").unwrap();
         std::fs::create_dir_all(root.join("workdir")).unwrap();
@@ -1779,7 +1779,7 @@ def test_never_runs_with_x():
     fn test_runs_collect_runtime_types_beside_the_reporter() {
         let Some(py) = python() else { return };
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(
             root.join("calc.py"),
             "def double(value):\n    return value * 2\n",
@@ -1890,7 +1890,7 @@ class Case(unittest.TestCase):
             return;
         }
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("test_diff.py"), DIFF_TEST).unwrap();
         let mut run = TestRun::start(24, Framework::Pytest, &py, &root, &[], &[], &[]).unwrap();
         let events = run_to_end(&mut run);
@@ -1941,7 +1941,7 @@ class Case(unittest.TestCase):
     fn unittest_reports_compared_values() {
         let Some(py) = python() else { return };
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("test_diff.py"), DIFF_TEST).unwrap();
         let mut run = TestRun::start(
             25,
@@ -1982,7 +1982,7 @@ class Case(unittest.TestCase):
     fn broken_module_reports_an_error_result() {
         let Some(py) = python() else { return };
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(
             root.join("test_broken.py"),
             "import does_not_exist\n\ndef test_x():\n    pass\n",
@@ -2038,7 +2038,7 @@ class Keywords(unittest.TestCase):
     fn equality_capture_keeps_keyword_arguments() {
         let Some(py) = python() else { return };
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("test_kw.py"), KEYWORD_ASSERTS).unwrap();
         let mut frameworks = vec![Framework::Unittest];
         if pytest_available(&py) {
@@ -2164,7 +2164,7 @@ def test_teardown_error(broken_teardown):
             return;
         }
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("test_stale.py"), STALE_COMPARISONS).unwrap();
         let mut run = TestRun::start(33, Framework::Pytest, &py, &root, &[], &[], &[]).unwrap();
         let events = run_to_end(&mut run);
@@ -2226,7 +2226,7 @@ def test_teardown_error(broken_teardown):
     fn unittest_discovery_arguments() {
         let Some(py) = python() else { return };
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::create_dir_all(root.join("tests")).unwrap();
         std::fs::write(root.join("tests/thing_test.py"), "import unittest\n\n\nclass Thing(unittest.TestCase):\n    def test_one(self):\n        pass\n").unwrap();
         std::fs::write(root.join("tests/test_other.py"), "import unittest\n\n\nclass Other(unittest.TestCase):\n    def test_other(self):\n        pass\n").unwrap();
@@ -2333,7 +2333,7 @@ def test_teardown_error(broken_teardown):
     /// A copy of `tests/fixtures/<kind>/project` in a temp dir.
     fn fixture_project(kind: &str) -> (tempfile::TempDir, PathBuf) {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         copy_dir(
             &Path::new(env!("CARGO_MANIFEST_DIR"))
                 .join("tests/fixtures")
@@ -2814,7 +2814,7 @@ def test_teardown_error(broken_teardown):
             require_module(&py, module);
         }
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         std::fs::write(
             root.join("target_module.py"),
             "def twice(value):\n    return value * 2\n",
@@ -2910,7 +2910,7 @@ def test_actual(value):
         let py = python().unwrap();
         require_module(&py, "tox");
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         std::fs::write(
             root.join("tox.ini"),
             format!(
@@ -2977,7 +2977,7 @@ commands = python -c "import sys; print('ACTUAL_TOX_BAD'); sys.exit(3)"
             return;
         }
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("test_cls.py"), "import unittest\n\n\nclass TestExtra(unittest.TestCase):\n    def test_passes(self):\n        self.assertEqual(1 + 1, 2)\n").unwrap();
         let mut run = TestRun::start(
             30,

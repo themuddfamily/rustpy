@@ -120,7 +120,7 @@ fn ssh_config_path(path: &Path) -> String {
     format!("\"{}\"", path.replace('\\', "\\\\").replace('"', "\\\""))
 }
 fn tunnel_children(program: &Path, config: &Path) -> Vec<Identity> {
-    let program = std::fs::canonicalize(program).unwrap();
+    let program = dunce::canonicalize(program).unwrap();
     let expected = config.to_string_lossy();
     let mut result = Vec::new();
     for task in std::fs::read_dir("/proc/self/task").unwrap().flatten() {

@@ -29,7 +29,7 @@ fn imported_async_slot_write_is_not_hidden_by_the_callers_clean_module() {
     let owner = db.file(receiver.class_ref().unwrap().file).unwrap();
     assert_eq!(
         owner.path,
-        std::fs::canonicalize(directory.path().join("reader.py")).unwrap()
+        dunce::canonicalize(directory.path().join("reader.py")).unwrap()
     );
     assert_eq!(owner.text.as_ref(), reader);
     let method = inferer.lookup_member(&receiver, "__anext__").unwrap();

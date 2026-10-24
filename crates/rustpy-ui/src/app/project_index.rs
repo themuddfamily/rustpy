@@ -682,7 +682,7 @@ mod tests {
                 std::env::temp_dir().join(format!("rustpy-index-test-{}-{n}", std::process::id()));
             let _ = std::fs::remove_dir_all(&dir);
             std::fs::create_dir_all(&dir).unwrap();
-            Self(dir.canonicalize().unwrap())
+            Self(dunce::canonicalize(&dir).unwrap())
         }
 
         fn path(&self) -> &Path {
@@ -748,7 +748,7 @@ mod tests {
     #[test]
     fn files_created_in_a_content_root_reach_the_file_list() {
         let dir = Scratch::new();
-        let base = dir.path().canonicalize().unwrap();
+        let base = dunce::canonicalize(dir.path()).unwrap();
         let (root, shared) = (base.join("app"), base.join("shared"));
         std::fs::create_dir_all(root.join(".rustpy")).unwrap();
         std::fs::create_dir_all(shared.join("pkg")).unwrap();
@@ -799,7 +799,7 @@ mod tests {
     #[test]
     fn the_list_is_not_trusted_when_changes_may_be_missed() {
         let dir = Scratch::new();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("a.py"), "a = 1\n").unwrap();
         let mut app = app_with_project(&root);
         let scope = app.project_scope().unwrap();
@@ -843,7 +843,7 @@ mod tests {
     #[test]
     fn switching_back_to_the_window_and_explicit_refreshes_rebuild_the_list() {
         let dir = Scratch::new();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::write(root.join("a.py"), "a = 1\n").unwrap();
         let mut app = app_with_project(&root);
         let ctx = egui::Context::default();

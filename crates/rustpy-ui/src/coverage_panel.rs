@@ -410,7 +410,7 @@ impl CoveragePanel {
         let Some(report) = &self.report else {
             return Vec::new();
         };
-        let canon = path.canonicalize().ok();
+        let canon = dunce::canonicalize(path).ok();
         let Some(f) = report
             .file(path)
             .or_else(|| canon.as_deref().and_then(|c| report.file(c)))

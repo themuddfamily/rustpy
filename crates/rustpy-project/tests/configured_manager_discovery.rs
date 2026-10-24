@@ -152,8 +152,8 @@ fn child(manifest: &Path) {
         }
         assert!(!interpreter.version.is_empty() && !interpreter.sys_path.is_empty());
         assert_eq!(
-            interpreter.prefix.canonicalize().unwrap(),
-            expectation.prefix.canonicalize().unwrap(),
+            dunce::canonicalize(&interpreter.prefix).unwrap(),
+            dunce::canonicalize(&expectation.prefix).unwrap(),
             "{path:?}"
         );
         eprintln!(
@@ -181,16 +181,16 @@ fn configured_conda_pipenv_hatch_pdm_environments_are_discovered_and_probed() {
     let base = selected("RUSTPY_ENVIRONMENT_PYTHON");
     let cache = selected("RUSTPY_CONDA_PKGS_DIR");
     let version = std::env::var("RUSTPY_CONDA_PYTHON_VERSION").expect("explicit Python version");
-    let temporary = selected("TMPDIR").canonicalize().unwrap();
+    let temporary = dunce::canonicalize(selected("TMPDIR")).unwrap();
     assert!(
-        cache.canonicalize().unwrap().starts_with(&temporary),
+        dunce::canonicalize(&cache).unwrap().starts_with(&temporary),
         "Root must admit an exclusive private offline cache below TMPDIR"
     );
     let private = tempfile::Builder::new()
         .prefix("configured-discovery-λ-")
         .tempdir_in(&temporary)
         .unwrap();
-    let root = private.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(private.path()).unwrap();
     let home = root.join("home");
     std::fs::create_dir_all(home.join(".conda")).unwrap();
     let mut expectations = Vec::new();
@@ -254,8 +254,7 @@ fn configured_conda_pipenv_hatch_pdm_environments_are_discovered_and_probed() {
         kinds: conda_kind.clone(),
         pep582_lib: None,
     });
-    let conda_base = conda
-        .canonicalize()
+    let conda_base = dunce::canonicalize(&conda)
         .unwrap()
         .parent()
         .unwrap()

@@ -33,7 +33,7 @@ pub struct DirectoryMappings {
 }
 impl DirectoryMappings {
     pub fn register_provider(&mut self, root: PathBuf, provider: crate::provider::Provider) {
-        let root = root.canonicalize().unwrap_or(root);
+        let root = dunce::canonicalize(&root).unwrap_or(root);
         if provider == crate::provider::Provider::Git {
             self.providers.remove(&root);
             self.register(root);
@@ -390,8 +390,8 @@ mod tests {
         let worktree = detection.roots.iter().find(|r| r.path == linked).unwrap();
         assert!(worktree.linked_worktree);
         assert_eq!(
-            worktree.common_dir.canonicalize().unwrap(),
-            repo.commondir().canonicalize().unwrap()
+            dunce::canonicalize(&worktree.common_dir).unwrap(),
+            dunce::canonicalize(repo.commondir()).unwrap()
         );
         assert_eq!(detection.roots.len(), 2);
     }

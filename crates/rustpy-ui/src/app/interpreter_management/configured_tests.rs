@@ -120,20 +120,20 @@ fn configured_add_interpreter_widget_publishes_real_sdk_and_preserves_project_au
         let root = std::env::var_os(variable)
             .map(PathBuf::from)
             .unwrap_or_else(std::env::temp_dir);
-        root.canonicalize()
+        dunce::canonicalize(&root)
             .unwrap_or_else(|e| panic!("admitted {variable} root {root:?}: {e}"))
     };
     let phase = admitted_root("RUSTPY_APP_INTERPRETER_PHASE_ROOT");
     let cleanup = admitted_root("RUSTPY_APP_INTERPRETER_CLEANUP_ROOT");
     assert!(
-        sdk_root.canonicalize().unwrap().starts_with(&phase),
+        dunce::canonicalize(&sdk_root).unwrap().starts_with(&phase),
         "SDK must be explicitly owned beneath the admitted phase root"
     );
     let config = PathBuf::from(
         std::env::var_os("RUSTPY_CONFIG_DIR").expect("fresh private config directory required"),
     );
     assert!(config.is_absolute() && config.is_dir());
-    let config = config.canonicalize().unwrap();
+    let config = dunce::canonicalize(&config).unwrap();
     assert!(config.starts_with(&cleanup) || config.starts_with(&phase));
     assert!(
         !registry_path().exists(),
@@ -198,8 +198,8 @@ fn configured_add_interpreter_widget_publishes_real_sdk_and_preserves_project_au
         .expect("real probe must select the SDK");
     assert_eq!(selected.path, python);
     assert_eq!(
-        selected.prefix.canonicalize().unwrap(),
-        sdk_root.canonicalize().unwrap()
+        dunce::canonicalize(&selected.prefix).unwrap(),
+        dunce::canonicalize(&sdk_root).unwrap()
     );
     assert!(selected.is_venv && !selected.sys_path.is_empty() && !selected.version.is_empty());
     assert_eq!(
@@ -280,11 +280,16 @@ fn configured_add_interpreter_widget_creates_real_manager_environment() {
     };
     let executable = selected("RUSTPY_APP_INTERPRETER_MANAGER_EXECUTABLE");
     let base = selected("RUSTPY_APP_INTERPRETER_BASE");
-    let temporary = std::env::temp_dir().canonicalize().unwrap();
+    let temporary = dunce::canonicalize(std::env::temp_dir()).unwrap();
     let config = PathBuf::from(
         std::env::var_os("RUSTPY_CONFIG_DIR").expect("fresh private config directory required"),
     );
-    assert!(config.is_dir() && config.canonicalize().unwrap().starts_with(&temporary));
+    assert!(
+        config.is_dir()
+            && dunce::canonicalize(&config)
+                .unwrap()
+                .starts_with(&temporary)
+    );
     assert!(
         !registry_path().exists(),
         "run exactly this ignored case in its own fresh profile"
@@ -293,7 +298,9 @@ fn configured_add_interpreter_widget_creates_real_manager_environment() {
         .prefix("configured-app-manager-λ-")
         .tempdir()
         .unwrap();
-    let project = roots.path().canonicalize().unwrap().join("managed project");
+    let project = dunce::canonicalize(roots.path())
+        .unwrap()
+        .join("managed project");
     std::fs::create_dir(&project).unwrap();
     std::fs::write(project.join("Pipfile"), "[packages]\n[dev-packages]\n").unwrap();
     std::fs::write(
@@ -368,10 +375,10 @@ fn configured_add_interpreter_widget_creates_real_manager_environment() {
     assert!(!interpreter.version.is_empty() && !interpreter.sys_path.is_empty());
     assert!(interpreter.path.is_file());
     assert_ne!(interpreter.path, base, "a new environment, not the base");
-    let prefix = interpreter.prefix.canonicalize().unwrap();
+    let prefix = dunce::canonicalize(&interpreter.prefix).unwrap();
     assert!(prefix.starts_with(&temporary), "{prefix:?}");
     if matches!(manager, Manager::Conda | Manager::Pipenv | Manager::Pdm) {
-        assert_eq!(prefix, location.canonicalize().unwrap());
+        assert_eq!(prefix, dunce::canonicalize(&location).unwrap());
     }
     assert_eq!(
         rustpy_project::ProjectModel::load(&project).sdk.as_ref(),

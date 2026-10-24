@@ -155,7 +155,7 @@ fn configured_grpcurl_descriptor_exchange_status_cancel_and_server_retirement() 
     let python = executable("RUSTPY_PROVIDER_PYTHON");
     let grpcurl = executable("RUSTPY_TEST_GRPCURL");
     let directory = tempfile::tempdir().unwrap();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     std::fs::write(root.join("acceptance.proto"), PROTO).unwrap();
     let mut server = Server::start(&root, &python);
     let mut options = Options::new(root.clone());

@@ -142,13 +142,13 @@ impl GitRepo {
                     {
                         bail!("Patch path escapes repository");
                     }
-                    let canonical_root = self.root().canonicalize()?;
+                    let canonical_root = dunce::canonicalize(self.root())?;
                     let mut ancestor = self.root().to_path_buf();
                     for component in path.components() {
                         ancestor.push(component);
                         if let Ok(metadata) = std::fs::symlink_metadata(&ancestor) {
                             if metadata.file_type().is_symlink()
-                                && !ancestor.canonicalize()?.starts_with(&canonical_root)
+                                && !dunce::canonicalize(&ancestor)?.starts_with(&canonical_root)
                             {
                                 bail!("Patch follows a symlink outside repository");
                             }

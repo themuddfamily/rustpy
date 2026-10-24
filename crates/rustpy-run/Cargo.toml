@@ -7,6 +7,7 @@ rust-version.workspace = true
 description = "RustPy IDE: process execution, consoles, coverage and profiling"
 
 [dependencies]
+dunce.workspace = true
 rustpy-project.workspace = true
 rustpy-core.workspace = true
 serde.workspace = true

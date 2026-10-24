@@ -54,7 +54,7 @@ impl Registration {
         Ok(registration)
     }
     pub fn set_project(&mut self, project: Option<&Path>) -> io::Result<()> {
-        self.info.project = project.map(std::fs::canonicalize).transpose()?;
+        self.info.project = project.map(dunce::canonicalize).transpose()?;
         // Called after an accepted UI switch: endpoint truth must not revert
         // merely because its discovery hint could not be persisted.
         self.publish()
@@ -297,7 +297,7 @@ pub fn live_windows(config: &Path) -> io::Result<Vec<WindowInfo>> {
 /// Chooses the deepest canonical project containing a file or folder target.
 /// A sibling prefix (e.g. `project-old`) cannot match `project`.
 pub fn find_project(config: &Path, target: &Path) -> io::Result<Option<WindowInfo>> {
-    let target = std::fs::canonicalize(target)?;
+    let target = dunce::canonicalize(target)?;
     Ok(live_windows(config)?
         .into_iter()
         .filter(|window| {

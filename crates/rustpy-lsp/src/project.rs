@@ -107,7 +107,7 @@ pub fn discover_interpreter(
 
 /// Trust as the IDE decides it (never from anything inside the project).
 pub fn is_trusted(settings: &Settings, root: &Path) -> bool {
-    let canonical = root.canonicalize().unwrap_or_else(|_| root.to_path_buf());
+    let canonical = dunce::canonicalize(root).unwrap_or_else(|_| root.to_path_buf());
     rustpy_settings::trust_all_from_env()
         || settings.is_project_trusted(&canonical)
         || settings.is_project_trusted(root)

@@ -37,7 +37,7 @@ fn key(path: &Path) -> PathBuf {
     let path = git2::Repository::discover(dir)
         .map(|r| r.commondir().to_path_buf())
         .unwrap_or_else(|_| dir.to_path_buf());
-    path.canonicalize().unwrap_or(path)
+    dunce::canonicalize(&path).unwrap_or(path)
 }
 
 /// The operation running in this repository, including linked worktrees.

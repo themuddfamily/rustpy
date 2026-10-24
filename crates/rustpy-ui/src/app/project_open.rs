@@ -204,7 +204,7 @@ impl IdeApp {
     /// File › Open, Recent Projects, Get from VCS and dropped folders: opens `root`
     /// here, in a new window, or asks, per Settings › System Settings.
     pub(super) fn request_open_project(&mut self, root: &Path) {
-        let root = root.canonicalize().unwrap_or_else(|_| root.to_path_buf());
+        let root = dunce::canonicalize(root).unwrap_or_else(|_| root.to_path_buf());
         let current = self.project.as_ref().map(|p| p.root.clone());
         match decide_open(current.as_deref(), &root, self.settings.open_project_in()) {
             OpenDecision::OpenHere => self.open_project(&root),
@@ -401,7 +401,7 @@ mod tests {
     #[test]
     fn untrusted_open_blocks_console_and_typed_launch_before_spawning() {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let mut app = IdeApp::new(Settings::default(), Some(root.clone()));
         assert!(app.project_safe_mode());
         assert!(!app.ensure_py_console());
@@ -421,7 +421,7 @@ mod tests {
     #[test]
     fn revocation_is_effective_before_the_next_frame_refresh() {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let mut app = IdeApp::new(Settings::default(), Some(root.clone()));
         app.settings.trust_project(&root);
         app.safe_mode = false;
@@ -440,7 +440,7 @@ mod tests {
     #[test]
     fn trust_admissions_share_one_probe_until_trust_settings_change() {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let mut app = IdeApp::new(Settings::default(), Some(root.clone()));
         app.settings.trust_project(&root);
         app.safe_mode = false;

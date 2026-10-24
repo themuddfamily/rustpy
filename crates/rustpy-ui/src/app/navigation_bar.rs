@@ -694,7 +694,7 @@ mod tests {
             for file in ["main.py", "sibling.py", "pkg/child.py"] {
                 std::fs::write(root.join(file), "value = 1\n").unwrap();
             }
-            Self(root.canonicalize().unwrap())
+            Self(dunce::canonicalize(&root).unwrap())
         }
         fn app(&self) -> IdeApp {
             let mut app = IdeApp::new(Settings::default(), None);

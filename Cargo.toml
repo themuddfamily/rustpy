@@ -11,6 +11,7 @@ repository = "https://github.com/themuddfamily/rustpy"
 rust-version = "1.95"
 
 [workspace.dependencies]
+dunce = "1.0"
 rustpy-core = { path = "crates/rustpy-core", version = "0.1.0" }
 rustpy-text = { path = "crates/rustpy-text", version = "0.1.0" }
 rustpy-syntax = { path = "crates/rustpy-syntax", version = "0.1.0" }

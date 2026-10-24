@@ -54,14 +54,14 @@ impl Fixture {
         );
         let temporary = PathBuf::from(required("TMPDIR"));
         assert!(temporary.is_absolute() && temporary.is_dir());
-        let temporary = temporary.canonicalize().unwrap();
+        let temporary = dunce::canonicalize(&temporary).unwrap();
         // Markdown snapshots use Settings::config_dir(). App settings/cache/log
         // authority must therefore be isolated before constructing the App.
         for name in ["RUSTPY_CONFIG_DIR", "RUSTPY_SYSTEM_DIR", "RUSTPY_LOG_DIR"] {
             let path = PathBuf::from(required(name));
             assert!(path.is_absolute() && path.starts_with(&temporary));
             std::fs::create_dir_all(&path).unwrap();
-            assert!(path.canonicalize().unwrap().starts_with(&temporary));
+            assert!(dunce::canonicalize(&path).unwrap().starts_with(&temporary));
         }
         let pandoc = PathBuf::from(required("RUSTPY_TEST_PANDOC"));
         assert!(pandoc.is_absolute() && pandoc.is_file());

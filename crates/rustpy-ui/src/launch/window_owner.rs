@@ -41,7 +41,7 @@ impl WindowOwnerLifetime {
         project: Option<&Path>,
         lease: &AdmissionLease,
     ) -> io::Result<Self> {
-        let config = std::fs::canonicalize(config)?;
+        let config = dunce::canonicalize(config)?;
         Self::validate_lease(&config, lease)?;
         Self::validate_endpoint(&config, server)?;
         server.set_quit_state(None)?;
@@ -75,7 +75,7 @@ impl WindowOwnerLifetime {
         token: WindowToken,
         project: Option<&Path>,
     ) -> io::Result<Self> {
-        let config = std::fs::canonicalize(config)?;
+        let config = dunce::canonicalize(config)?;
         let store = WindowSessionStore::new(&config);
         let actual = store
             .load()

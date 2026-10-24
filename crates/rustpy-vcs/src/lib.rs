@@ -169,9 +169,7 @@ impl GitRepo {
     pub fn discover(path: &Path) -> Option<GitRepo> {
         let repo = Repository::discover(path).ok()?;
         let root = repo.workdir()?.to_path_buf();
-        let operation_key = repo
-            .commondir()
-            .canonicalize()
+        let operation_key = dunce::canonicalize(repo.commondir())
             .unwrap_or_else(|_| repo.commondir().to_path_buf());
         Some(GitRepo {
             command_env: GitEnv::default(),
@@ -188,9 +186,7 @@ impl GitRepo {
             .workdir()
             .map(Path::to_path_buf)
             .unwrap_or_else(|| path.to_path_buf());
-        let operation_key = repo
-            .commondir()
-            .canonicalize()
+        let operation_key = dunce::canonicalize(repo.commondir())
             .unwrap_or_else(|_| repo.commondir().to_path_buf());
         Ok(GitRepo {
             command_env: GitEnv::default(),

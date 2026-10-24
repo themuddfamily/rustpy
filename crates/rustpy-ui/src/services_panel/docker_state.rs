@@ -26,7 +26,7 @@ impl DockerState {
     /// revoking authority cancels, but never drops, the previously captured owner.
     pub fn set_admission(&mut self, allowed: bool, root: &Path) {
         let mut scope = if allowed {
-            root.canonicalize().ok().and_then(|canonical| {
+            dunce::canonicalize(root).ok().and_then(|canonical| {
                 DirectoryIdentity::capture(&canonical)
                     .ok()
                     .map(|identity| Scope {
@@ -74,7 +74,7 @@ impl DockerState {
             program
         };
         self.admission.as_ref().is_some_and(|scope| {
-            root.canonicalize().is_ok_and(|root| {
+            dunce::canonicalize(root).is_ok_and(|root| {
                 scope.root == root && scope.program == program && scope.identity.matches(&root)
             })
         })
@@ -207,7 +207,7 @@ mod tests {
     }
     #[test]
     fn regrant_after_revocation_is_a_new_admission_even_for_the_same_root() {
-        let root = std::env::current_dir().unwrap().canonicalize().unwrap();
+        let root = dunce::canonicalize(std::env::current_dir().unwrap()).unwrap();
         let mut state = DockerState::default();
         state.set_admission(true, &root);
         let original = state.admission.clone().unwrap();

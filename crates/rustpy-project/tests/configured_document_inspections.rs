@@ -16,11 +16,11 @@ fn admitted(name: &str, resolved_name: Option<&str>) -> PathBuf {
     assert!(path.is_absolute() && path.is_file(), "invalid {name}");
     if let Some(program) = resolved_name {
         assert_eq!(
-            which::which(program)
-                .expect("admitted provider must be on captured PATH")
-                .canonicalize()
-                .unwrap(),
-            path.canonicalize().unwrap(),
+            dunce::canonicalize(
+                which::which(program).expect("admitted provider must be on captured PATH")
+            )
+            .unwrap(),
+            dunce::canonicalize(&path).unwrap(),
             "production PATH must select the explicitly admitted {program}"
         );
     }

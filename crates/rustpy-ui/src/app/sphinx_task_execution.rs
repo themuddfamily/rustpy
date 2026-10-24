@@ -95,7 +95,7 @@ fn last_session(app: &IdeApp) -> u64 {
 #[ignore = "requires explicit admitted SDK with real Sphinx; runs actual documentation Run configuration"]
 fn configured_sphinx_task_builds_html_and_reports_real_warning_failure() {
     let directory = tempfile::tempdir().unwrap();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     let docs = root.join("docs with spaces");
     std::fs::create_dir(&docs).unwrap();
     std::fs::write(docs.join("conf.py"), "project = 'RustPy actual task'\nmaster_doc = 'index'\nextensions = []\nhtml_theme = 'basic'\n").unwrap();
@@ -183,7 +183,7 @@ fn configured_sphinx_task_builds_html_and_reports_real_warning_failure() {
 #[ignore = "requires explicit admitted SDK with real Docutils; runs actual documentation Run configuration"]
 fn configured_docutils_task_saves_html_and_exposes_real_document_errors() {
     let directory = tempfile::tempdir().unwrap();
-    let root = directory.path().canonicalize().unwrap();
+    let root = dunce::canonicalize(directory.path()).unwrap();
     let source = root.join("document with spaces.rst");
     std::fs::write(&source, "Original\n========\n").unwrap();
     let mut app = configured_app(&root);

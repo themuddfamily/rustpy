@@ -161,7 +161,7 @@ impl NativeWorkspace {
         if self.owners.len() >= 32 || self.owners.iter().filter(|c| c.owner.alive()).count() >= 16 {
             return Err("Close a database session before opening another".into());
         }
-        let canonical_root = std::fs::canonicalize(root).map_err(|e| e.to_string())?;
+        let canonical_root = dunce::canonicalize(root).map_err(|e| e.to_string())?;
         // Exact captured connection authority: changed endpoints must never inherit
         // a previous server's edit buffer or reconciliation acknowledgement.
         let authority = self
@@ -352,7 +352,7 @@ impl NativeWorkspace {
         for c in &mut self.owners {
             let valid = admitted
                 && root == Some(c.root.as_path())
-                && std::fs::canonicalize(&c.root).ok().as_ref() == Some(&c.canonical_root)
+                && dunce::canonicalize(&c.root).ok().as_ref() == Some(&c.canonical_root)
                 && sources.iter().any(|source| source == &c.owner.source);
             if !valid && !c.stopping {
                 c.stale = true;
@@ -485,7 +485,7 @@ impl NativeConsole {
         self.new_document = false;
     }
     fn send(&mut self, request: NativeRequest, kind: PendingKind) {
-        if std::fs::canonicalize(&self.root).ok().as_ref() != Some(&self.canonical_root) {
+        if dunce::canonicalize(&self.root).ok().as_ref() != Some(&self.canonical_root) {
             self.stale = true;
             self.status =
                 "Project location changed. Reconnect from the current trusted project.".into();

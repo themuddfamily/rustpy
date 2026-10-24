@@ -62,7 +62,7 @@ impl Client {
         extra_options: Value,
     ) -> Client {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         for (rel, text) in files {
             let p = root.join(rel);
             std::fs::create_dir_all(p.parent().unwrap()).unwrap();
@@ -98,7 +98,7 @@ impl Client {
     }
 
     fn root(&self) -> PathBuf {
-        self.dir.path().canonicalize().unwrap()
+        dunce::canonicalize(self.dir.path()).unwrap()
     }
 
     fn uri(&self, rel: &str) -> Uri {

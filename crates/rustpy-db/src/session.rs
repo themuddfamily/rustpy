@@ -1414,7 +1414,7 @@ fn ssh_command_base(t: &Tunnel) -> Result<std::process::Command> {
 fn capture_ssh_file(path: &std::path::Path) -> Result<std::path::PathBuf> {
     // Preserve legacy relative identity/known-hosts selections, while freezing
     // the existing file's absolute authority before a consumer changes cwd.
-    let captured = std::fs::canonicalize(path).context("Capture selected SSH file")?;
+    let captured = dunce::canonicalize(path).context("Capture selected SSH file")?;
     validate_ssh_file(&captured)?;
     Ok(captured)
 }

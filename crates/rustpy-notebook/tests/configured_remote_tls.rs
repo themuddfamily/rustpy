@@ -178,7 +178,7 @@ fn configured_owned_remote_jupyter_tls_token_refusal_cell_and_retirement() {
     );
     // Keep the private provider logs/runtime as root-reviewable evidence even
     // if an actual provider fails. Never include token-bearing logs in panic.
-    let root = tempfile::tempdir().unwrap().keep().canonicalize().unwrap();
+    let root = dunce::canonicalize(tempfile::tempdir().unwrap().keep()).unwrap();
     eprintln!("owned remote Jupyter TLS evidence: {}", root.display());
     let mut environment = Vec::new();
     for (name, folder) in [
@@ -398,7 +398,7 @@ fn configured_owned_remote_jupyter_password_tls_login_refusal_cell_and_retiremen
         sdk.join("pyvenv.cfg").is_file(),
         "admitted isolated SDK required"
     );
-    let root = tempfile::tempdir().unwrap().keep().canonicalize().unwrap();
+    let root = dunce::canonicalize(tempfile::tempdir().unwrap().keep()).unwrap();
     eprintln!(
         "owned password-only Jupyter TLS evidence: {}",
         root.display()

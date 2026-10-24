@@ -52,7 +52,7 @@ fn required(name: &str) -> String {
 }
 fn private(path: &Path, root: &Path, maximum: u64) -> PathBuf {
     assert!(path.is_absolute() && !path.is_symlink());
-    let path = path.canonicalize().unwrap();
+    let path = dunce::canonicalize(path).unwrap();
     assert!(path.starts_with(root));
     let info = std::fs::metadata(&path).unwrap();
     assert_eq!(info.uid(), 0);
@@ -89,7 +89,7 @@ impl Case {
         assert_eq!(required("RUSTPY_P4_ADMITTED"), "yes");
         let root = PathBuf::from(required("RUSTPY_P4_ROOT"));
         assert!(root.is_absolute() && root.is_dir() && !root.is_symlink());
-        let root = root.canonicalize().unwrap();
+        let root = dunce::canonicalize(&root).unwrap();
         let info = std::fs::metadata(&root).unwrap();
         assert_eq!((info.uid(), info.mode() & 0o077), (0, 0));
         let descriptor = private(
@@ -142,15 +142,13 @@ impl Case {
         }
         assert!(
             admitted.server_root.is_absolute()
-                && admitted
-                    .server_root
-                    .canonicalize()
+                && dunce::canonicalize(&admitted.server_root)
                     .unwrap()
                     .starts_with(&root)
         );
         assert_eq!(
             std::fs::read_link(format!("/proc/{}/exe", admitted.server_pid)).unwrap(),
-            admitted.p4d.path.canonicalize().unwrap()
+            dunce::canonicalize(&admitted.p4d.path).unwrap()
         );
         let stat = std::fs::read_to_string(format!("/proc/{}/stat", admitted.server_pid)).unwrap();
         assert_eq!(

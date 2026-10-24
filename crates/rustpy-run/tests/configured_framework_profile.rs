@@ -240,11 +240,8 @@ fn configured_frameworks(engine: &str, base_id: u64) {
                 })
                 .expect("actual framework hot function in result table");
             assert_eq!(
-                Path::new(&hot.file).canonicalize().unwrap(),
-                root.path()
-                    .join("profile_workload.py")
-                    .canonicalize()
-                    .unwrap()
+                dunce::canonicalize(Path::new(&hot.file)).unwrap(),
+                dunce::canonicalize(root.path().join("profile_workload.py")).unwrap()
             );
             assert_eq!(hot.line, 3);
             assert_eq!(hot.ncalls, 3);
@@ -447,8 +444,8 @@ urlpatterns = [path('owned-profile/', actual_profile_view)]
         assert_eq!(function.ncalls, calls);
         assert_eq!(function.primitive_calls, calls);
         assert_eq!(
-            Path::new(&function.file).canonicalize().unwrap(),
-            root.path().join(file).canonicalize().unwrap()
+            dunce::canonicalize(Path::new(&function.file)).unwrap(),
+            dunce::canonicalize(root.path().join(file)).unwrap()
         );
         assert!(
             function.line > 0

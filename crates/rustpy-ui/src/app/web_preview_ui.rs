@@ -68,7 +68,7 @@ impl Default for Workspace {
 }
 impl IdeApp {
     fn preview_server(&mut self, root: &Path) -> Result<(), String> {
-        let root = root.canonicalize().map_err(|e| e.to_string())?;
+        let root = dunce::canonicalize(root).map_err(|e| e.to_string())?;
         if self
             .web_preview
             .server

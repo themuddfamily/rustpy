@@ -610,7 +610,7 @@ pub fn opens_read_only(path: &Path, search_paths: &[PathBuf], roots: &[PathBuf])
         return false;
     }
     let mut all_roots = roots.to_vec();
-    all_roots.extend(roots.iter().filter_map(|r| r.canonicalize().ok()));
+    all_roots.extend(roots.iter().filter_map(|r| dunce::canonicalize(r).ok()));
     is_library_file(path, search_paths, &all_roots)
 }
 

@@ -85,7 +85,7 @@ fn configured_services_snapshot_lifecycle_and_compose_projects_use_real_daemon()
         .as_nanos();
     let root = mount.join(format!("services-{unique}"));
     std::fs::create_dir_all(&root).unwrap();
-    let root = root.canonicalize().unwrap();
+    let root = dunce::canonicalize(&root).unwrap();
     let project = format!("rustpyservices{unique}");
     let container = format!("rustpy-services-{unique}");
     let compose_file = root.join("compose.yaml");

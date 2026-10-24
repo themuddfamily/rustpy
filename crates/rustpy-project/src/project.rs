@@ -529,7 +529,7 @@ impl ProjectModel {
 /// would pull in every sibling folder or the whole disk) and must not overlap
 /// another content root. Symbolic links are followed for folders that exist.
 pub fn content_root_problem(project: &Path, root: &Path, others: &[PathBuf]) -> Option<String> {
-    let real = |p: &Path| p.canonicalize().unwrap_or_else(|_| p.to_path_buf());
+    let real = |p: &Path| dunce::canonicalize(p).unwrap_or_else(|_| p.to_path_buf());
     let (project_real, root_real) = (real(project), real(root));
     let inside = |a: &Path, b: &Path, a_real: &Path, b_real: &Path| {
         a.starts_with(b) || a_real.starts_with(b_real)
@@ -976,7 +976,7 @@ mod tests {
     #[test]
     fn content_roots_that_contain_or_overlap_the_project_are_ignored_on_load() {
         let dir = tempfile::tempdir().unwrap();
-        let base = dir.path().canonicalize().unwrap();
+        let base = dunce::canonicalize(dir.path()).unwrap();
         let root = base.join("proj");
         for d in ["proj/src", "shared/lib", "other"] {
             std::fs::create_dir_all(base.join(d)).unwrap();

@@ -339,10 +339,7 @@ fn execute(
     out: &mut dyn Write,
     err: &mut dyn Write,
 ) -> Result<i32, String> {
-    let root = args
-        .project
-        .canonicalize()
-        .map_err(|error| format!("project: {error}"))?;
+    let root = dunce::canonicalize(&args.project).map_err(|error| format!("project: {error}"))?;
     if !root.is_dir() {
         return Err("--project must be a directory".into());
     }

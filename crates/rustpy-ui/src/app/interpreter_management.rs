@@ -417,7 +417,7 @@ impl IdeApp {
         let ignored_root = root.clone();
         std::thread::spawn(move || {
             let result = (|| {
-                let python = std::fs::canonicalize(python).map_err(|e| e.to_string())?;
+                let python = dunce::canonicalize(python).map_err(|e| e.to_string())?;
                 if rebuild {
                     rustpy_project::native_skeleton::clear_interpreter_cache(&python, &token)
                         .map_err(|e| e.to_string())?;
@@ -436,7 +436,7 @@ impl IdeApp {
                     if depth > 16 {
                         continue;
                     }
-                    let Ok(directory) = std::fs::canonicalize(directory) else {
+                    let Ok(directory) = dunce::canonicalize(directory) else {
                         continue;
                     };
                     if !visited.insert(directory.clone()) {

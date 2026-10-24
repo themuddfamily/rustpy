@@ -51,7 +51,7 @@ fn copy_file(src: &Path, dst: &Path) -> anyhow::Result<()> {
     if meta.is_dir() {
         bail!("{} is a directory", src.display());
     }
-    if let (Ok(a), Ok(b)) = (fs::canonicalize(src), fs::canonicalize(dst)) {
+    if let (Ok(a), Ok(b)) = (dunce::canonicalize(src), dunce::canonicalize(dst)) {
         if a == b {
             return Ok(()); // the deployment folder is the project itself
         }

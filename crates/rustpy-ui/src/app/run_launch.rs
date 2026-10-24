@@ -1855,7 +1855,7 @@ mod rerun_tests {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(dir.join("srv.py"), "print('serving')\n").unwrap();
-        Scratch(dir.canonicalize().unwrap())
+        Scratch(dunce::canonicalize(&dir).unwrap())
     }
 
     /// An IDE window on the project `root`, without interpreter discovery or Git.

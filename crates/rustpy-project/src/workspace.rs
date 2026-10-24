@@ -46,7 +46,7 @@ impl WorkspaceSnapshot {
     pub fn unavailable(folders: Vec<PathBuf>) -> Self {
         let mut snapshot = Self::default();
         for folder in folders {
-            let root = folder.canonicalize().unwrap_or(folder);
+            let root = dunce::canonicalize(&folder).unwrap_or(folder);
             if !snapshot.folders.contains(&root) {
                 snapshot.folders.push(root);
             }

@@ -9,6 +9,7 @@ description = "RustPy IDE: declarative plugins (manifests, install/enable/disabl
 autoexamples = false
 
 [dependencies]
+dunce.workspace = true
 rustpy-highlight.workspace = true
 rustpy-settings.workspace = true
 rustpy-net.workspace = true

@@ -7,6 +7,7 @@ rust-version.workspace = true
 description = "RustPy IDE: Git integration"
 
 [dependencies]
+dunce.workspace = true
 rustpy-core.workspace = true
 rustpy-settings.workspace = true
 rustpy-net.workspace = true

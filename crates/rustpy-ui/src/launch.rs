@@ -38,10 +38,7 @@ pub fn startup_project(targets: &[OpenTarget]) -> Option<PathBuf> {
         return Some(dir.path.clone());
     }
     let file = targets.iter().find(|t| t.path.is_file())?;
-    let path = file
-        .path
-        .canonicalize()
-        .unwrap_or_else(|_| file.path.clone());
+    let path = dunce::canonicalize(&file.path).unwrap_or_else(|_| file.path.clone());
     if path.components().any(|c| c.as_os_str() == ".git") {
         return None;
     }
@@ -667,7 +664,7 @@ mod tests {
         assert!(shell.owner.is_some());
         assert_eq!(
             shell.registered_project,
-            Some(Some(project.canonicalize().unwrap()))
+            Some(Some(dunce::canonicalize(project).unwrap()))
         );
         drop(startup_lease);
         shell
@@ -782,7 +779,7 @@ mod tests {
         shell.sync_project_registration();
         assert_eq!(
             shell.app.actual_current_project_root(),
-            Some(first.canonicalize().unwrap().as_path())
+            Some(dunce::canonicalize(&first).unwrap().as_path())
         );
         assert_eq!(
             rustpy_cli::window_registry::find_project(&config, &first)
@@ -834,7 +831,7 @@ mod tests {
         );
         assert_eq!(
             shell.app.actual_current_project_root(),
-            Some(second.canonicalize().unwrap().as_path())
+            Some(dunce::canonicalize(&second).unwrap().as_path())
         );
         assert!(matches!(rustpy_cli::ipc::forward_window(&original, &[], false, None), Err(rustpy_cli::ipc::ForwardError::Rejected(_))), "endpoint proof must retain the accepted new project even when metadata publication fails");
         std::fs::remove_dir(&record).unwrap();
@@ -842,7 +839,7 @@ mod tests {
         assert!(shell.registry_failure.is_none());
         assert_eq!(
             shell.registered_project,
-            Some(Some(second.canonicalize().unwrap()))
+            Some(Some(dunce::canonicalize(&second).unwrap()))
         );
         assert_eq!(
             rustpy_cli::window_registry::find_project(&config, &second)
@@ -923,7 +920,7 @@ mod tests {
             accepted_rx
                 .recv_timeout(std::time::Duration::from_secs(5))
                 .unwrap(),
-            vec![first.join("wait.py").canonicalize().unwrap()]
+            vec![dunce::canonicalize(first.join("wait.py")).unwrap()]
         );
         assert_eq!(shell.waits.len(), 1);
         shell.app.open_project(&second);
@@ -941,7 +938,7 @@ mod tests {
         std::fs::create_dir_all(second.join(".rustpy")).unwrap();
         let file = first.join("queued.py");
         std::fs::write(&file, "answer = 42\n").unwrap();
-        let file = file.canonicalize().unwrap();
+        let file = dunce::canonicalize(&file).unwrap();
         let server = Server::start_secondary(&dir.path().join("config")).unwrap();
         server.set_project(Some(&first)).unwrap();
         let destination =
@@ -976,11 +973,11 @@ mod tests {
         shell.app.open_project(&second);
         assert!(shell
             .app
-            .cli_target_is_open(&second.canonicalize().unwrap()));
+            .cli_target_is_open(&dunce::canonicalize(&second).unwrap()));
         shell.accept_request(request);
         let opened = shell
             .app
-            .cli_target_is_open(&first.join("queued.py").canonicalize().unwrap());
+            .cli_target_is_open(&dunce::canonicalize(first.join("queued.py")).unwrap());
         let result = forward.join().unwrap();
         assert!(
             !opened,
@@ -999,7 +996,7 @@ mod tests {
     #[test]
     fn startup_project_for_targets() {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::create_dir_all(root.join("proj/.rustpy")).unwrap();
         std::fs::create_dir_all(root.join("proj/src/pkg")).unwrap();
         std::fs::create_dir_all(root.join("loose")).unwrap();

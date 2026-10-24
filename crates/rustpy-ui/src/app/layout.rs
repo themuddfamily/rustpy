@@ -1391,7 +1391,7 @@ mod tests {
                 std::env::temp_dir().join(format!("rustpy-layout-test-{}-{n}", std::process::id()));
             let _ = std::fs::remove_dir_all(&dir);
             std::fs::create_dir_all(&dir).unwrap();
-            Self(dir.canonicalize().unwrap())
+            Self(dunce::canonicalize(&dir).unwrap())
         }
 
         fn path(&self) -> &Path {

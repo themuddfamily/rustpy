@@ -7,6 +7,7 @@ rust-version.workspace = true
 description = "RustPy IDE: password safe — OS keyring (Secret Service, Windows Credential Manager, macOS Keychain), AES-256-GCM encrypted file with master password or key file, memory-only mode"
 
 [dependencies]
+dunce.workspace = true
 rustpy-settings.workspace = true
 log.workspace = true
 serde.workspace = true

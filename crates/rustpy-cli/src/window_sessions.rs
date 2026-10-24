@@ -848,7 +848,7 @@ pub fn prepare_startup(
         let targets: Vec<_> = args
             .targets
             .iter()
-            .map(|target| std::fs::canonicalize(&target.path))
+            .map(|target| dunce::canonicalize(&target.path))
             .collect::<io::Result<_>>()?;
         if targets != project.iter().cloned().collect::<Vec<_>>()
             || (project.is_none() && !args.welcome)
@@ -1066,7 +1066,7 @@ fn check_marker(
 }
 fn canonical_project(project: Option<&Path>) -> Result<Option<PathBuf>, RestoreIssue> {
     project
-        .map(|path| match std::fs::canonicalize(path) {
+        .map(|path| match dunce::canonicalize(path) {
             Ok(root) if root.is_dir() => Ok(root),
             Ok(_) => Err(RestoreIssue::InvalidProject {
                 path: path.into(),

@@ -25,7 +25,7 @@ fn provisioning_child() {
         return;
     };
     let nonce = std::env::var(CHILD_NONCE).expect("explicit child nonce required");
-    let root = std::fs::canonicalize(root).unwrap();
+    let root = dunce::canonicalize(root).unwrap();
     let mut records = Vec::new();
     for (name, bytes) in [("provider", PROVIDER), ("malformed", MALFORMED)] {
         let path = root.join(name);
@@ -54,7 +54,7 @@ fn provisioning_child() {
 }
 
 pub(crate) fn provision(root: &Path) {
-    let root = std::fs::canonicalize(root).unwrap();
+    let root = dunce::canonicalize(root).unwrap();
     let nonce = root.file_name().unwrap().to_string_lossy().into_owned();
     let owned = root.join("provisioning-child-environment");
     std::fs::create_dir(&owned).unwrap();

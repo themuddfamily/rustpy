@@ -1191,7 +1191,7 @@ mod tests {
     #[test]
     fn interpreter_symlinks_preserve_distinct_sdk_authority_and_stale_guards() {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let base_python = root.join("base-python");
         std::fs::write(&base_python, b"owned executable identity fixture").unwrap();
         for sdk in ["first-venv", "second-venv"] {
@@ -1202,8 +1202,8 @@ mod tests {
         let first = root.join("first-venv/bin/python");
         let second = root.join("second-venv/bin/python");
         assert_eq!(
-            first.canonicalize().unwrap(),
-            second.canonicalize().unwrap()
+            dunce::canonicalize(&first).unwrap(),
+            dunce::canonicalize(&second).unwrap()
         );
         let store = WorkspaceStore::new(&root);
         let initial = store.load().unwrap();

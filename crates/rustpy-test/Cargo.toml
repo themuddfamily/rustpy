@@ -7,6 +7,7 @@ rust-version.workspace = true
 description = "RustPy IDE: test discovery and pytest/unittest/behave/Twisted Trial runner with streamed results"
 
 [dependencies]
+dunce.workspace = true
 rustpy-core.workspace = true
 rustpy-run.workspace = true
 rustpy-syntax.workspace = true

@@ -145,7 +145,7 @@ impl Session {
             .map_err(|e| e.to_string())?
             .file_type()
             .is_symlink()
-            || self.root.canonicalize().map_err(|e| e.to_string())? != self.root
+            || dunce::canonicalize(&self.root).map_err(|e| e.to_string())? != self.root
         {
             return Err("The captured remote root changed; reconnect explicitly".into());
         }
@@ -160,7 +160,7 @@ impl Session {
             }
         }
         if target.exists() {
-            let canonical = target.canonicalize().map_err(|e| e.to_string())?;
+            let canonical = dunce::canonicalize(&target).map_err(|e| e.to_string())?;
             if !canonical.starts_with(&self.root) {
                 return Err("Remote path escaped the captured root".into());
             }
@@ -201,9 +201,7 @@ impl Session {
             if version != env!("CARGO_PKG_VERSION") || protocol != PROTOCOL {
                 return Err(format!("Gateway version mismatch: server {} protocol {PROTOCOL}, client {version} protocol {protocol}",env!("CARGO_PKG_VERSION")));
             }
-            let root = PathBuf::from(root)
-                .canonicalize()
-                .map_err(|e| e.to_string())?;
+            let root = dunce::canonicalize(PathBuf::from(root)).map_err(|e| e.to_string())?;
             if root != self.root || !admitted {
                 return Err(
                     "The client did not explicitly admit this exact target and root".into(),
@@ -567,7 +565,7 @@ pub fn run_stdio(root: PathBuf, admit_client: bool) -> Result<(), String> {
     if !admit_client {
         return Err("remote-server requires explicit --admit-client for the selected root".into());
     }
-    let root = root.canonicalize().map_err(|e| e.to_string())?;
+    let root = dunce::canonicalize(&root).map_err(|e| e.to_string())?;
     if !root.is_dir() {
         return Err("Choose an existing remote directory".into());
     }
@@ -694,7 +692,7 @@ mod tests {
     #[test]
     fn admission_and_cancel_are_required_before_any_mutation() {
         let root = tempfile::tempdir().unwrap();
-        let root = root.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(root.path()).unwrap();
         let mut session = Session {
             root: root.clone(),
             admitted: false,
@@ -757,7 +755,7 @@ mod tests {
         std::fs::write(outside.path().join("secret.py"), "secret=1").unwrap();
         std::os::unix::fs::symlink(outside.path(), root.path().join("linked")).unwrap();
         let session = Session {
-            root: root.path().canonicalize().unwrap(),
+            root: dunce::canonicalize(root.path()).unwrap(),
             admitted: true,
             python: (3, 12),
             forwards: HashMap::new(),
@@ -770,7 +768,7 @@ mod tests {
         let root = tempfile::tempdir().unwrap();
         std::fs::write(root.path().join("a.py"), "value=1\n").unwrap();
         let mut session = Session {
-            root: root.path().canonicalize().unwrap(),
+            root: dunce::canonicalize(root.path()).unwrap(),
             admitted: true,
             python: (3, 12),
             forwards: HashMap::new(),
@@ -800,7 +798,7 @@ mod tests {
         )
         .unwrap();
         let session = Session {
-            root: root.path().canonicalize().unwrap(),
+            root: dunce::canonicalize(root.path()).unwrap(),
             admitted: true,
             python: (3, 12),
             forwards: HashMap::new(),

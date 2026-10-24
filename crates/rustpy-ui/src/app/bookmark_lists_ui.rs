@@ -162,7 +162,7 @@ impl IdeApp {
         } else {
             return false;
         };
-        let path = match path.canonicalize() {
+        let path = match dunce::canonicalize(path) {
             Ok(path) => path,
             Err(_) => return false,
         };

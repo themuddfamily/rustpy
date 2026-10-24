@@ -140,14 +140,13 @@ impl IdeApp {
             self.collaboration.notice = "Share a saved project text file".into();
             return;
         };
-        let allowed = path
-            .canonicalize()
+        let allowed = dunce::canonicalize(path)
             .ok()
             .zip(
                 self.collaboration
                     .root
                     .as_ref()
-                    .and_then(|root| root.canonicalize().ok()),
+                    .and_then(|root| dunce::canonicalize(root).ok()),
             )
             .is_some_and(|(file, root)| file.starts_with(root));
         if !allowed
@@ -229,14 +228,12 @@ impl IdeApp {
                                 |(identity, path)| {
                                     *identity == t.state.doc.identity()
                                         && t.state.path.as_ref() == Some(path)
-                                        && path
-                                            .canonicalize()
+                                        && dunce::canonicalize(path)
                                             .ok()
                                             .zip(
-                                                self.collaboration
-                                                    .root
-                                                    .as_ref()
-                                                    .and_then(|root| root.canonicalize().ok()),
+                                                self.collaboration.root.as_ref().and_then(|root| {
+                                                    dunce::canonicalize(root).ok()
+                                                }),
                                             )
                                             .is_some_and(|(file, root)| file.starts_with(root))
                                 },

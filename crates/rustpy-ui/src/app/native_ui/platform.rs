@@ -108,8 +108,7 @@ fn checked_provider(path: &Path) -> Result<String, String> {
             "Choose an absolute native dialog executable path without control characters".into(),
         );
     }
-    let canonical = path
-        .canonicalize()
+    let canonical = dunce::canonicalize(path)
         .map_err(|_| "The configured native dialog executable is unavailable")?;
     let metadata = canonical
         .metadata()

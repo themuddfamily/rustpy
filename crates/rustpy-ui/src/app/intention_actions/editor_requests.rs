@@ -300,14 +300,13 @@ impl IdeApp {
             .ok_or("Open a project first")?
             .root
             .clone();
-        let root_real = root.canonicalize().map_err(|error| error.to_string())?;
+        let root_real = dunce::canonicalize(&root).map_err(|error| error.to_string())?;
         let target = root.join("requirements.txt");
         match std::fs::symlink_metadata(&target) {
             Ok(metadata) => {
                 if metadata.file_type().is_symlink()
                     || !metadata.is_file()
-                    || !target
-                        .canonicalize()
+                    || !dunce::canonicalize(&target)
                         .map_err(|error| error.to_string())?
                         .starts_with(&root_real)
                 {

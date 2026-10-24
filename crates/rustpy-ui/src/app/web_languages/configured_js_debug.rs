@@ -120,15 +120,14 @@ fn configured_web_debug_launch_hits_real_node_breakpoint_variables_continue_and_
     let config = PathBuf::from(
         std::env::var_os("RUSTPY_CONFIG_DIR").expect("explicit private profile required"),
     );
-    let canonical_config = config
-        .canonicalize()
-        .expect("private profile must already exist");
+    let canonical_config =
+        dunce::canonicalize(&config).expect("private profile must already exist");
     // The profile must be a throwaway one: under the system temp directory or
     // under an explicitly named test profile root, never a real user profile.
     let allowed_roots: Vec<PathBuf> = std::iter::once(std::env::temp_dir())
         .chain(std::env::var_os("RUSTPY_TEST_PROFILE_ROOT").map(PathBuf::from))
         .filter(|root| root.is_absolute())
-        .filter_map(|root| root.canonicalize().ok())
+        .filter_map(|root| dunce::canonicalize(&root).ok())
         .collect();
     assert!(
         config.is_absolute()

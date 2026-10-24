@@ -19,7 +19,7 @@ pub fn validate(path: &Path) -> Result<PathBuf, String> {
                 if !metadata.is_dir() {
                     return Err("Project directory has a non-directory ancestor".into());
                 }
-                let mut canonical = ancestor.canonicalize().map_err(|e| e.to_string())?;
+                let mut canonical = dunce::canonicalize(ancestor).map_err(|e| e.to_string())?;
                 for name in missing.iter().rev() {
                     canonical.push(name);
                 }

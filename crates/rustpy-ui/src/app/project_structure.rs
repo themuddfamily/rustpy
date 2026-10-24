@@ -72,9 +72,8 @@ fn parse_content_root(
         None if Path::new(raw).is_absolute() => PathBuf::from(raw),
         None => project.join(raw),
     };
-    let path = path
-        .canonicalize()
-        .map_err(|_| format!("{} does not exist", path.display()))?;
+    let path =
+        dunce::canonicalize(&path).map_err(|_| format!("{} does not exist", path.display()))?;
     if !path.is_dir() {
         return Err(format!("{} is not a folder", path.display()));
     }
@@ -744,8 +743,8 @@ mod tests {
         for d in ["app/tests/unit", "app/src", "shared/lib", "app/.git"] {
             std::fs::create_dir_all(base.join(d)).unwrap();
         }
-        let root = root.canonicalize().unwrap();
-        let shared = base.join("shared").canonicalize().unwrap();
+        let root = dunce::canonicalize(&root).unwrap();
+        let shared = dunce::canonicalize(base.join("shared")).unwrap();
         let mut model = ProjectModel::default();
         assert_eq!(
             parse_content_root("../shared", &root, &model),

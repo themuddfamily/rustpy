@@ -74,7 +74,7 @@ impl IdeApp {
             return Err("Module destination is outside the project".into());
         }
         let parent = path.parent().ok_or("Module has no parent directory")?;
-        let canonical_root = root.canonicalize().map_err(|error| error.to_string())?;
+        let canonical_root = dunce::canonicalize(&root).map_err(|error| error.to_string())?;
         // Validate every existing ancestor BEFORE any filesystem mutation. A
         // project-relative spelling must not traverse a symlink outside it.
         let mut current = root.clone();
@@ -86,7 +86,8 @@ impl IdeApp {
             current.push(component);
             match std::fs::symlink_metadata(&current) {
                 Ok(_) => {
-                    let resolved = current.canonicalize().map_err(|error| error.to_string())?;
+                    let resolved =
+                        dunce::canonicalize(&current).map_err(|error| error.to_string())?;
                     if !resolved.starts_with(&canonical_root) || !resolved.is_dir() {
                         return Err(
                             "Module parent resolves outside the project or is not a directory"

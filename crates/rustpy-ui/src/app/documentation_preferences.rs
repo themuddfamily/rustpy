@@ -133,7 +133,7 @@ mod tests {
     #[test]
     fn project_docstring_style_and_doc_analysis_policy_apply_to_real_consumers() {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let path = root.join("module.py");
         let source = "def f(value):\n    return value\n";
         std::fs::write(&path, source).unwrap();

@@ -296,7 +296,7 @@ fn inspect_on_disk(db: &Analysis, path: &Path) -> Vec<Problem> {
 #[test]
 fn imports_found_only_relative_to_a_file_outside_project_roots_are_reported() {
     let tmp = tempfile::TempDir::with_prefix("module-not-on-path").unwrap();
-    let base = tmp.path().canonicalize().unwrap();
+    let base = dunce::canonicalize(tmp.path()).unwrap();
     write_tree(
         &base,
         &[
@@ -333,7 +333,7 @@ fn imports_found_only_relative_to_a_file_outside_project_roots_are_reported() {
 #[test]
 fn project_files_shadowing_library_modules_and_init_submodule_rebinds_are_reported() {
     let tmp = tempfile::TempDir::with_prefix("import-shadows-module").unwrap();
-    let base = tmp.path().canonicalize().unwrap();
+    let base = dunce::canonicalize(tmp.path()).unwrap();
     write_tree(
         &base,
         &[

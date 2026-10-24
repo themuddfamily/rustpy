@@ -243,8 +243,7 @@ impl LegacyDockerBuildResources {
         if !context.is_absolute() {
             return Err("Legacy build policy requires a resolved absolute local context".into());
         }
-        let context = context
-            .canonicalize()
+        let context = dunce::canonicalize(context)
             .map_err(|error| format!("Cannot resolve local build context: {error}"))?;
         if !context.is_dir() {
             return Err("Legacy build policy requires an existing local directory".into());
@@ -686,9 +685,8 @@ impl ConfigurationSpec {
                 if let Some(resources) = &self.legacy_docker_build_resources {
                     let working_dir = cfg.working_dir.as_deref().filter(|path| path.is_absolute())
                         .ok_or("Legacy build requires a captured project root or absolute working directory")?;
-                    let working_dir = working_dir
-                        .canonicalize()
-                        .map_err(|error| error.to_string())?;
+                    let working_dir =
+                        dunce::canonicalize(working_dir).map_err(|error| error.to_string())?;
                     command = resources.apply_at(&command, &working_dir)?;
                     result.working_dir = Some(working_dir);
                     result.env.insert("DOCKER_BUILDKIT".into(), "0".into());
@@ -1278,14 +1276,11 @@ mod legacy_build_policy_tests {
                 "rootless lowering must not guess IDE cwd"
             );
             let lowered = spec.materialize_at(&cfg, project.path()).unwrap();
-            let expected = relative
-                .as_ref()
-                .map_or_else(
-                    || project.path().to_path_buf(),
-                    |path| project.path().join(path),
-                )
-                .canonicalize()
-                .unwrap();
+            let expected = dunce::canonicalize(relative.as_ref().map_or_else(
+                || project.path().to_path_buf(),
+                |path| project.path().join(path),
+            ))
+            .unwrap();
             assert_eq!(lowered.working_dir.as_ref(), Some(&expected));
             let RunConfigKind::Program { args, .. } = lowered.kind else {
                 panic!()
@@ -1297,7 +1292,7 @@ mod legacy_build_policy_tests {
     fn local_context_is_verified_against_captured_directory() {
         let root = tempfile::tempdir().unwrap();
         std::fs::create_dir(root.path().join("context")).unwrap();
-        let expected = root.path().join("context").canonicalize().unwrap();
+        let expected = dunce::canonicalize(root.path().join("context")).unwrap();
         let args = vec!["build".into(), "context".into()];
         let relative = policy().apply_at(&args, root.path()).unwrap();
         assert_eq!(relative.last().unwrap(), expected.to_str().unwrap());

@@ -302,7 +302,7 @@ fn coverage_runs_script_when_coverage_is_installed() {
     assert!(run.error().is_none(), "{:?} / {output:?}", run.error());
     assert!(output.iter().any(|(l, _)| l == "args: []"), "{output:?}");
     let report = run.report().expect("coverage report");
-    let canonical = script.canonicalize().unwrap_or(script.clone());
+    let canonical = dunce::canonicalize(&script).unwrap_or(script.clone());
     let f = report
         .files
         .iter()
@@ -358,7 +358,7 @@ fn file_of<'a>(
     report: &'a rustpy_run::CoverageReport,
     script: &Path,
 ) -> &'a rustpy_run::FileCoverage {
-    let canonical = script.canonicalize().unwrap_or(script.to_path_buf());
+    let canonical = dunce::canonicalize(script).unwrap_or(script.to_path_buf());
     report
         .files
         .iter()

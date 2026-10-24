@@ -529,7 +529,7 @@ fn fastapi_response_model_must_be_a_type_compatible_with_the_return_annotation()
     let header = "from fastapi import FastAPI\nfrom pydantic import BaseModel\napp = FastAPI()\nclass Item(BaseModel):\n    name: str\nclass Detailed(Item):\n    extra: int\nclass User(BaseModel):\n    email: str\nclass Plain:\n    pass\ndef helper():\n    return 1\n";
     // Route identities need the framework classes from an installed library.
     let tmp = tempfile::TempDir::with_prefix("fastapi-response-model").unwrap();
-    let base = tmp.path().canonicalize().unwrap();
+    let base = dunce::canonicalize(tmp.path()).unwrap();
     for (path, text) in [
         (
             "site/fastapi/__init__.py",
@@ -596,7 +596,7 @@ fn fastapi_response_model_must_be_a_type_compatible_with_the_return_annotation()
 #[test]
 fn fastapi_response_model_resolves_real_package_layout_inside_project_venv() {
     let tmp = tempfile::TempDir::with_prefix("fastapi-real-layout").unwrap();
-    let base = tmp.path().canonicalize().unwrap();
+    let base = dunce::canonicalize(tmp.path()).unwrap();
     let project = base.join("proj");
     write_real_web_layout(&project.join(".venv"));
     assert_real_fastapi_routes(
@@ -612,7 +612,7 @@ fn fastapi_response_model_resolves_real_package_layout_inside_project_venv() {
 #[test]
 fn web_routes_resolve_real_package_layout_in_symlinked_project_venv() {
     let tmp = tempfile::TempDir::with_prefix("fastapi-symlinked-venv").unwrap();
-    let base = tmp.path().canonicalize().unwrap();
+    let base = dunce::canonicalize(tmp.path()).unwrap();
     let project = base.join("proj");
     write_real_web_layout(&base.join("venv"));
     std::fs::create_dir_all(&project).unwrap();

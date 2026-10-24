@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn generated_cache_ownership_uses_normalized_component_boundaries() {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let cache = root.join(".stubs");
         std::fs::create_dir(&cache).unwrap();
         let stubs = StubDir::new(cache.clone());
@@ -182,7 +182,7 @@ mod tests {
     fn generated_cache_ownership_resolves_aliases_but_not_links_to_user_stubs() {
         use std::os::unix::fs::symlink;
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let cache = root.join("typeshed");
         std::fs::create_dir(&cache).unwrap();
         let alias = root.join("cache-alias");

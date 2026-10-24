@@ -124,7 +124,7 @@ impl Drop for Temporary {
     }
 }
 fn publish(root: &Path, ending: LineEnding) -> io::Result<()> {
-    let root = root.canonicalize()?;
+    let root = dunce::canonicalize(root)?;
     let path = root.join(".editorconfig");
     let _lock = ConfigLock::acquire(&root)?;
     let existing = read_existing(&path)?;

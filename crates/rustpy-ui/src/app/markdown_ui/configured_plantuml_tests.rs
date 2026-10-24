@@ -268,12 +268,12 @@ fn configured_plantuml_current_buffer_renders_real_svg_and_browser_pixels() {
         "RUSTPY_BROWSER_TEST_PYTHON",
         "RUSTPY_BROWSER_TEST_PYTHON_SHA256",
     );
-    let temporary = PathBuf::from(required("TMPDIR")).canonicalize().unwrap();
+    let temporary = dunce::canonicalize(PathBuf::from(required("TMPDIR"))).unwrap();
     for name in ["RUSTPY_CONFIG_DIR", "RUSTPY_SYSTEM_DIR", "RUSTPY_LOG_DIR"] {
         let path = PathBuf::from(required(name));
         assert!(path.is_absolute() && path.starts_with(&temporary));
         std::fs::create_dir_all(&path).unwrap();
-        assert!(path.canonicalize().unwrap().starts_with(&temporary));
+        assert!(dunce::canonicalize(&path).unwrap().starts_with(&temporary));
     }
     let directory = tempfile::Builder::new()
         .prefix("actual-plantuml-")
@@ -385,8 +385,8 @@ fn configured_plantuml_current_buffer_renders_real_svg_and_browser_pixels() {
         .expect("real Java process");
     let server_start = identity(server_pid).unwrap();
     assert_eq!(
-        std::fs::canonicalize(format!("/proc/{server_pid}/exe")).unwrap(),
-        java.canonicalize().unwrap()
+        dunce::canonicalize(format!("/proc/{server_pid}/exe")).unwrap(),
+        dunce::canonicalize(&java).unwrap()
     );
     let deadline = Instant::now() + Duration::from_secs(30);
     while !owns_listener(server_pid, &server_start, port) {

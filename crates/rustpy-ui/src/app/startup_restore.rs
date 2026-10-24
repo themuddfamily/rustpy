@@ -100,7 +100,7 @@ pub(crate) struct PreparedStartupProject {
 
 impl IdeApp {
     pub(crate) fn prepare_startup_project(root: &Path) -> Result<PreparedStartupProject, String> {
-        let root = std::fs::canonicalize(root).map_err(|error| error.to_string())?;
+        let root = dunce::canonicalize(root).map_err(|error| error.to_string())?;
         if !root.is_dir() {
             return Err("Restored project is not a directory".into());
         }

@@ -68,7 +68,7 @@ pub fn fingerprint_file(path: &Path, cancel: &CancellationToken) -> Result<Strin
     use std::fs::OpenOptions;
     cancel.check()?;
     ensure!(
-        fs::canonicalize(path)? == path,
+        dunce::canonicalize(path)? == path,
         "noncanonical fingerprint path"
     );
     let before = fs::symlink_metadata(path)?;
@@ -253,15 +253,15 @@ pub fn produce(request: &Request, cancel: &CancellationToken) -> Result<Artifact
         "qualified module name required"
     );
     ensure!(
-        fs::canonicalize(&request.interpreter)? == request.interpreter,
+        dunce::canonicalize(&request.interpreter)? == request.interpreter,
         "noncanonical interpreter"
     );
     ensure!(
-        fs::canonicalize(&request.module_path)? == request.module_path,
+        dunce::canonicalize(&request.module_path)? == request.module_path,
         "noncanonical module"
     );
     ensure!(
-        fs::canonicalize(&request.library_root)? == request.library_root
+        dunce::canonicalize(&request.library_root)? == request.library_root
             && request.module_path.starts_with(&request.library_root),
         "module outside canonical admitted library root"
     );
@@ -470,7 +470,7 @@ mod documentation_source_tests {
         let Ok(python) = which::which("python3") else {
             return;
         };
-        let Ok(python) = python.canonicalize() else {
+        let Ok(python) = dunce::canonicalize(&python) else {
             return;
         };
         let cancel = CancellationToken::new();
@@ -482,7 +482,7 @@ mod documentation_source_tests {
         let Some(module_path) = value["path"].as_str() else {
             return;
         };
-        let module = fs::canonicalize(module_path).unwrap();
+        let module = dunce::canonicalize(module_path).unwrap();
         let artifact = prepare_and_produce(
             &python,
             value["version"].as_str().unwrap(),

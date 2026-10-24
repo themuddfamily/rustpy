@@ -789,7 +789,7 @@ fn sort_keys(value: Value) -> Value {
 /// allow this (no write access to it, a file locked on Windows) the file is written in place, but
 /// never after writing the data failed: that is the case the original must survive.
 fn write_file(path: &Path, bytes: &[u8]) -> io::Result<()> {
-    let target = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+    let target = dunce::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
     // Fail where writing in place would (a read-only notebook, a directory): a rename would not.
     let permissions = match std::fs::OpenOptions::new().write(true).open(&target) {
         Ok(existing) => Some(existing.metadata()?.permissions()),

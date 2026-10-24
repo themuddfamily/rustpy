@@ -955,7 +955,7 @@ impl IdeApp {
         {
             return false;
         }
-        let path = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+        let path = dunce::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
         if let Some(i) = self.tab_of(&path) {
             self.active = Some(i);
             self.focus_editor = true;
@@ -1728,7 +1728,7 @@ mod tests {
     #[test]
     fn legacy_index_and_remap_reject_results_from_replaced_analysis_same_root() {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let manager = TaskManager::new();
         let old = Arc::new(Analysis::for_project(&root));
         let current = Arc::new(Analysis::for_project(&root));

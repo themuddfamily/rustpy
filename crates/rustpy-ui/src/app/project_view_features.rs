@@ -1268,7 +1268,7 @@ impl IdeApp {
         let project = self.project.as_ref().ok_or("No project")?;
         let root = project.root.clone();
         let analysis = project.analysis.clone();
-        let target = std::fs::canonicalize(target).map_err(|error| error.to_string())?;
+        let target = dunce::canonicalize(target).map_err(|error| error.to_string())?;
         if !target.is_dir() {
             return Err("Destination is not a directory".into());
         }

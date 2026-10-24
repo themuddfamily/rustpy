@@ -384,11 +384,11 @@ impl IdeApp {
             .or(active_path.as_ref())
             .ok_or("Select a native library module first")?;
         let module_path =
-            std::fs::canonicalize(target).map_err(|_| "Native module is unavailable")?;
+            dunce::canonicalize(target).map_err(|_| "Native module is unavailable")?;
         let library_root = interpreter
             .sys_path
             .iter()
-            .filter_map(|root| std::fs::canonicalize(root).ok())
+            .filter_map(|root| dunce::canonicalize(root).ok())
             .filter(|root| root != &project.root && module_path.starts_with(root))
             .max_by_key(|root| root.components().count())
             .ok_or("The module must belong to the selected interpreter library")?;
@@ -416,7 +416,7 @@ impl IdeApp {
         Ok(Capture {
             project: project.root.clone(),
             analysis: project.analysis.clone(),
-            interpreter: std::fs::canonicalize(&interpreter.path)
+            interpreter: dunce::canonicalize(&interpreter.path)
                 .map_err(|_| "Interpreter is unavailable")?,
             version: interpreter.version.clone(),
             library_root,
@@ -472,11 +472,11 @@ impl IdeApp {
                         project.root == job.capture.project
                             && Arc::ptr_eq(&project.analysis, &job.capture.analysis)
                             && project.interpreter.as_ref().is_some_and(|interpreter| {
-                                std::fs::canonicalize(&interpreter.path)
+                                dunce::canonicalize(&interpreter.path)
                                     .is_ok_and(|path| path == job.capture.interpreter)
                                     && interpreter.version == job.capture.version
                                     && interpreter.sys_path.iter().any(|root| {
-                                        std::fs::canonicalize(root)
+                                        dunce::canonicalize(root)
                                             .is_ok_and(|root| root == job.capture.library_root)
                                     })
                             })

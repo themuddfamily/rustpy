@@ -885,7 +885,7 @@ fn bundle_path_from_input(input: &str, existing: &[TextMateBundle]) -> Result<Pa
     if !path.exists() {
         return Err(format!("{} does not exist", path.display()));
     }
-    let path = path.canonicalize().unwrap_or(path);
+    let path = dunce::canonicalize(&path).unwrap_or(path);
     if existing.iter().any(|b| b.path == path) {
         return Err(format!("{} is already in the list", path.display()));
     }
@@ -1627,7 +1627,7 @@ mod tests {
                 .ends_with("does not exist")
         );
         let path = bundle_path_from_input(&format!(" {} ", dir.display()), &[]).unwrap();
-        assert_eq!(path, dir.canonicalize().unwrap());
+        assert_eq!(path, dunce::canonicalize(&dir).unwrap());
         assert!(
             bundle_path_from_input(&dir.display().to_string(), &[bundle(&path)])
                 .unwrap_err()

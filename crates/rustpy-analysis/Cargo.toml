@@ -7,6 +7,7 @@ rust-version.workspace = true
 description = "RustPy IDE: inspections, quick fixes and code intentions"
 
 [dependencies]
+dunce.workspace = true
 rustpy-search.workspace = true
 rustpy-core.workspace = true
 rustpy-project.workspace = true

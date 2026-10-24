@@ -307,10 +307,9 @@ impl IdeApp {
                     .is_some_and(|tab| {
                         tab.state.path.as_ref().is_some_and(|current| {
                             current == &path
-                                || current
-                                    .canonicalize()
+                                || dunce::canonicalize(current)
                                     .ok()
-                                    .zip(path.canonicalize().ok())
+                                    .zip(dunce::canonicalize(&path).ok())
                                     .is_some_and(|(left, right)| left == right)
                         }) && source.line <= tab.state.doc.line_count()
                             && source.column.is_none_or(|column| {

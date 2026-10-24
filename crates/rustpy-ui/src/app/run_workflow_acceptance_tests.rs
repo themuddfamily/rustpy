@@ -212,10 +212,8 @@ fn assert_chain(fixture: &Fixture) {
             fixture.python.to_str().unwrap()
         );
         assert_eq!(
-            PathBuf::from(event["cwd"].as_str().unwrap())
-                .canonicalize()
-                .unwrap(),
-            fixture.root.path().join("cwd π").canonicalize().unwrap()
+            dunce::canonicalize(PathBuf::from(event["cwd"].as_str().unwrap())).unwrap(),
+            dunce::canonicalize(fixture.root.path().join("cwd π")).unwrap()
         );
         assert_reaped(event["pid"].as_u64().unwrap());
     }

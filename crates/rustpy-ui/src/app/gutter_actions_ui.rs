@@ -330,7 +330,7 @@ mod tests {
     #[test]
     fn actual_flags_off_project_publishes_and_readonly_override_navigates() {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let path = root.join("main.py");
         let source="class Base:\n    def work(self):\n        return 1\nclass Child(Base):\n    def work(self):\n        return 2\n";
         std::fs::write(&path, source).unwrap();
@@ -398,7 +398,7 @@ mod tests {
     fn initial_readonly_open_uses_normal_analysis_lifecycle_and_worker_snapshot() {
         use std::os::unix::fs::PermissionsExt;
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let path = root.join("main.py");
         let source="class Base:\n    def work(self):\n        return 1\nclass Child(Base):\n    def work(self):\n        return 2\n";
         std::fs::write(&path, source).unwrap();

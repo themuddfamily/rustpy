@@ -637,9 +637,7 @@ fn configured_ipython_magic_help_and_completion_share_live_namespace() {
     let (value, error, more, _, _) = wait_result(&mut session, request);
     assert!(error.is_none() && !more, "{error:?}");
     assert!(value.unwrap_or_default().contains(
-        &directory
-            .path()
-            .canonicalize()
+        &dunce::canonicalize(directory.path())
             .unwrap()
             .to_string_lossy()
             .to_string()

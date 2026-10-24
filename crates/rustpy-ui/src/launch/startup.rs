@@ -405,7 +405,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             startup.app.actual_current_project_root(),
-            Some(project.canonicalize().unwrap().as_path())
+            Some(dunce::canonicalize(&project).unwrap().as_path())
         );
         assert_eq!(startup.owner.token().owner(), &original_owner);
         assert!(startup.restore.awaiting_confirmation());

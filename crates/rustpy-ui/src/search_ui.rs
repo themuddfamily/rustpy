@@ -2191,7 +2191,7 @@ mod tests {
                 std::fs::create_dir_all(p.parent().unwrap()).unwrap();
                 std::fs::write(p, text).unwrap();
             }
-            Self(dir.canonicalize().unwrap())
+            Self(dunce::canonicalize(&dir).unwrap())
         }
     }
 

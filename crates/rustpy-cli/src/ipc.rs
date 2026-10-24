@@ -1683,7 +1683,7 @@ pub fn absolute_targets(targets: &[OpenTarget], cwd: &Path) -> Vec<OpenTarget> {
                 cwd.join(&t.path)
             };
             OpenTarget {
-                path: joined.canonicalize().unwrap_or(joined),
+                path: dunce::canonicalize(&joined).unwrap_or(joined),
                 line: t.line,
                 column: t.column,
             }
@@ -2694,7 +2694,7 @@ mod tests {
         assert_eq!(
             t[0],
             OpenTarget {
-                path: dir.path().join("a.py").canonicalize().unwrap(),
+                path: dunce::canonicalize(dir.path().join("a.py")).unwrap(),
                 line: Some(2),
                 column: None
             }
@@ -2938,7 +2938,7 @@ mod native_project_host_fixtures {
             _ => panic!("Fresh router lease"),
         };
         router.become_native_project_router().unwrap();
-        let config = directory.path().canonicalize().unwrap();
+        let config = dunce::canonicalize(directory.path()).unwrap();
         let args = crate::args::OpenArgs {
             new_window: true,
             wait: true,

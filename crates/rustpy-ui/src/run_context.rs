@@ -637,7 +637,7 @@ if __name__ == "__main__":
             let p =
                 std::env::temp_dir().join(format!("rustpy-ui-{tag}-{}-{n}", std::process::id()));
             std::fs::create_dir_all(&p).unwrap();
-            ScratchDir(p.canonicalize().unwrap())
+            ScratchDir(dunce::canonicalize(&p).unwrap())
         }
     }
 

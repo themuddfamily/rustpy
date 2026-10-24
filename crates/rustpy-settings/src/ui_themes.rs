@@ -132,12 +132,9 @@ pub fn path(config: &Path, id: &str) -> Result<PathBuf, String> {
 
 pub fn load(config: &Path, id: &str) -> Result<Theme, String> {
     let p = path(config, id)?;
-    let root = directory(config)
-        .canonicalize()
+    let root = dunce::canonicalize(directory(config))
         .map_err(|e| format!("{}: {e}", directory(config).display()))?;
-    let resolved = p
-        .canonicalize()
-        .map_err(|e| format!("{}: {e}", p.display()))?;
+    let resolved = dunce::canonicalize(&p).map_err(|e| format!("{}: {e}", p.display()))?;
     if resolved.parent() != Some(root.as_path()) {
         return Err("UI theme file resolves outside the themes directory".into());
     }

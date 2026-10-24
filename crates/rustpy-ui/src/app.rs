@@ -1431,7 +1431,7 @@ impl IdeApp {
         root: &Path,
         prepared: Option<startup_restore::PreparedStartupProject>,
     ) {
-        let root = root.canonicalize().unwrap_or_else(|_| root.to_path_buf());
+        let root = dunce::canonicalize(root).unwrap_or_else(|_| root.to_path_buf());
         // Unsaved edits are saved first; edits that cannot be saved stop the switch.
         if !self.save_before_switching(&root) {
             return;
@@ -1781,7 +1781,7 @@ impl IdeApp {
             self.open_virtual(path);
             return;
         }
-        let path = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+        let path = dunce::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
         if let Some(i) = self
             .tabs
             .iter()

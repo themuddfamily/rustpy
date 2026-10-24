@@ -186,7 +186,7 @@ mod provider_fixture {
     }
 
     pub(super) fn provision(directory: &Path, body: &str) -> PathBuf {
-        let directory = std::fs::canonicalize(directory).unwrap();
+        let directory = dunce::canonicalize(directory).unwrap();
         let bytes = format!("#!/bin/sh\n{body}\n");
         let nonce = directory
             .file_name()

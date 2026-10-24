@@ -72,7 +72,7 @@ fn normalize_path_inner(path: &Path, depth: usize) -> PathBuf {
     }
     let mut prefix = absolute.as_path();
     let mut suffix = Vec::new();
-    while std::fs::canonicalize(prefix).is_err() {
+    while dunce::canonicalize(prefix).is_err() {
         let Some(name) = prefix.file_name() else {
             break;
         };
@@ -80,7 +80,7 @@ fn normalize_path_inner(path: &Path, depth: usize) -> PathBuf {
         let Some(parent) = prefix.parent() else { break };
         prefix = parent;
     }
-    let mut result = std::fs::canonicalize(prefix).unwrap_or_else(|_| prefix.to_path_buf());
+    let mut result = dunce::canonicalize(prefix).unwrap_or_else(|_| prefix.to_path_buf());
     for name in suffix.into_iter().rev() {
         result.push(name);
     }

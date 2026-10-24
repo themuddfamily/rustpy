@@ -154,8 +154,8 @@ impl Fixture {
             .kernel_executable()
             .expect("kernel reports its interpreter");
         assert_eq!(
-            std::fs::canonicalize(executable).unwrap(),
-            std::fs::canonicalize(python).unwrap(),
+            dunce::canonicalize(executable).unwrap(),
+            dunce::canonicalize(python).unwrap(),
             "the registered kernel must use the admitted interpreter"
         );
         if kind == "managed" {
@@ -437,8 +437,8 @@ fn configured_local_debug_cell_hits_real_breakpoint_stack_continue_and_result() 
                 let captured = identity(pid).expect("logged actual adapter must still be alive");
                 let executable = std::fs::read_link(format!("/proc/{pid}/exe")).unwrap();
                 assert_eq!(
-                    executable.canonicalize().unwrap(),
-                    std::fs::canonicalize(fixture.runner.kernel_executable().unwrap()).unwrap()
+                    dunce::canonicalize(&executable).unwrap(),
+                    dunce::canonicalize(fixture.runner.kernel_executable().unwrap()).unwrap()
                 );
                 let command = std::fs::read(format!("/proc/{pid}/cmdline")).unwrap();
                 let arguments: Vec<_> = command

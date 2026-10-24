@@ -457,7 +457,7 @@ fn describe(i: &Interpreter) -> Value {
 }
 
 fn same_dir(a: &Path, b: &Path) -> bool {
-    match (a.canonicalize(), b.canonicalize()) {
+    match (dunce::canonicalize(a), dunce::canonicalize(b)) {
         (Ok(a), Ok(b)) => a == b,
         _ => false,
     }

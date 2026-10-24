@@ -61,7 +61,7 @@ pub fn scratch_dir() -> PathBuf {
 /// Whether `path` is a scratch file (or the scratches folder).
 pub fn is_scratch(path: &Path) -> bool {
     let dir = scratch_dir();
-    path.starts_with(&dir) || dir.canonicalize().is_ok_and(|d| path.starts_with(d))
+    path.starts_with(&dir) || dunce::canonicalize(&dir).is_ok_and(|d| path.starts_with(d))
 }
 
 /// The first free name of `stem.ext`, `stem_1.ext`, `stem_2.ext`, … in `dir`.

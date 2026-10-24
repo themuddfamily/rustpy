@@ -1207,7 +1207,7 @@ mod tests {
     #[test]
     fn plans_targets_and_keywords() {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         std::fs::create_dir_all(root.join("tests")).unwrap();
         std::fs::write(root.join("tests/test_b.py"), "from twisted.trial import unittest\nclass B(unittest.TestCase):\n    def test_y(self):\n        pass\n    def test_z(self):\n        pass\n").unwrap();
         std::fs::write(

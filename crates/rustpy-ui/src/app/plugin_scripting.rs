@@ -662,7 +662,7 @@ mod configured_execution_tests {
     #[ignore = "explicit real RUSTPY_PROVIDER_PYTHON and serial isolated App config required"]
     fn configured_actual_python_ide_api_publishes_actions_diagnostics_completion_and_undo() {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let mut app = app(&root);
         let index = app.active.unwrap();
         let ctx = egui::Context::default();
@@ -768,7 +768,7 @@ print('Actual Python transcript π')
     #[ignore = "explicit real Python SDK; actual stale publication, revocation and owned descendant retirement"]
     fn configured_actual_python_stale_result_and_revocation_retire_physical_owners() {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let mut app = app(&root);
         let index = app.active.unwrap();
         let ctx = egui::Context::default();

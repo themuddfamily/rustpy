@@ -52,7 +52,7 @@ fn private_env(name: &str, root: &Path) {
     let path = PathBuf::from(std::env::var_os(name).expect(name));
     assert!(path.is_absolute() && path.is_dir());
     assert!(
-        path.canonicalize().unwrap().starts_with(root),
+        dunce::canonicalize(&path).unwrap().starts_with(root),
         "{name} must be privately owned"
     );
 }
@@ -68,7 +68,7 @@ fn configured_pipenv_hatch_pdm_create_probe_reuse_and_persist_private_environmen
     let parent =
         PathBuf::from(std::env::var_os("RUSTPY_ADDITIONAL_MANAGER_ROOT").expect("private root"));
     assert!(parent.is_absolute() && parent.is_dir());
-    let parent = parent.canonicalize().unwrap();
+    let parent = dunce::canonicalize(&parent).unwrap();
     for name in [
         "XDG_CONFIG_HOME",
         "XDG_CACHE_HOME",
@@ -126,7 +126,9 @@ fn configured_pipenv_hatch_pdm_create_probe_reuse_and_persist_private_environmen
         let (created, progress) = finish(&mut task);
         assert!(created.is_venv && !created.version.is_empty() && !created.sys_path.is_empty());
         assert!(
-            created.prefix.canonicalize().unwrap().starts_with(&parent),
+            dunce::canonicalize(&created.prefix)
+                .unwrap()
+                .starts_with(&parent),
             "manager must not select/mutate an ambient SDK"
         );
         assert_ne!(created.path, base);

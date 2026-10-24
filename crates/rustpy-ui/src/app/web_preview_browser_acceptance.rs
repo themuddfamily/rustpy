@@ -469,8 +469,8 @@ fn acceptance(kind: Kind, variable: &str, protocol: Protocol) {
     let detected = browser::detect_program(&stock)
         .unwrap_or_else(|| panic!("{} not detected on PATH", stock.program));
     assert_eq!(
-        detected.canonicalize().unwrap().parent(),
-        binary.canonicalize().unwrap().parent(),
+        dunce::canonicalize(&detected).unwrap().parent(),
+        dunce::canonicalize(&binary).unwrap().parent(),
         "detected {} is not the admitted installation",
         detected.display()
     );
@@ -546,8 +546,8 @@ fn acceptance(kind: Kind, variable: &str, protocol: Protocol) {
     let port = await_port(&mut app, 0, protocol, &profile);
     let pid = app.run_panel.sessions[0].process_id().unwrap();
     assert_eq!(
-        std::fs::canonicalize(format!("/proc/{pid}/exe")).unwrap(),
-        binary.canonicalize().unwrap()
+        dunce::canonicalize(format!("/proc/{pid}/exe")).unwrap(),
+        dunce::canonicalize(&binary).unwrap()
     );
     eprintln!(
         "Actual configured browser launch: {}",

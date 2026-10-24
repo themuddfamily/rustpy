@@ -114,9 +114,9 @@ pub fn with_project_packages(mut interpreter: Interpreter, root: &Path) -> Inter
     };
     let same = |a: &Path, b: &Path| {
         a == b
-            || a.canonicalize()
+            || dunce::canonicalize(a)
                 .ok()
-                .is_some_and(|a| b.canonicalize().ok() == Some(a))
+                .is_some_and(|a| dunce::canonicalize(b).ok() == Some(a))
     };
     if kind != PDM_PEP582_KIND || interpreter.is_venv || !same(&python, &interpreter.path) {
         return interpreter;

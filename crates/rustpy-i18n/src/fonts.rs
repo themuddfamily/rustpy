@@ -461,7 +461,7 @@ fn scan(dirs: &[PathBuf]) -> Vec<Candidate> {
                 continue;
             };
             let canonical =
-                std::fs::canonicalize(entry.path()).unwrap_or_else(|_| entry.path().to_path_buf());
+                dunce::canonicalize(entry.path()).unwrap_or_else(|_| entry.path().to_path_buf());
             if seen.insert(canonical) {
                 out.push(Candidate {
                     path: entry.into_path(),

@@ -81,7 +81,7 @@ pub fn canonical_directory(path: &Path) -> std::io::Result<PathBuf> {
             "Select an existing absolute directory",
         ));
     }
-    path.canonicalize()
+    dunce::canonicalize(path)
 }
 
 /// Stored authorities are canonical paths, never project-controlled aliases.
@@ -117,7 +117,7 @@ mod fixtures {
     #[test]
     fn missing_relative_and_component_prefixes_never_grant_trust() {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let safe = root.join("safe");
         let sibling = root.join("safe-other");
         std::fs::create_dir(&safe).unwrap();
@@ -134,7 +134,7 @@ mod fixtures {
     #[test]
     fn replacing_open_directory_at_same_spelling_revokes_live_identity() {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let project = root.join("project");
         std::fs::create_dir(&project).unwrap();
         let identity = DirectoryIdentity::capture(&project).unwrap();
@@ -148,7 +148,7 @@ mod fixtures {
     fn symlink_escape_and_replaced_authority_are_rejected() {
         use std::os::unix::fs::symlink;
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let safe = root.join("safe");
         let outside = root.join("outside");
         std::fs::create_dir(&safe).unwrap();

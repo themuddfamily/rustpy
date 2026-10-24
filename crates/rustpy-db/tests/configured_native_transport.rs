@@ -58,7 +58,7 @@ fn path(name: &str, root: Option<&Path>) -> PathBuf {
         value.is_absolute() && value.is_file(),
         "absolute existing {name} required"
     );
-    let value = value.canonicalize().unwrap();
+    let value = dunce::canonicalize(&value).unwrap();
     if let Some(root) = root {
         assert!(
             value.starts_with(root),
@@ -76,7 +76,7 @@ impl Policy {
         assert_eq!(required("RUSTPY_NATIVE_TRANSPORT_DISPOSABLE"), "yes");
         let root = PathBuf::from(required("RUSTPY_NATIVE_TRANSPORT_ROOT"));
         assert!(root.is_absolute() && root.is_dir());
-        let root = root.canonicalize().unwrap();
+        let root = dunce::canonicalize(&root).unwrap();
         let token = required("RUSTPY_NATIVE_TRANSPORT_TOKEN");
         assert!(!token.is_empty() && token.len() <= 128);
         let certificates = tempfile::tempdir_in(&root).unwrap();

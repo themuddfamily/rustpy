@@ -140,7 +140,7 @@ fn configured_private_ssh_notebook_cell_host_refusal_and_physical_retirement() {
     let daemon_executable = std::fs::read_link(format!("/proc/{}/exe", daemon.pid)).unwrap();
     assert_eq!(
         daemon_executable,
-        std::fs::canonicalize(&daemon_program).unwrap(),
+        dunce::canonicalize(&daemon_program).unwrap(),
         "live executable must match the admitted daemon"
     );
     let command = std::fs::read(format!("/proc/{}/cmdline", daemon.pid)).unwrap();

@@ -941,7 +941,7 @@ impl RunConfigStore {
 /// removed, or after resolving symbolic links when both exist.
 fn same_file(a: &Path, b: &Path) -> bool {
     lexical(a) == lexical(b)
-        || matches!((a.canonicalize(), b.canonicalize()), (Ok(x), Ok(y)) if x == y)
+        || matches!((dunce::canonicalize(a), dunce::canonicalize(b)), (Ok(x), Ok(y)) if x == y)
 }
 
 #[cfg(test)]

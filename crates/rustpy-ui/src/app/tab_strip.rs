@@ -1299,7 +1299,7 @@ mod tests {
             .map(|n| {
                 let p = dir.join(n);
                 std::fs::write(&p, format!("# {n}\n")).unwrap();
-                p.canonicalize().unwrap()
+                dunce::canonicalize(&p).unwrap()
             })
             .collect();
         (dir, paths)

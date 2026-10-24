@@ -43,7 +43,7 @@ impl IdeApp {
                 if !path.is_absolute() || !path.is_dir() {
                     self.settings_ui.message = Some("Choose an existing absolute directory".into());
                 } else {
-                    let path = path.canonicalize().unwrap_or(path);
+                    let path = dunce::canonicalize(&path).unwrap_or(path);
                     if !self.settings.python_stub_roots.contains(&path) {
                         self.settings.python_stub_roots.push(path);
                     }

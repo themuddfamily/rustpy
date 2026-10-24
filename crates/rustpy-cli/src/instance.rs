@@ -94,7 +94,7 @@ pub fn launch_admitted(
     admission: crate::window_admission::AdmissionLease,
 ) -> (Launch, Option<crate::window_admission::AdmissionLease>) {
     if admission.validate_identity().is_err()
-        || std::fs::canonicalize(config_dir).ok().as_deref() != Some(admission.configuration())
+        || dunce::canonicalize(config_dir).ok().as_deref() != Some(admission.configuration())
     {
         eprintln!("rustpy: startup admission does not match this configuration");
         return (Launch::Done(1), None);

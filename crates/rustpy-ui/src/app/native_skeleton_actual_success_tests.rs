@@ -23,15 +23,15 @@ fn actual_trusted_cpython_extension_action_publishes_verified_stub_and_revokes_o
     let config: Config = serde_json::from_slice(&std::fs::read(config_path).unwrap()).unwrap();
     let token = CancellationToken::new();
     assert_eq!(
-        std::fs::canonicalize(&config.interpreter).unwrap(),
+        dunce::canonicalize(&config.interpreter).unwrap(),
         config.interpreter
     );
     assert_eq!(
-        std::fs::canonicalize(&config.module_path).unwrap(),
+        dunce::canonicalize(&config.module_path).unwrap(),
         config.module_path
     );
     assert_eq!(
-        std::fs::canonicalize(&config.library_root).unwrap(),
+        dunce::canonicalize(&config.library_root).unwrap(),
         config.library_root
     );
     assert!(config.module_path.starts_with(&config.library_root));

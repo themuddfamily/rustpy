@@ -789,7 +789,7 @@ pub(super) fn spawn(
                         .as_nanos()
                 );
                 let directory = PrivateDirectory::new(&project)?;
-                let source = captured.1.join(&captured.2).canonicalize().map_err(|e|e.to_string())?;
+                let source = dunce::canonicalize(captured.1.join(&captured.2)).map_err(|e|e.to_string())?;
                 let project_dir = source.parent().ok_or("Compose file has no parent")?.to_path_buf();
                 if environment.get("DOCKER_CONTEXT").is_some_and(|value: &String|!value.is_empty()) {return Err("Isolated Compose requires explicit endpoint authority without DOCKER_CONTEXT override".into());}
                 let host=environment.get("DOCKER_HOST").filter(|value|!value.is_empty()).ok_or("Isolated Compose requires a captured explicit DOCKER_HOST")?.clone();

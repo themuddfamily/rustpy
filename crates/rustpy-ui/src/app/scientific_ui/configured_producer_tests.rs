@@ -31,14 +31,13 @@ impl Fixture {
             hash,
             std::env::var("RUSTPY_SCIENTIFIC_PYTHON_SHA256").unwrap()
         );
-        let temporary = PathBuf::from(std::env::var_os("TMPDIR").unwrap())
-            .canonicalize()
-            .unwrap();
+        let temporary =
+            dunce::canonicalize(PathBuf::from(std::env::var_os("TMPDIR").unwrap())).unwrap();
         for name in ["RUSTPY_CONFIG_DIR", "RUSTPY_SYSTEM_DIR", "RUSTPY_LOG_DIR"] {
             let path = PathBuf::from(std::env::var_os(name).expect(name));
             assert!(path.is_absolute() && path.starts_with(&temporary));
             std::fs::create_dir_all(&path).unwrap();
-            assert!(path.canonicalize().unwrap().starts_with(&temporary));
+            assert!(dunce::canonicalize(&path).unwrap().starts_with(&temporary));
         }
         let root = tempfile::Builder::new()
             .prefix("scientific-λ-")

@@ -630,7 +630,7 @@ fn common_magics_are_emulated() {
     let Some(py) = python() else { return };
     let dir = tempfile::tempdir().unwrap();
     std::fs::create_dir(dir.path().join("sub")).unwrap();
-    let sub = std::fs::canonicalize(dir.path().join("sub"))
+    let sub = dunce::canonicalize(dir.path().join("sub"))
         .unwrap()
         .to_string_lossy()
         .into_owned();

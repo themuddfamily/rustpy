@@ -54,7 +54,7 @@ fn bytes(path: &Path, limit: usize) -> Result<Vec<u8>, String> {
 /// and SHA256 content digests, sorted by path. File mode and timestamps are not
 /// signed; symbolic links, devices and paths outside the directory are refused.
 pub fn inventory(root: &Path) -> Result<Vec<u8>, String> {
-    let root = root.canonicalize().map_err(|e| e.to_string())?;
+    let root = dunce::canonicalize(root).map_err(|e| e.to_string())?;
     let mut pending = vec![(root.clone(), 0)];
     let mut files = BTreeMap::new();
     let mut count = 0;

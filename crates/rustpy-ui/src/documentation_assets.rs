@@ -19,8 +19,8 @@ pub fn local_path(source: &Path, target: &str) -> Option<PathBuf> {
     {
         return None;
     }
-    let root = source.parent()?.canonicalize().ok()?;
-    let path = root.join(target).canonicalize().ok()?;
+    let root = dunce::canonicalize(source.parent()?).ok()?;
+    let path = dunce::canonicalize(root.join(target)).ok()?;
     path.starts_with(root).then_some(path)
 }
 pub fn texture(ctx: &egui::Context, source: &Path, target: &str) -> Option<egui::TextureHandle> {

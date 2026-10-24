@@ -241,9 +241,9 @@ pub fn candidate_paths_with(
         include_project_envs,
     );
     if let (Some(root), false) = (project_root, include_project_envs) {
-        let real_root = root.canonicalize().unwrap_or_else(|_| root.to_path_buf());
+        let real_root = dunce::canonicalize(root).unwrap_or_else(|_| root.to_path_buf());
         out.retain(|(p, _)| {
-            let real = p.canonicalize().unwrap_or_else(|_| p.clone());
+            let real = dunce::canonicalize(p).unwrap_or_else(|_| p.clone());
             !p.starts_with(root) && !real.starts_with(&real_root)
         });
     }
@@ -567,7 +567,7 @@ fn conda_roots(env: &dyn Fn(&str) -> Option<String>) -> Vec<PathBuf> {
     let mut roots = Vec::new();
     for tool in tools {
         // Follow a PATH symlink (e.g. ~/.local/bin/conda) to the real install.
-        let tool = tool.canonicalize().unwrap_or(tool);
+        let tool = dunce::canonicalize(&tool).unwrap_or(tool);
         let Some(dir) = tool.parent() else { continue };
         let leaf = dir.file_name().unwrap_or_default().to_string_lossy();
         let root = if matches!(leaf.as_ref(), "bin" | "condabin" | "Scripts") {
@@ -628,7 +628,7 @@ fn dedup_candidates(mut out: Vec<(PathBuf, String)>) -> Vec<(PathBuf, String)> {
         let key = if in_venv || managed_env {
             p.clone()
         } else {
-            p.canonicalize().unwrap_or_else(|_| p.clone())
+            dunce::canonicalize(p).unwrap_or_else(|_| p.clone())
         };
         if seen.contains(&key) {
             false

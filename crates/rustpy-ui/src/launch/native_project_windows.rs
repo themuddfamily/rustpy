@@ -85,10 +85,9 @@ pub(crate) fn open_project(root: &Path) -> Option<Result<(), String>> {
         Err(_) => return Some(Err("The native project host is unavailable".into())),
     };
     let mailbox = mailbox.as_ref()?;
-    if rustpy_settings::Settings::config_dir()
-        .canonicalize()
+    if dunce::canonicalize(&rustpy_settings::Settings::config_dir())
         .ok()
-        .zip(mailbox.config.canonicalize().ok())
+        .zip(dunce::canonicalize(&mailbox.config).ok())
         .is_none_or(|(current, expected)| current != expected)
     {
         return Some(Err("Native host configuration changed".into()));

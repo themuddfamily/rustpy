@@ -30,7 +30,7 @@ fn executable(name: &str) -> PathBuf {
         path.is_absolute() && path.is_file(),
         "real absolute executable required"
     );
-    path.canonicalize().unwrap()
+    dunce::canonicalize(&path).unwrap()
 }
 struct Case {
     directory: tempfile::TempDir,
@@ -89,7 +89,7 @@ impl Case {
     }
     fn execute(&self, mut plan: CommandPlan, endpoint: &str) -> (Completed, Data) {
         if self.provider == Provider::Subversion
-            && Path::new(&plan.executable).canonicalize().unwrap() == self.executable
+            && dunce::canonicalize(Path::new(&plan.executable)).unwrap() == self.executable
         {
             // SVN otherwise creates/reads ~/.subversion even for file://.
             // Apply its real global option to setup checkout and planned jobs;
@@ -169,7 +169,7 @@ impl Case {
         // Run genuine public integration setup commands through the SAME owned
         // process runner. Never call its older synchronous setup executor.
         for command in integration.commands().unwrap() {
-            let program = Path::new(&command.executable).canonicalize().unwrap();
+            let program = dunce::canonicalize(Path::new(&command.executable)).unwrap();
             assert!(program == self.executable || svnadmin == Some(program.as_path()));
             let plan = CommandPlan {
                 tfs_authority: None,

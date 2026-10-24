@@ -426,7 +426,7 @@ fn collect_files_in(
                     rustpy_vcs::FileStatus::Deleted | rustpy_vcs::FileStatus::Ignored
                 )
             })
-            .map(|e| e.path.canonicalize().unwrap_or(e.path))
+            .map(|e| dunce::canonicalize(&e.path).unwrap_or(e.path))
             .filter(|p| p.is_file() && scope.contains(p))
             .collect()
     } else {
@@ -647,7 +647,7 @@ pub fn run_with(
     out: &mut dyn Write,
     err: &mut dyn Write,
 ) -> i32 {
-    let project = match args.project.canonicalize() {
+    let project = match dunce::canonicalize(&args.project) {
         Ok(p) if p.is_dir() => p,
         Ok(p) => {
             let _ = writeln!(err, "rustpy inspect: {} is not a folder", p.display());
@@ -673,7 +673,7 @@ pub fn run_with(
             } else {
                 project.join(d)
             };
-            match candidate.canonicalize() {
+            match dunce::canonicalize(&candidate) {
                 Ok(c) if c.is_dir() && c.starts_with(&project) => c,
                 Ok(c) => {
                     let _ = writeln!(

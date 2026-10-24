@@ -1020,7 +1020,7 @@ impl IdeApp {
             }
         }
         std::fs::create_dir_all(root).map_err(|error| error.to_string())?;
-        let root = root.canonicalize().map_err(|error| error.to_string())?;
+        let root = dunce::canonicalize(root).map_err(|error| error.to_string())?;
         if st.git_init {
             if let Some(file) = template
                 .files

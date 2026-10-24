@@ -88,8 +88,8 @@ fn file(key: &str, console: bool, allow_x86_launcher: bool) -> PathBuf {
     path
 }
 fn same_file(left: &Path, right: &Path) -> bool {
-    fs::canonicalize(left).expect("actual discovered file exists")
-        == fs::canonicalize(right).expect("admitted file exists")
+    dunce::canonicalize(left).expect("actual discovered file exists")
+        == dunce::canonicalize(right).expect("admitted file exists")
 }
 fn contains_sdk(paths: &[PathBuf], sdk: &Path) -> bool {
     paths

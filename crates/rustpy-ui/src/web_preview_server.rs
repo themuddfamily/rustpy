@@ -41,7 +41,7 @@ impl Server {
         reload: bool,
         markdown: rustpy_settings::markdown::Settings,
     ) -> Result<Self, String> {
-        let root = root.canonicalize().map_err(|e| e.to_string())?;
+        let root = dunce::canonicalize(root).map_err(|e| e.to_string())?;
         if !root.is_dir() {
             return Err("Preview root must be a directory".into());
         }
@@ -309,7 +309,7 @@ fn resolve(root: &Path, path: &str) -> Result<PathBuf, String> {
     } else {
         path
     };
-    let path = path.canonicalize().map_err(|_| "Preview file not found")?;
+    let path = dunce::canonicalize(&path).map_err(|_| "Preview file not found")?;
     if !path.starts_with(root) {
         return Err("Symlink escapes preview root".into());
     }
@@ -816,7 +816,7 @@ mod tests {
     #[test]
     fn font_assets_keep_correct_types_and_root_traversal_and_size_guards() {
         let directory = tempfile::tempdir().unwrap();
-        let root = directory.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(directory.path()).unwrap();
         let state = state();
         for (extension, mime) in [
             ("woff", "font/woff"),

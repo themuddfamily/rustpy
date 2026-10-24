@@ -1324,7 +1324,7 @@ mod snapshot_tests {
     #[test]
     fn generated_stub_events_preserve_pending_type_definition() {
         let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
+        let root = dunce::canonicalize(dir.path()).unwrap();
         let main = root.join("main.py");
         let text = "value = 'x'\n";
         std::fs::write(&main, text).unwrap();
@@ -1412,7 +1412,7 @@ mod snapshot_tests {
             ("user.pyi", true, true),
         ] {
             let dir = tempfile::tempdir().unwrap();
-            let root = dir.path().canonicalize().unwrap();
+            let root = dunce::canonicalize(dir.path()).unwrap();
             let cache = root.join(".stubs");
             let init: InitializeParams = serde_json::from_value(json!({"rootUri": paths::uri_from_path(&root).unwrap(), "capabilities": {}, "initializationOptions": {"interpreter": "none"}})).unwrap();
             let (server_conn, client) = Connection::memory();
