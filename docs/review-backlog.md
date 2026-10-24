@@ -14,6 +14,7 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 | Terminal profiles | PowerShell, cmd and WSL profiles, and zsh, fish and pwsh as shells, have not been exercised end to end. | Untested. |
 | Certificates (Windows, macOS) | Importing trusted roots from the Windows certificate store and the macOS keychain is covered by tests but has not been checked against live system stores. | Untested. |
 | External formatters on macOS | Launching an external formatter (Black, Ruff, …) fails with "Operation not permitted" on the macOS CI runner at the process-group step; the process tests are Linux-only until this is reproduced on a Mac. | Formatting |
+| Directory diff on macOS and Windows | The symlink-safe directory inventory uses Linux descriptor-relative opens; on other systems directory comparisons report themselves incomplete. | Diff |
 | rsync deployment on stock macOS | Apple's rsync 2.6.9 lacks `-s` (protect-args); install rsync 3 from Homebrew. Remote listing also needs GNU find on the server. | Deployment |
 
 ## Recently fixed

@@ -13,6 +13,9 @@ fn drain(job: &mut DirectoryJob) {
         std::thread::sleep(std::time::Duration::from_millis(1));
     }
 }
+// The descriptor-relative inventory is Linux-only; elsewhere every scan reports
+// itself incomplete by design.
+#[cfg(target_os = "linux")]
 #[test]
 fn separate_app_task_domains_cancel_only_their_own_scan_and_acknowledge_retirement() {
     let left = tempfile::tempdir().unwrap();
