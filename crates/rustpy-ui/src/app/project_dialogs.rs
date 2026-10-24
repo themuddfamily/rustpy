@@ -1456,6 +1456,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // matches against a Unix root path
     fn new_project_gitignore_keeps_the_project_structure_shareable() {
         let mut builder = ignore::gitignore::GitignoreBuilder::new("/p");
         for line in new_project_gitignore("").lines() {
@@ -1492,6 +1493,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // matches against a Unix root path
     fn the_rustpy_gitignore_keeps_only_the_shared_files_committable() {
         // Written with the first project.json into an existing repository.
         let dir = std::env::temp_dir().join(format!("rustpy-dir-gitignore-{}", std::process::id()));

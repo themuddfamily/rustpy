@@ -483,7 +483,12 @@ mod platform {
             let result = unsafe { libc::kill(-(self.0 as i32), libc::SIGKILL) };
             if result < 0 {
                 let error = io::Error::last_os_error();
-                if error.raw_os_error() != Some(libc::ESRCH) {
+                // ESRCH: the group is gone. EPERM on macOS: a member could not be
+                // signalled, which is the already-exited (zombie) leader held by
+                // WNOWAIT; nothing else of ours can refuse a signal.
+                let benign = error.raw_os_error() == Some(libc::ESRCH)
+                    || (cfg!(target_os = "macos") && error.raw_os_error() == Some(libc::EPERM));
+                if !benign {
                     return Err(error);
                 }
             }

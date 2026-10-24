@@ -134,6 +134,7 @@ fn focus_controls() -> Vec<egui::Event> {
     ]
 }
 #[test]
+#[cfg(unix)] // ConPTY echo and output timing differ from a Unix PTY
 fn actual_terminal_group_announces_unicode_and_keyboard_returns_to_tool_controls() {
     let Some(mut fixture) = fixture() else {
         return;
@@ -377,6 +378,7 @@ fn double_shift_and_alt_f12_work_from_the_terminal() {
     );
 }
 #[test]
+#[cfg(unix)] // ConPTY echo and output timing differ from a Unix PTY
 fn escape_returns_focus_to_editor_when_enabled() {
     let Some(mut fixture) = focused_terminal() else {
         return;

@@ -476,9 +476,15 @@ impl RunSession {
         if !inherit_environment {
             cmd.env_clear();
         }
+        // Output is decoded as UTF-8 unless the caller chose an encoding, so
+        // Python must also write UTF-8 (Windows consoles default to a code page).
+        let mut env = env.clone();
+        env.entry("PYTHONIOENCODING".into())
+            .or_insert_with(|| "utf-8".into());
+        env.entry("PYTHONUTF8".into()).or_insert_with(|| "1".into());
         cmd.args(args)
             .current_dir(cwd)
-            .envs(env)
+            .envs(&env)
             .stdin(stdin.unwrap_or_else(Stdio::piped))
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());

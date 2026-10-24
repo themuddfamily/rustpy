@@ -90,7 +90,9 @@ jobs:
       - if: matrix.shard == 'ui'
         run: cargo test --locked -p rustpy-ui --no-fail-fast
       - if: matrix.shard == 'rest'
-        run: cargo test --locked --workspace --exclude rustpy-ui --no-fail-fast
+        run: |
+          python3 --version
+          cargo test --locked --workspace --exclude rustpy-ui --no-fail-fast
       # Temporary diagnostic for the macOS EPERM at process-group spawn.
       - if: ${{ always() && matrix.shard == 'rest' && runner.os == 'macOS' }}
         run: cargo test --locked -p rustpy-format --lib -- --ignored spawn_probe --nocapture

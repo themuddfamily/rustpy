@@ -140,6 +140,7 @@ fn exclusive_python_package_creation_preserves_existing_initializer_and_refuses_
 }
 
 #[test]
+#[cfg(unix)] // removes .rustpy while the app holds its lock files, which Windows refuses
 fn actual_project_catalog_tracks_successful_save_and_queued_external_template_event() {
     let root = tempfile::tempdir().unwrap();
     let mut app = IdeApp::new(Settings::default(), Some(root.path().to_owned()));

@@ -430,7 +430,11 @@ mod tests {
         let stopped = panel
             .log
             .iter()
-            .filter(|(l, err)| *err && l.contains("stopped before"))
+            .filter(|(l, err)| {
+                // Windows has no interrupt: TerminateProcess leaves no profile data.
+                *err && (l.contains("stopped before")
+                    || (cfg!(windows) && l.contains("No profile data")))
+            })
             .count();
         assert_eq!(stopped, 1, "{:?}", panel.log);
         let _ = std::fs::remove_dir_all(&dir);

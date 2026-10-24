@@ -134,6 +134,11 @@ impl Harness {
         let mut text = header + &digest(shapes);
         for (from, to) in &self.replacements {
             text = text.replace(from.as_str(), to);
+            // Texts are printed with `{:?}`, which escapes Windows separators.
+            let escaped = from.escape_default().to_string();
+            if escaped != *from {
+                text = text.replace(&escaped, to);
+            }
         }
         let placeholders: Vec<&str> = self
             .replacements

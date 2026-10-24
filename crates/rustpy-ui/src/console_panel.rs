@@ -1851,10 +1851,12 @@ mod tests {
         assert!(c.run_file(&dir.join("job.py"), &["a".into()], Some(&dir), &[]));
         settle(&mut c);
         let texts: Vec<String> = c.lines.iter().map(line_text).collect();
+        // The echo is a Python literal: backslashes are escaped.
+        let literal = |p: &std::path::Path| p.display().to_string().replace('\\', "\\\\");
         let echo = format!(
             ">>> runfile('{}', args=['a'], wdir='{}')",
-            dir.join("job.py").display(),
-            dir.display()
+            literal(&dir.join("job.py")),
+            literal(&dir)
         );
         assert!(texts.contains(&echo), "{texts:?}");
         assert!(texts.contains(&"job ['a']\n".to_string()), "{texts:?}");

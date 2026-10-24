@@ -188,8 +188,11 @@ fn native_html_save_payload_survives_automatic_completion_and_real_frame_batchin
             "closing </html> must not leave a context-free keyword lookup"
         );
         assert!(app.save_tab(index));
+        // The added final newline uses the platform line separator.
         assert_eq!(
-            std::fs::read_to_string(app.tabs[index].state.path.as_ref().unwrap()).unwrap(),
+            std::fs::read_to_string(app.tabs[index].state.path.as_ref().unwrap())
+                .unwrap()
+                .replace("\r\n", "\n"),
             format!("{NATIVE_HTML_SAVE_PAYLOAD}\n"),
             "actual Save must publish the typed bytes plus its configured final newline"
         );
