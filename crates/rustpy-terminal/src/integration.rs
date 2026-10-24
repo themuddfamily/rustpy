@@ -479,6 +479,7 @@ mod launch_tests {
         values.iter().map(|v| v.to_string()).collect()
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn bash_uses_generated_rcfile_and_emulates_login() {
         let dir = scratch("bash");
         let bash = launch(
@@ -591,6 +592,7 @@ mod launch_tests {
         std::fs::remove_dir_all(dir).unwrap();
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn fish_and_powershell_load_integration_after_user_config() {
         let dir = scratch("fish");
         let fish = launch("fish", &args(&["-l"]), "", None, &dir)

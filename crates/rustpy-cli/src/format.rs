@@ -489,14 +489,14 @@ mod tests {
         assert!(
             out.contains(&format!(
                 "Formatting {}...Formatted",
-                root.join("pkg/a.py").display()
+                root.join("pkg").join("a.py").display()
             )),
             "{out}"
         );
         assert!(
             out.contains(&format!(
                 "Formatting {}...Already formatted",
-                root.join("pkg/sub/b.py").display()
+                root.join("pkg").join("sub").join("b.py").display()
             )),
             "{out}"
         );
@@ -580,7 +580,11 @@ mod tests {
             paths: vec![root.to_path_buf()],
             ..Default::default()
         });
-        assert!(out.contains("bin/tool") && !out.contains("top.py"), "{out}");
+        let listing = out.replace('\\', "/"); // relative paths print with the platform separator
+        assert!(
+            listing.contains("bin/tool") && !listing.contains("top.py"),
+            "{out}"
+        );
         let (code, out, _) = run_format(FormatArgs {
             dry: true,
             paths: vec![root.join("bin/tool")],

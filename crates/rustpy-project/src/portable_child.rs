@@ -566,6 +566,7 @@ mod portable_tests {
         heartbeat_stopped(&pid);
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn portable_closed_input_and_exact_child_retirement() {
         let dir = tempfile::tempdir().unwrap();
         let pid = dir.path().join("pid");

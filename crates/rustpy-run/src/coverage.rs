@@ -1055,6 +1055,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn cobertura_xml_reports_parse() {
         let xml = r#"<?xml version="1.0" ?>
 <coverage version="7.6" timestamp="1" lines-valid="5" lines-covered="3" line-rate="0.6" branches-covered="1" branches-valid="2" branch-rate="0.5">

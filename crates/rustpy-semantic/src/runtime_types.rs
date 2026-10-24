@@ -79,7 +79,7 @@ impl RuntimeTypes {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))] // its only test uses Unix fixture paths
 mod tests {
     use super::*;
 

@@ -347,6 +347,7 @@ fn actual_processes_preserve_disjoint_owners_and_tombstones() {
     assert_eq!(bytes(&store), closed);
 }
 #[test]
+#[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
 fn actual_process_claim_isolation_and_atomic_readers() {
     let (dir, store) = store();
     let saved = checkpoint(&store);
@@ -426,6 +427,7 @@ fn actual_process_old_generation_callback_cannot_erase_quit_checkpoint() {
 }
 
 #[test]
+#[cfg(unix)] // Unix fixture paths, tools or process semantics
 fn inaccessible_configuration_ancestor_is_error_without_writes() {
     let dir = tempfile::tempdir().unwrap();
     let parent = dir.path().join("ordinary-file");

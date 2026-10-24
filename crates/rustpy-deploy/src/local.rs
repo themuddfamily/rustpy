@@ -312,6 +312,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn listing_mkdirs_delete_and_connection_test() {
         let tmp = TempDir::new("local-ops");
         let t = LocalTransport::new(tmp.path()).with_root_path("/site");

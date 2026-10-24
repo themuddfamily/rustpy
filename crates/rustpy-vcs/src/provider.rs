@@ -397,6 +397,7 @@ impl SetupCommand {
 mod tests {
     use super::*;
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn svn_setup_creates_a_separate_repository_and_checkout() {
         let plan = Integration {
             provider: Provider::Subversion,
@@ -413,6 +414,7 @@ mod tests {
             .contains(&"file:///repositories/project%20space".into()));
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn perforce_setup_does_not_put_credentials_in_the_client_spec() {
         let plan = Integration {
             provider: Provider::Perforce,

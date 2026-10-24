@@ -1328,8 +1328,8 @@ mod tests {
             ["discover", "-s", &s(&root.join("tests"))]
         );
         assert_eq!(
-            unittest_cli_args(&s(&root.join("tests/./unit")), root),
-            ["discover", "-s", &s(&root.join("tests/unit"))]
+            unittest_cli_args(&s(&root.join("tests").join(".").join("unit")), root),
+            ["discover", "-s", &s(&root.join("tests").join("unit"))]
         );
         // A package is discovered from the first directory above it that is not one.
         assert_eq!(

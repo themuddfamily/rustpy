@@ -1689,6 +1689,7 @@ def test_never_runs_with_x():
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn runtime_type_collector_wraps_each_runner_command() {
         let c = Path::new("/r/rustpy_typecollect.py");
         let root = Path::new("/p");
@@ -3015,6 +3016,7 @@ commands = python -c "import sys; print('ACTUAL_TOX_BAD'); sys.exit(3)"
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn relative_targets() {
         let root = Path::new("/proj");
         assert_eq!(

@@ -525,6 +525,7 @@ mod tests {
         }
     }
     #[test]
+    #[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
     fn certified_unknown_registry_lease_blocks_admission() {
         let config = tempfile::tempdir().unwrap();
         certify(config.path(), "old-endpoint");

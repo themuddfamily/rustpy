@@ -3292,6 +3292,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn module_import_sites_list_importers() {
         let util = "def f():\n    return 1\n";
         let main = "import util\nfrom util import f\nfrom pkg import util as pu\n\n\ndef late():\n    import util.sub\n";

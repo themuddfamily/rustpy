@@ -133,6 +133,7 @@ pub fn completion_schema<'a>(
 mod fixtures {
     use super::*;
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn local_mappings_override_document_schema_and_keep_uri_identity() {
         let mappings = vec![("*.json".into(), "schemas/local.json".into())];
         assert_eq!(

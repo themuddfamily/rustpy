@@ -94,6 +94,7 @@ fn inherited_profiles_scopes_custom_severity_and_xml_drive_real_inspections() {
             && problem.diagnostic.severity == Severity::Error));
 }
 #[test]
+#[cfg(unix)] // file levels are keyed by a Unix path string
 fn highlighting_levels_only_limit_on_the_fly_and_batch_remains_explicit() {
     let mut settings = Profiles::default();
     let path = "/profiles/main.py";

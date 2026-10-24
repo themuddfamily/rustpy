@@ -740,6 +740,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn folder_edits_preserve_sdk_module_and_future_metadata() {
         let dir = tempfile::tempdir().unwrap();
         let path = ProjectModel::path_for(dir.path());
@@ -880,6 +881,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn relative_paths_resolve_lexically() {
         assert_eq!(
             resolve(Path::new("/w/proj"), Path::new("../shared/./lib")),
@@ -974,6 +976,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn content_roots_that_contain_or_overlap_the_project_are_ignored_on_load() {
         let dir = tempfile::tempdir().unwrap();
         let base = dunce::canonicalize(dir.path()).unwrap();

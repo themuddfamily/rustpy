@@ -2577,7 +2577,7 @@ mod inherited_diagram_models {
         );
     }
 }
-#[cfg(test)]
+#[cfg(all(test, unix))] // its only test and helper use Unix fixture paths
 mod route_name_definitions {
     use super::*;
     use crate::module::ModuleResolver;

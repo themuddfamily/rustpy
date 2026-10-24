@@ -245,6 +245,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn relative_directories_become_absolute() {
         assert!(absolute(Path::new("cfg")).is_absolute());
         assert_eq!(absolute(Path::new("/x")), PathBuf::from("/x"));

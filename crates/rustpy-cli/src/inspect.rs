@@ -1432,6 +1432,7 @@ mod tests {
         a.verbosity = 2;
         let (_, output, error) = run_inspect(&a, &quiet_settings());
         assert!(error.is_empty(), "{error}");
+        let output = output.replace('\\', "/"); // relative paths print with the platform separator
         assert!(
             output.contains("Inspecting src/main.py")
                 && output.contains("Inspecting tests/check.py"),

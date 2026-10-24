@@ -15,6 +15,8 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 | Certificates (Windows, macOS) | Importing trusted roots from the Windows certificate store and the macOS keychain is covered by tests but has not been checked against live system stores. | Untested. |
 | External formatters on macOS | Launching an external formatter (Black, Ruff, …) fails with "Operation not permitted" on the macOS CI runner at the process-group step; the process tests are Linux-only until this is reproduced on a Mac. | Formatting |
 | Directory diff on macOS and Windows | The symlink-safe directory inventory uses Linux descriptor-relative opens; on other systems directory comparisons report themselves incomplete. | Diff |
+| Window registry and session store on Windows | Concurrent registration stress and the atomic session-store claim hit sharing violations (ERROR_ACCESS_DENIED) when a lease or record is replaced while another process reads it; the multi-process tests are Unix-only until the Windows lease protocol is reworked. | Windows |
+| AI streaming on Windows | A server that closes the connection right after the stop reason is reported as "connection interrupted" (WSAECONNRESET) rather than a clean end of stream. | AI Assistant |
 | rsync deployment on stock macOS | Apple's rsync 2.6.9 lacks `-s` (protect-args); install rsync 3 from Homebrew. Remote listing also needs GNU find on the server. | Deployment |
 
 ## Recently fixed

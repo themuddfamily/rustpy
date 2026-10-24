@@ -2079,6 +2079,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn workspace_paths_follow_a_copied_project() {
         let base = std::env::temp_dir().join(format!("rustpy-ws-copy-{}", std::process::id()));
         let (a, b) = (base.join("projA"), base.join("projB"));
@@ -2267,6 +2268,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn line_breakpoints_follow_a_copied_project() {
         let base = std::env::temp_dir().join(format!("rustpy-ws-bp-copy-{}", std::process::id()));
         let (a, b) = (base.join("projA"), base.join("projB"));

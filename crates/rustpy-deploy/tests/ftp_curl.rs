@@ -362,6 +362,7 @@ fn session(stream: TcpStream, config: &Config) -> std::io::Result<()> {
 // ---------------------------------------------------------------------------
 
 #[test]
+#[cfg(unix)] // Unix fixture paths, tools or process semantics
 fn ftp_transport_against_a_loopback_server() {
     if !installed("curl") {
         eprintln!("skipped: curl is not installed");

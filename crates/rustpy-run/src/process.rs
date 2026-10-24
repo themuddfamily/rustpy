@@ -948,6 +948,10 @@ impl RunSession {
     /// Records a chunk of output: in the console and in the raw log, whose
     /// oldest chunks go once it exceeds [`RAW_OUTPUT_LIMIT`].
     fn push_output(&mut self, mut chunk: OutputChunk) {
+        // Windows text-mode children write CRLF; the console keeps one line ending.
+        if cfg!(windows) && chunk.kind != OutputKind::System && chunk.text.contains("\r\n") {
+            chunk.text = chunk.text.replace("\r\n", "\n");
+        }
         match chunk.kind {
             OutputKind::Stdout => self.stdout_revision = self.stdout_revision.wrapping_add(1),
             OutputKind::Stderr => self.stderr_revision = self.stderr_revision.wrapping_add(1),

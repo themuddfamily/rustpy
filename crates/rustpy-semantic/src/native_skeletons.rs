@@ -189,6 +189,7 @@ mod tests {
         }
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn extension_sources_are_bound_to_exact_binary_and_interpreter() {
         for extension in [".cpython-312-test.so", ".pyd"] {
             let record = record(extension);
@@ -209,6 +210,7 @@ mod tests {
         }
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn qualified_extension_keeps_exact_package_and_binary_binding() {
         let mut rec = record(".pyd");
         rec.module_name = "package.native".into();
@@ -237,6 +239,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn trust_or_index_generation_changes_do_not_reuse_old_sources() {
         let rec = record(".so");
         let path = rec.module_path.clone();
@@ -264,6 +267,7 @@ mod tests {
         assert!(Catalogue::from_records(true, 1, interpreter(), vec![big]).is_err());
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn missing_catalogue_retains_truthful_fallback_and_unsupported_reasons() {
         assert!(Catalogue::default()
             .lookup(

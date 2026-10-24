@@ -1047,6 +1047,7 @@ mod tests {
         .unwrap()
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn mercurial_history_requests_complete_json_changeset_metadata() {
         for operation in [Operation::Log, Operation::Incoming, Operation::Outgoing] {
             let plan = command(Provider::Mercurial, operation, Arguments::default());
@@ -1074,6 +1075,7 @@ mod tests {
         }
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn mercurial_incoming_preserves_no_changes_success_and_mq_is_explicit() {
         let incoming = command(
             Provider::Mercurial,
@@ -1099,6 +1101,7 @@ mod tests {
             .any(|arg| arg == "/workspace/file with spaces.py"));
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn svn_history_uses_selected_file_and_ignore_preserves_multiline_value() {
         let history = command(
             Provider::Subversion,
@@ -1131,6 +1134,7 @@ mod tests {
         );
     }
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn perforce_forms_use_stdin_and_job_links_do_not_append_files() {
         let form = command(
             Provider::Perforce,

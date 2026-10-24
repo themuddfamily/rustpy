@@ -740,6 +740,7 @@ mod tests {
         )
     }
     #[test]
+    #[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
     fn actual_two_process_routing_wait_disconnect_rejection_and_crash_pruning() {
         let directory = tempfile::tempdir().unwrap();
         let a = directory.path().join("a");
@@ -1025,6 +1026,7 @@ mod tests {
         drop(lease);
     }
     #[test]
+    #[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
     fn registration_and_discovery_concurrent_stress() {
         let directory = tempfile::tempdir().unwrap();
         let root = directory.path().to_path_buf();

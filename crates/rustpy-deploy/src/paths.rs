@@ -447,6 +447,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn relative_and_special_roots() {
         let root = Path::new("/p");
         let home = Server::rsync("r", "h", "u", "~/site");

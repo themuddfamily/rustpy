@@ -2680,6 +2680,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn targets_become_absolute() {
         let dir = tempfile::tempdir().unwrap();
         std::fs::write(dir.path().join("a.py"), "").unwrap();

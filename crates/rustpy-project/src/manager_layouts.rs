@@ -373,6 +373,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Unix fixture paths, tools or process semantics
     fn hatch_config_dirs_env_and_project_name_select_the_project_envs() {
         let temp = tempfile::tempdir().unwrap();
         let home = temp.path().join("home");

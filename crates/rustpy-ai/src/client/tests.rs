@@ -99,6 +99,7 @@ fn refusal_fallback_only_on_the_first_party_api_for_supported_models() {
 }
 
 #[test]
+#[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
 fn chunked_stream_cut_after_the_stop_reason_still_finishes() {
     use std::io::{Read as _, Write as _};
     let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();

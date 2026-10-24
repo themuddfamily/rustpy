@@ -253,6 +253,7 @@ fn ended_session_removes_its_helper_dir_and_writes_no_bytecode_there() {
 }
 
 #[test]
+#[cfg(unix)] // Unix fixture paths, tools or process semantics
 fn interrupt_and_restart() {
     let Some(py) = python() else {
         eprintln!("python3 not found; skipping");
