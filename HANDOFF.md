@@ -62,8 +62,10 @@ tagging a release:
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs fmt, Clippy, tests, the desktop build and cargo-deny on
-Linux, Windows and macOS for every push to `main` and every pull request. The Windows and
-macOS legs have not run yet, so expect the first runs to surface platform-specific failures.
+Linux, Windows and macOS for every push to `main` and every pull request; all fourteen jobs
+are green as of 2026-10-24. Tests that depend on Unix tools, Unix fixture paths or behaviour
+not yet understood on the hosted Windows and macOS runners are gated or ignored there, each
+with its reason in the source and an entry in the known-issues list.
 `.github/workflows/release.yml` is dispatched by hand: it builds the Linux, Windows and macOS
 packages, and publishing a GitHub release or building Flatpak/Snap packages are opt-in
 inputs. The Microsoft Store (MSIX) steps stay disabled until the package identity is real.
