@@ -837,6 +837,20 @@ impl Server {
         let changes: Vec<_> = changes
             .into_iter()
             .filter(|(path, _)| !self.stubs.contains_generated_path(path))
+            // A watcher may report a write the analysis has already read (macOS
+            // FSEvents arrive with latency): a file whose text is unchanged is no
+            // change, and must not invalidate the requests in flight.
+            .filter(|(path, typ)| {
+                let python_source = path
+                    .extension()
+                    .is_some_and(|extension| extension == "py" || extension == "pyi");
+                *typ != lsp_types::FileChangeType::CHANGED
+                    || !python_source
+                    || self.analysis.file_for_path(path).is_none_or(|file| {
+                        std::fs::read_to_string(path)
+                            .map_or(true, |disk| disk.as_str() != &*file.text)
+                    })
+            })
             .collect();
         let paths: Vec<PathBuf> = changes.iter().map(|(p, _)| p.clone()).collect();
         if paths.is_empty() {
