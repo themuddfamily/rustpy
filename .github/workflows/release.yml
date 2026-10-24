@@ -34,7 +34,7 @@ jobs:
             target: aarch64-unknown-linux-gnu
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -63,7 +63,7 @@ jobs:
             target: aarch64-pc-windows-msvc
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -95,7 +95,7 @@ jobs:
             if (-not (Test-Path -LiteralPath "target/windows/$name")) { throw "Missing release asset: $name" }
           }
           Get-ChildItem target/windows -File | Where-Object Extension -in '.exe','.msi','.zip' | ForEach-Object { $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); "$h  $($_.Name)" } | Set-Content target/windows/SHA256SUMS
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows-${{ matrix.target }}
           path: |
@@ -110,7 +110,7 @@ jobs:
         if: ${{ false }}
         shell: pwsh
         run: packaging/windows/build-msix.ps1 -Target '${{ matrix.target }}' -NoBuild
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ false }}
         with:
           name: msix-${{ matrix.target }}
@@ -121,8 +121,8 @@ jobs:
     needs: windows
     runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: msix-*
           path: target/msix
@@ -130,7 +130,7 @@ jobs:
       # x64 + arm64 in one .msixbundle, uploaded unsigned to Partner Center.
       - shell: pwsh
         run: packaging/windows/build-msix.ps1 -Bundle
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: msixbundle
           path: target/msix/*.msixbundle
@@ -138,7 +138,7 @@ jobs:
   macos:
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
@@ -157,7 +157,7 @@ jobs:
         runner: [ubuntu-24.04, ubuntu-24.04-arm]
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # flatpak-builder, snapcraft and the pinned SDK/runtime must be preprovisioned.
       - run: packaging/linux/flatpak/build-flatpak.sh --no-install --bundle
       - run: packaging/linux/build-snap.sh
@@ -168,11 +168,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: windows-*
           path: target/release-assets
