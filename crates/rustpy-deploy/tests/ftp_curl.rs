@@ -1,3 +1,4 @@
+#![cfg(unix)] // the loopback FTP fixture uses Unix tools and file names
 //! [`FtpTransport`] end to end with the real `curl` client against a minimal FTP server that
 //! runs inside this test process on 127.0.0.1 (loopback only; no other host is contacted).
 //! The server implements just what curl uses: login, `PWD`/`CWD`/`MKD`/`RMD`/`DELE`,
@@ -362,7 +363,6 @@ fn session(stream: TcpStream, config: &Config) -> std::io::Result<()> {
 // ---------------------------------------------------------------------------
 
 #[test]
-#[cfg(unix)] // Unix fixture paths, tools or process semantics
 fn ftp_transport_against_a_loopback_server() {
     if !installed("curl") {
         eprintln!("skipped: curl is not installed");
