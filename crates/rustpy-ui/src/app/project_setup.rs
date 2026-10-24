@@ -491,7 +491,11 @@ mod tests {
         let target = original.path().join(".venv");
         let mut service = Setup::new(
             original.path().into(),
-            PathBuf::from("/bin/true"),
+            PathBuf::from(if cfg!(target_os = "macos") {
+                "/usr/bin/true"
+            } else {
+                "/bin/true"
+            }),
             plan(
                 rustpy_project::setup::ProjectKind::Pure,
                 true,

@@ -150,6 +150,10 @@ fn query(app: &mut IdeApp, ctx: &egui::Context, text: &str) -> Frame {
 }
 
 #[test]
+#[cfg_attr(
+    target_os = "macos",
+    ignore = "egui applies the macOS text-system Ctrl bindings inside text fields"
+)]
 fn multiline_query_enter_is_text_and_control_enter_navigates_without_editor_newline() {
     let source = "a\nb a\nb";
     let (mut app, ctx) = fixture(source, Language::PlainText);
@@ -240,6 +244,10 @@ fn multiline_replacement_previews_newline_without_edit_then_control_enter_applie
 }
 
 #[test]
+#[cfg_attr(
+    target_os = "macos",
+    ignore = "egui applies the macOS text-system Ctrl bindings inside text fields"
+)]
 fn regex_live_preview_tracks_replacement_and_exclusion_without_mutating_buffer() {
     let source = "snake_case snake_case";
     let (mut app, ctx) = fixture(source, Language::PlainText);
@@ -335,6 +343,10 @@ fn readonly_replace_all_preserves_preview_and_reports_refusal_not_replaced_count
 }
 
 #[test]
+#[cfg_attr(
+    target_os = "macos",
+    ignore = "egui applies the macOS text-system Ctrl bindings inside text fields"
+)]
 fn multiline_control_shift_enter_owns_query_navigation_before_global_dispatch() {
     let source = "foo()\nfoo()";
     let (mut app, ctx) = fixture(source, Language::Python);

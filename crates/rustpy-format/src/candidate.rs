@@ -816,6 +816,76 @@ pub fn parse_arguments(text: &str) -> Result<Vec<String>, CandidateError> {
     Ok(result)
 }
 
+/// Diagnostic for the macOS EPERM seen in CI: prints how each spawn variant
+/// behaves. Run with `cargo test -p rustpy-format --lib -- --ignored spawn_probe --nocapture`.
+#[cfg(all(test, unix))]
+mod spawn_probe {
+    use std::os::unix::process::CommandExt;
+    use std::process::{Command, Stdio};
+
+    fn report(label: &str, command: &mut Command) {
+        match command.stdout(Stdio::null()).stderr(Stdio::null()).spawn() {
+            Ok(mut child) => {
+                let status = child.wait();
+                eprintln!(
+                    "probe {label}: spawned pid {}, status {status:?}",
+                    child.id()
+                );
+            }
+            Err(error) => eprintln!(
+                "probe {label}: spawn failed: {error} ({:?})",
+                error.raw_os_error()
+            ),
+        }
+    }
+
+    #[test]
+    #[ignore = "diagnostic only"]
+    fn spawn_probe() {
+        eprintln!(
+            "probe identity: pid {} pgid {} sid {}",
+            std::process::id(),
+            unsafe { libc::getpgid(0) },
+            unsafe { libc::getsid(0) }
+        );
+        report("plain sh", Command::new("/bin/sh").args(["-c", "exit 0"]));
+        report(
+            "sh + process_group(0)",
+            Command::new("/bin/sh")
+                .args(["-c", "exit 0"])
+                .process_group(0),
+        );
+        let mut pre = Command::new("/bin/sh");
+        pre.args(["-c", "exit 0"]);
+        unsafe {
+            pre.pre_exec(|| {
+                if libc::setpgid(0, 0) != 0 {
+                    return Err(std::io::Error::last_os_error());
+                }
+                Ok(())
+            });
+        }
+        report("sh + pre_exec setpgid", &mut pre);
+        let dir = std::env::temp_dir().join(format!("rustpy-spawn-probe-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let script = dir.join("fmt.sh");
+        std::fs::write(&script, "#!/bin/sh\nexit 0\n").unwrap();
+        let mut permissions = std::fs::metadata(&script).unwrap().permissions();
+        std::os::unix::fs::PermissionsExt::set_mode(&mut permissions, 0o755);
+        std::fs::set_permissions(&script, permissions).unwrap();
+        report(
+            "script + process_group(0)",
+            Command::new(&script).process_group(0),
+        );
+        report(
+            "python3 + process_group(0)",
+            Command::new("python3")
+                .args(["-c", "pass"])
+                .process_group(0),
+        );
+    }
+}
+
 // macOS runners fail these with EPERM at process-group operations; see the
 // known-issues list until that is understood on a Mac.
 #[cfg(all(test, target_os = "linux"))]

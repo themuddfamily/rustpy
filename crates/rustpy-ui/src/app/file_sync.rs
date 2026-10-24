@@ -603,7 +603,13 @@ mod tests {
             "root=true\n[*]\ncharset=utf-16le\n",
         )
         .unwrap();
+        // On a case-insensitive file system `m.PY` is the `m.py` already opened.
+        std::fs::write(dir.0.join("Case.probe"), b"").unwrap();
+        let case_insensitive = dir.0.join("case.probe").exists();
         for extension in ["py", "pyi", "pyw", "PY"] {
+            if extension == "PY" && case_insensitive {
+                continue;
+            }
             let path = dir.0.join(format!("m.{extension}"));
             let original = b"x=1\n";
             std::fs::write(&path, original).unwrap();
