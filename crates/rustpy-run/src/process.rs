@@ -1856,7 +1856,7 @@ mod tests {
         );
         assert_eq!(env.get("PYTHONPATH").map(String::as_str), Some("/project"));
     }
-    #[cfg(unix)]
+    #[cfg(target_os = "linux")]
     fn child_pid(session: &mut RunSession) -> u32 {
         let deadline = Instant::now() + std::time::Duration::from_secs(3);
         while Instant::now() < deadline {
