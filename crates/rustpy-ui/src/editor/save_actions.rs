@@ -229,6 +229,30 @@ fn write_impl(
     bytes: &[u8],
     check: impl Fn() -> std::io::Result<()>,
 ) -> std::io::Result<()> {
+    // Windows reports a file another process is replacing, or has open without
+    // delete sharing, as a transient access or sharing error at any step (stat,
+    // open, rename). One attempt is self-contained (its temporary file is removed
+    // on failure), so the whole write is retried for about two seconds there.
+    let transient = |e: &std::io::Error| {
+        e.kind() == std::io::ErrorKind::PermissionDenied
+            || matches!(e.raw_os_error(), Some(32) | Some(33))
+    };
+    let mut attempt = 0;
+    loop {
+        match write_once(path, bytes, &check) {
+            Err(e) if cfg!(windows) && transient(&e) && attempt < 200 => {
+                attempt += 1;
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            }
+            other => return other,
+        }
+    }
+}
+fn write_once(
+    path: &Path,
+    bytes: &[u8],
+    check: impl Fn() -> std::io::Result<()>,
+) -> std::io::Result<()> {
     use std::io::Write;
     static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let target = rustpy_core::vfs::normalize_path(path);
@@ -301,23 +325,7 @@ fn write_impl(
         check()?;
         // Windows refuses to replace a file another handle has open without
         // FILE_SHARE_DELETE (an indexer, a concurrent save): retry briefly.
-        // ERROR_ACCESS_DENIED, ERROR_SHARING_VIOLATION (32) and ERROR_LOCK_VIOLATION
-        // (33) are all transient here; FlushFileBuffers makes concurrent savers hold
-        // the file for a while, so the budget is generous (about two seconds).
-        let transient = |e: &std::io::Error| {
-            e.kind() == std::io::ErrorKind::PermissionDenied
-                || matches!(e.raw_os_error(), Some(32) | Some(33))
-        };
-        let mut attempt = 0;
-        loop {
-            match std::fs::rename(&tmp, &target) {
-                Err(e) if cfg!(windows) && transient(&e) && attempt < 200 => {
-                    attempt += 1;
-                    std::thread::sleep(std::time::Duration::from_millis(10));
-                }
-                other => break other,
-            }
-        }
+        std::fs::rename(&tmp, &target)
     })();
     drop(file);
     if result.is_err() {
