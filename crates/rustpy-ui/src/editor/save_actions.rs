@@ -294,7 +294,22 @@ fn write_impl(
         }
         file.sync_all()?;
         check()?;
-        std::fs::rename(&tmp, &target)
+        // Windows refuses to replace a file another handle has open without
+        // FILE_SHARE_DELETE (an indexer, a concurrent save): retry briefly.
+        let mut attempt = 0;
+        loop {
+            match std::fs::rename(&tmp, &target) {
+                Err(e)
+                    if cfg!(windows)
+                        && e.kind() == std::io::ErrorKind::PermissionDenied
+                        && attempt < 50 =>
+                {
+                    attempt += 1;
+                    std::thread::sleep(std::time::Duration::from_millis(5));
+                }
+                other => break other,
+            }
+        }
     })();
     drop(file);
     if result.is_err() {

@@ -133,6 +133,13 @@ pub fn open_regular_file_for_write(path: &Path) -> io::Result<std::fs::File> {
         use std::os::unix::fs::OpenOptionsExt;
         options.custom_flags(libc::O_NONBLOCK);
     }
+    #[cfg(windows)]
+    {
+        // Allow a concurrent atomic replacement (rename over the file) while this
+        // handle is open: FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE.
+        use std::os::windows::fs::OpenOptionsExt;
+        options.share_mode(0x1 | 0x2 | 0x4);
+    }
     let file = options.open(path)?;
     if !file.metadata()?.is_file() {
         return Err(io::Error::new(
