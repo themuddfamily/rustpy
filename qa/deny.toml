@@ -2,6 +2,16 @@
 # No advisory/license exception is pre-approved; resolve findings explicitly.
 [advisories]
 yanked = "deny"
+# zbus_names, zvariant and zvariant_derive are transitive dependencies of zbus,
+# reached only through accesskit_unix / atspi (Linux accessibility). They are
+# flagged unmaintained with no safe upgrade; the accessibility stack has no
+# alternative provider, so the advisories are acknowledged and revisited when
+# accesskit moves off them.
+ignore = [
+    { id = "RUSTSEC-2026-0370", reason = "zvariant: unmaintained transitive dependency of zbus via accesskit_unix/atspi; no alternative" },
+    { id = "RUSTSEC-2026-0371", reason = "zbus_names: unmaintained transitive dependency of zbus via accesskit_unix/atspi; no alternative" },
+    { id = "RUSTSEC-2026-0372", reason = "zvariant_derive: unmaintained transitive dependency of zbus via accesskit_unix/atspi; no alternative" },
+]
 [licenses]
 confidence-threshold = 0.93
 allow = ["Apache-2.0", "Apache-2.0 WITH LLVM-exception", "MIT", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Zlib", "Unicode-3.0", "Unicode-DFS-2016", "CC0-1.0", "BSL-1.0", "MPL-2.0"]
@@ -19,7 +29,7 @@ version = "=0.36.2"
 allow = ["OFL-1.1", "Ubuntu-font-1.0"]
 [[licenses.exceptions]]
 name = "webpki-roots"
-version = "=1.0.9"
+version = "=1.0.11"
 # CDLA §2.1: distribute the agreement with the embedded root-certificate data.
 allow = ["CDLA-Permissive-2.0"]
 [[licenses.exceptions]]

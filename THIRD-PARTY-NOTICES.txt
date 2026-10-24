@@ -1200,13 +1200,13 @@ Text SHA-256: 249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe
 Notice: LICENSE-MIT
 Text SHA-256: 6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6
 
-clipboard-win@5.4.1
+clipboard-win@5.4.3
 ------------------------------------------------------------------------
 Declared: BSL-1.0
 Selected: BSL-1.0
-Source: https://crates.io/api/v1/crates/clipboard-win/5.4.1/download
-Source SHA-256: bde03770d3df201d4fb868f2c9c59e66a3e4e2bd06692a0fe701e7103c7e84d4
-Notice: https://raw.githubusercontent.com/DoumanAsh/clipboard-win/3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342/LICENSE
+Source: https://crates.io/api/v1/crates/clipboard-win/5.4.3/download
+Source SHA-256: 052af7878466feccda12ba7a6a67d019d712f296809559b47c12c8cc196d3a9a
+Notice: https://raw.githubusercontent.com/DoumanAsh/clipboard-win/ed27008ae5d1f10cfbb266de039f0fb35fd05a56/LICENSE
 Text SHA-256: c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566
 
 cmov@0.5.4
@@ -1659,12 +1659,12 @@ Text SHA-256: 3481c338b8e2760b5a58e129339501c01e640f7597767f91d1a84e25e68fbdb4
 Notice: LICENSE-MIT
 Text SHA-256: 23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3
 
-ctutils@0.4.3
+ctutils@0.4.5
 ------------------------------------------------------------------------
 Declared: Apache-2.0 OR MIT
 Selected: MIT
-Source: https://crates.io/api/v1/crates/ctutils/0.4.3/download
-Source SHA-256: 03bb0e1cc970d482d121d9a1744999169b69a07470b3d644a7894e53fcaf4574
+Source: https://crates.io/api/v1/crates/ctutils/0.4.5/download
+Source SHA-256: 38d28fb6aa7dd680b3ffd1a3e64e115c177bdba63c0ae7f9cd48129ff05c4fa0
 Notice: LICENSE-APACHE
 Text SHA-256: cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
 Notice: LICENSE-MIT
@@ -5894,12 +5894,12 @@ Text SHA-256: 45fd05c4865e7c350b98ad7ac50e1b15462d49af4a91e9b0c9dd933dc9a69742
 Notice: LICENSE-MIT
 Text SHA-256: 9117d922e667125508dde62b02c1f57ed22f5ad21eb536aa2e2d99e1c796e639
 
-rustls-webpki@0.103.15
+rustls-webpki@0.103.16
 ------------------------------------------------------------------------
 Declared: ISC
 Selected: ISC
-Source: https://crates.io/api/v1/crates/rustls-webpki/0.103.15/download
-Source SHA-256: f3c3cf1d8b1e7d4927e2d154c3fcb02979afb9939629c62cd9048d4f07b60ac2
+Source: https://crates.io/api/v1/crates/rustls-webpki/0.103.16/download
+Source SHA-256: 4443b1b6d39d7c663139942cc4558262562d2c84123bb6282ef177009ca8b281
 Notice: LICENSE
 Text SHA-256: 5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a
 
@@ -6988,12 +6988,12 @@ Source SHA-256: e464cf451ba96ebfc6f9b6542f17ee8b8956e33f1e40d9690624e59d7a7f8a4b
 Notice: LICENSE
 Text SHA-256: 253cd04c6714889df2d32f3f64d669179a1c95c76ac43c40882c52eb06bc3552
 
-tokio@1.53.2
+tokio@1.54.1
 ------------------------------------------------------------------------
 Declared: MIT
 Selected: MIT
-Source: https://crates.io/api/v1/crates/tokio/1.53.2/download
-Source SHA-256: e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044
+Source: https://crates.io/api/v1/crates/tokio/1.54.1/download
+Source SHA-256: b52fd3255258d26fac7264ab5a76b53c13367136dc011d3d6ad4f8ed070396a3
 Notice: LICENSE
 Text SHA-256: 253cd04c6714889df2d32f3f64d669179a1c95c76ac43c40882c52eb06bc3552
 
@@ -7883,12 +7883,12 @@ Source SHA-256: 521bc38abb08001b01866da9f51eb7c5d647a19260e00054a8c7fd5f9e57f7a9
 Notice: LICENSE
 Text SHA-256: e271993808fec50ab29350b39539cdec611a9103f827e0aa26d61da70e2d33f8
 
-webpki-roots@1.0.9
+webpki-roots@1.0.11
 ------------------------------------------------------------------------
 Declared: CDLA-Permissive-2.0
 Selected: CDLA-Permissive-2.0
-Source: https://crates.io/api/v1/crates/webpki-roots/1.0.9/download
-Source SHA-256: 7dcd9d09a39985f5344844e66b0c530a33843579125f23e21e9f0f220850f22a
+Source: https://crates.io/api/v1/crates/webpki-roots/1.0.11/download
+Source SHA-256: f5f280bbb2b287bc8e7de7e3852945a0ff50d1bbcb5ed42b6c7a568c546df171
 Notice: LICENSE
 Text SHA-256: e271993808fec50ab29350b39539cdec611a9103f827e0aa26d61da70e2d33f8
 
