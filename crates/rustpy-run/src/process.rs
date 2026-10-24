@@ -1412,13 +1412,22 @@ mod tests {
         }
         s.poll();
         assert_eq!(s.status, SessionStatus::Exited(3));
-        let text = s.text();
-        assert!(text.contains("hello\n"), "{text}");
-        assert!(s
-            .output
-            .iter()
-            .any(|c| c.kind == OutputKind::Stderr && c.text.contains("err")));
-        assert!(text.contains("exit code 3"));
+        // stdout and stderr arrive as separate chunks whose interleaving in the
+        // merged text depends on scheduling; check each stream on its own.
+        let stream = |kind: OutputKind| {
+            s.output
+                .iter()
+                .filter(|c| c.kind == kind)
+                .map(|c| c.text.as_str())
+                .collect::<String>()
+        };
+        assert!(
+            stream(OutputKind::Stdout).contains("hello\n"),
+            "{}",
+            s.text()
+        );
+        assert!(stream(OutputKind::Stderr).contains("err"), "{}", s.text());
+        assert!(s.text().contains("exit code 3"));
     }
 
     #[cfg(unix)]

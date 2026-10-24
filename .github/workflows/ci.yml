@@ -62,6 +62,12 @@ jobs:
       - name: Linux graphics dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgtk-3-dev unixodbc-dev xvfb libgl1-mesa-dri libegl1 libxcursor1 libxrandr2 libxi6
+      # The database backend links unixODBC; Homebrew's lib dir is not on the default search path.
+      - name: macOS unixODBC
+        if: runner.os == 'macOS'
+        run: |
+          brew install unixodbc
+          echo "LIBRARY_PATH=$(brew --prefix)/lib" >> "$GITHUB_ENV"
       # Interpreter/debugpy/pytest/coverage, fuzz/nightly and cargo-deny are
       # provisioned separately; this recipe never installs Python packages.
       - run: cargo test --locked --workspace --no-fail-fast

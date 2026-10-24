@@ -238,9 +238,9 @@ mod process {
             if let Some(thread) = cancellation {
                 thread.join().unwrap();
             }
-            let pid: u32 = std::fs::read_to_string(&pid_file).unwrap().parse().unwrap();
             #[cfg(target_os = "linux")]
             {
+                let pid: u32 = std::fs::read_to_string(&pid_file).unwrap().parse().unwrap();
                 let stat = std::fs::read_to_string(format!("/proc/{pid}/stat")).unwrap_or_default();
                 assert!(
                     stat.is_empty() || stat.split_once(") ").unwrap().1.starts_with('Z'),

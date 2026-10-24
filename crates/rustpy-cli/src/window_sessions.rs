@@ -1295,6 +1295,8 @@ fn load_journal(store: &WindowSessionStore) -> Result<Journal, RestoreError> {
     })
 }
 struct JournalLock {
+    /// Held for its lifetime; only Unix reads its metadata back.
+    #[cfg_attr(not(unix), allow(dead_code))]
     file: ipc::FileLease,
     path: PathBuf,
 }

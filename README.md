@@ -70,6 +70,13 @@ sudo apt-get install -y build-essential pkg-config libxkbcommon-dev libwayland-d
 cargo run --release -- /path/to/python/project
 ```
 
+On macOS, install unixODBC with Homebrew and point the linker at it:
+
+```bash
+brew install unixodbc
+LIBRARY_PATH="$(brew --prefix)/lib" cargo run --release -- /path/to/python/project
+```
+
 The database backend links unixODBC even when you only use SQLite. Building needs
 `unixodbc-dev` (for `libodbc.so`); running a prebuilt binary needs `libodbc2`
 (`libodbc.so.2`). Database-specific ODBC drivers are only needed for ODBC connections.

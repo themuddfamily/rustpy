@@ -142,6 +142,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - name: unixODBC
+        run: |
+          brew install unixodbc
+          echo "LIBRARY_PATH=$(brew --prefix)/lib" >> "$GITHUB_ENV"
       - name: Universal bundle and DMG
         run: packaging/macos/build-app.sh --universal
       # Signing/notary credentials are injected only by an authorized release operator.

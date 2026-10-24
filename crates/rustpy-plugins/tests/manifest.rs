@@ -2,7 +2,9 @@
 
 mod common;
 
-use common::{example_dir, write_files, write_plugin, write_tool_plugin};
+#[cfg(unix)]
+use common::write_files;
+use common::{example_dir, write_plugin, write_tool_plugin};
 use rustpy_highlight::{HighlightTag, Rgb};
 use rustpy_plugins::{validate_plugin_dir, PluginError, PluginManifest};
 use rustpy_templates::TemplateContext;

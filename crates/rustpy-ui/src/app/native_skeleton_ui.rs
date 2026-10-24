@@ -599,7 +599,7 @@ impl Drop for NativeSkeletonUi {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 #[path = "native_skeleton_ui_tests.rs"]
 mod tests;
 

@@ -1,3 +1,4 @@
+#[cfg(unix)]
 use rustpy_core::CancellationToken;
 use rustpy_project::setup::{
     self, CommandSpec, CommandTask, EnvTool, ProjectKind, Setup, SetupAction, SetupError,

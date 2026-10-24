@@ -1,3 +1,4 @@
+#![cfg(unix)] // kernel process supervision uses waitpid and friends
 //! Explicitly admitted Linux acceptance of real local/managed Jupyter transport.
 //! Run serially with --ignored --exact and a provisioned interpreter/kernelspec.
 //! This checks captured child identities, not an unavailable reader-join API.

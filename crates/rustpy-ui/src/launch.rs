@@ -675,6 +675,7 @@ mod tests {
 
     /// Frames of the real shell until `done` holds (drive_quit is what
     /// `ui()` runs first in every frame).
+    #[cfg(unix)]
     fn drive_until(
         shell: &mut IdeShell,
         what: &str,
@@ -694,6 +695,7 @@ mod tests {
         }
     }
 
+    #[cfg(unix)]
     const FRAME: Duration = Duration::from_millis(5);
     #[cfg(unix)]
     #[test]

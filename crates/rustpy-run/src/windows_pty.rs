@@ -497,6 +497,9 @@ mod tests {
         }
         println!("RUSTPY_CONPTY_STDOUT");
         eprintln!("RUSTPY_CONPTY_STDERR");
+        // The fixture leader is terminated by the test with its whole console
+        // process tree; the grandchild is never individually waited on.
+        #[allow(clippy::zombie_processes)]
         let _descendant = Command::new(std::env::current_exe().unwrap())
             .args(["--exact", PRODUCER, "--nocapture", "--test-threads=1"])
             .env("RUSTPY_WINDOWS_PTY_GRANDCHILD", "1")

@@ -72,7 +72,7 @@ pub(crate) fn is_quit_backdrop(user_data: &egui::UserData) -> bool {
 }
 
 impl IdeApp {
-    #[cfg(test)]
+    #[cfg(all(test, unix))]
     pub(crate) fn testing_coordinated_quit_transaction(&self) -> Option<String> {
         self.coordinated_quit
             .as_ref()

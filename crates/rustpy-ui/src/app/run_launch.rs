@@ -1756,6 +1756,8 @@ impl IdeApp {
     }
 }
 
+// Platform-specific test modules and their shared helpers follow this module.
+#[allow(clippy::items_after_test_module)]
 #[cfg(test)]
 mod tests {
     use super::*;

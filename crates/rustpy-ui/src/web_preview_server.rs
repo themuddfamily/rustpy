@@ -673,6 +673,7 @@ mod tests {
         );
     }
     #[test]
+    #[cfg(unix)]
     fn symlink_escape_is_never_served() {
         let root = tempfile::tempdir().unwrap();
         let outside = tempfile::tempdir().unwrap();

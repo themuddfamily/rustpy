@@ -757,6 +757,12 @@ fn protocol_event(v: &serde_json::Value) -> Option<ConsoleEvent> {
     }
 }
 
+#[cfg(windows)]
+#[link(name = "kernel32")]
+extern "system" {
+    fn GenerateConsoleCtrlEvent(event: u32, group: u32) -> i32;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -877,10 +883,4 @@ mod tests {
         );
         assert!(!dir.exists(), "{} was left behind", dir.display());
     }
-}
-
-#[cfg(windows)]
-#[link(name = "kernel32")]
-extern "system" {
-    fn GenerateConsoleCtrlEvent(event: u32, group: u32) -> i32;
 }

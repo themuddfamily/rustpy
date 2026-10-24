@@ -1,6 +1,7 @@
 //! Real repository checks across synchronous mutations and every job owner.
 
 use std::path::Path;
+#[cfg(unix)]
 use std::time::Duration;
 
 use rustpy_vcs::{GitEnv, GitJob, GitRepo, RepositoryOperation, RepositoryReservation};

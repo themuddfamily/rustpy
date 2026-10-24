@@ -411,6 +411,7 @@ impl IdeApp {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(unix)]
     use rustpy_project::setup::plan;
 
     #[test]

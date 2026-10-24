@@ -120,7 +120,9 @@ fn deactivation_saves_named_files_but_never_prompts_untitled_or_readonly() {
         use std::os::unix::fs::PermissionsExt;
         permissions.set_mode(permissions.mode() | 0o200);
     }
+    // Releases a temporary fixture file for cleanup, not a security boundary.
     #[cfg(not(unix))]
+    #[allow(clippy::permissions_set_readonly_false)]
     permissions.set_readonly(false);
     std::fs::set_permissions(&fixture.path, permissions).unwrap();
 }

@@ -9,17 +9,17 @@ impl IdeApp {
         let content = format!("{text}{}", document.text());
         document.set_text(&content, &[], &[]).unwrap();
     }
-    #[cfg(test)]
+    #[cfg(all(test, unix))]
     pub(crate) fn testing_handle_action(&mut self, action: crate::actions::Action) {
         self.handle_action(action, &egui::Context::default());
         self.testing_skip_quit_capture();
     }
     /// Closes the project-trust (or any other) question opened at startup.
-    #[cfg(test)]
+    #[cfg(all(test, unix))]
     pub(crate) fn testing_dismiss_dialog(&mut self) {
         self.dialog = super::Dialog::None;
     }
-    #[cfg(test)]
+    #[cfg(all(test, unix))]
     pub(crate) fn testing_run_sessions(&mut self) -> &mut Vec<rustpy_run::RunSession> {
         &mut self.run_panel.sessions
     }
@@ -55,7 +55,7 @@ impl IdeApp {
         std::mem::take(&mut self.shell_global_quit_requested)
     }
     /// Unit tests run no frames: skip waiting for the backdrop frame.
-    #[cfg(test)]
+    #[cfg(all(test, unix))]
     pub(crate) fn testing_skip_quit_capture(&mut self) {
         self.shell_quit_after_frame = None;
     }
