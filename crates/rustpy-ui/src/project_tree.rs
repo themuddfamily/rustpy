@@ -337,7 +337,7 @@ impl ProjectTree {
         self.new_template_groups = groups;
     }
 
-    #[cfg(test)]
+    #[cfg(all(test, unix))] // its only test is Unix-only
     pub(crate) fn new_template_groups_for_test(&self) -> &[(String, Vec<String>)] {
         &self.new_template_groups
     }

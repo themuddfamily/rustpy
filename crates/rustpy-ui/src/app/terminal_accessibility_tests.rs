@@ -113,6 +113,7 @@ fn frame(
     output.drop_without_applying_deltas();
     update
 }
+#[cfg(unix)] // used by the Unix-only ConPTY-sensitive tests
 fn focus_controls() -> Vec<egui::Event> {
     let modifiers = egui::Modifiers::CTRL | egui::Modifiers::ALT;
     vec![
