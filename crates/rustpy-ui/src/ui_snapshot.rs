@@ -135,7 +135,12 @@ impl Harness {
         for (from, to) in &self.replacements {
             text = text.replace(from.as_str(), to);
         }
-        text
+        let placeholders: Vec<&str> = self
+            .replacements
+            .iter()
+            .map(|(_, to)| to.as_str())
+            .collect();
+        mask_placeholder_text(&text, &placeholders)
     }
 
     /// Renders and compares against (or writes) the golden.
@@ -177,6 +182,48 @@ pub(crate) fn verdict(golden: Option<&str>, actual: &str, update: bool, require:
         None if require => Verdict::Missing,
         None => Verdict::WriteGolden { new: true },
     }
+}
+
+/// A text whose content was replaced by a placeholder (a project path, for
+/// example) has a machine-specific width, elision and style-run length: those
+/// are masked so the snapshot is the same on every machine.
+fn mask_placeholder_text(text: &str, placeholders: &[&str]) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut masking = false;
+    for line in text.split_inclusive('\n') {
+        let body = line.trim_end_matches('\n');
+        if let Some(rest) = body.strip_prefix("text ") {
+            masking = placeholders
+                .iter()
+                .any(|p| !p.is_empty() && rest.contains(p));
+            if masking {
+                // `text (x,y) WxH "..."`: the width becomes `~`, elision is dropped.
+                let mut parts = rest.splitn(3, ' ');
+                let (Some(pos), Some(size), Some(tail)) =
+                    (parts.next(), parts.next(), parts.next())
+                else {
+                    out.push_str(line);
+                    continue;
+                };
+                let height = size.split_once('x').map(|(_, h)| h).unwrap_or(size);
+                let tail = tail.strip_suffix(" elided").unwrap_or(tail);
+                out.push_str(&format!("text {pos} ~x{height} {tail}\n"));
+                continue;
+            }
+        } else if masking && body.starts_with("  [") {
+            // Style runs `  [a..b] style`: the end offset depends on the text.
+            if let Some((range, style)) = body[2..].split_once("] ") {
+                if let Some((start, _)) = range.trim_start_matches('[').split_once("..") {
+                    out.push_str(&format!("  [{start}..~] {style}\n"));
+                    continue;
+                }
+            }
+        } else {
+            masking = false;
+        }
+        out.push_str(line);
+    }
+    out
 }
 
 fn normalize_newlines(text: &str) -> String {

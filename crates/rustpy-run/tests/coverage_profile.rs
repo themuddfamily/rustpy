@@ -251,23 +251,29 @@ fn coverage_runs_script_when_coverage_is_installed() {
         return;
     };
     if !coverage_available(&py) {
+        // Without an installed `coverage`, only a run that refuses the bundled
+        // runtime fails; the default options below fall back to the bundle.
         eprintln!(
-            "coverage not installed for {}; skipping the end-to-end test",
+            "coverage not installed for {}; the end-to-end run uses the bundled runtime",
             py.display()
         );
         let dir = tempfile::tempdir().unwrap();
         let script = dir.path().join("prog.py");
         std::fs::write(&script, SCRIPT).unwrap();
-        let err = run_with_coverage(
+        let options = CoverageOptions {
+            bundled: false,
+            ..CoverageOptions::default()
+        };
+        let err = run_with_coverage_opts(
             3,
             &RunConfig::for_script(&script),
             Some(&interpreter(&py)),
             dir.path(),
+            &options,
         )
         .err()
         .expect("error without coverage");
         assert!(err.to_string().contains("pip install coverage"), "{err}");
-        return;
     }
     let dir = tempfile::tempdir().unwrap();
     let script = dir.path().join("prog.py");

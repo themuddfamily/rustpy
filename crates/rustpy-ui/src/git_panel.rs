@@ -2447,6 +2447,14 @@ mod tests {
             let _ = std::fs::remove_dir_all(&dir);
             std::fs::create_dir_all(&dir).unwrap();
             let repo = GitRepo::init(&dir).unwrap();
+            // Commits go through the git CLI, which needs an identity; hosted CI
+            // runners have no global one, so the fixture repository sets its own.
+            for (key, value) in [("user.name", "Ann"), ("user.email", "ann@example.com")] {
+                let _ = std::process::Command::new("git")
+                    .args(["config", key, value])
+                    .current_dir(&dir)
+                    .output();
+            }
             (TempRepo(dir), repo)
         }
 
