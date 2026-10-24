@@ -958,6 +958,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // local fixture paths with characters invalid on Windows
     fn upload_creates_remote_dirs_once() {
         let project = tree(&[
             ("pkg/a.py", "a", T),

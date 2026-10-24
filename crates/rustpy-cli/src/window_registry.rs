@@ -206,6 +206,14 @@ pub(crate) fn replace_file(source: &Path, destination: &Path) -> io::Result<()> 
 
 /// Returns only OS-live windows whose endpoint proves its identity and current
 /// project. PID and on-disk project values never establish liveness or routing.
+/// A registration removed concurrently vanishes between listing and reading;
+/// on Windows it is briefly inaccessible instead.
+fn transient(error: &io::Error) -> bool {
+    matches!(
+        error.kind(),
+        io::ErrorKind::NotFound | io::ErrorKind::PermissionDenied
+    )
+}
 pub fn live_windows(config: &Path) -> io::Result<Vec<WindowInfo>> {
     let entries = match std::fs::read_dir(config.join(DIRECTORY)) {
         Ok(entries) => entries,
@@ -217,13 +225,13 @@ pub fn live_windows(config: &Path) -> io::Result<Vec<WindowInfo>> {
     for entry in entries {
         let entry = match entry {
             Ok(entry) => entry,
-            Err(error) if error.kind() == io::ErrorKind::NotFound => continue,
+            Err(error) if transient(&error) => continue,
             Err(error) => return Err(error),
         };
         match entry.file_type() {
             Ok(kind) if kind.is_dir() => {}
             Ok(_) => continue,
-            Err(error) if error.kind() == io::ErrorKind::NotFound => continue,
+            Err(error) if transient(&error) => continue,
             Err(error) => return Err(error),
         }
         let id = entry.file_name().to_string_lossy().to_string();
@@ -233,8 +241,11 @@ pub fn live_windows(config: &Path) -> io::Result<Vec<WindowInfo>> {
         let directory = entry.path();
         // The record is atomically published only AFTER its owner holds the
         // lease. Never create/probe a lease in an unpublished starting directory.
-        if !directory.join(RECORD).try_exists()? {
-            continue;
+        match directory.join(RECORD).try_exists() {
+            Ok(true) => {}
+            Ok(false) => continue,
+            Err(error) if transient(&error) => continue,
+            Err(error) => return Err(error),
         }
         published += 1;
         if published > MAX_WINDOWS {
@@ -253,6 +264,7 @@ pub fn live_windows(config: &Path) -> io::Result<Vec<WindowInfo>> {
                 }
                 continue;
             }
+            Err(error) if transient(&error) => continue,
             Err(error) => return Err(error),
         };
         match lease {

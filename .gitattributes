@@ -1,3 +1,7 @@
+# Every file is committed with LF and checked out unchanged on every platform:
+# fixtures, goldens and pinned corpora are compared byte for byte by the tests.
+* -text
+
 # Retained upstream grants are byte-for-byte evidence. Preserve upstream line
 # endings and whitespace instead of rewriting legal texts during checkout.
 **/LICENSE* -text -whitespace

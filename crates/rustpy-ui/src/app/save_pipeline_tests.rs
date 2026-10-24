@@ -648,8 +648,13 @@ fn final_newline_precedence_is_independent_and_explicit_false_removes_newlines()
             let (_directory, mut app, path) = fixture("final.txt", b"nonempty", &ec);
             app.settings.editor.ensure_newline_at_eof = setting;
             app.settings.editor.keep_trailing_spaces_on_caret_line = false;
+            // The added final newline uses the platform line separator.
             let expected = if ec_final.unwrap_or(setting) {
-                b"nonempty\n".as_slice()
+                if cfg!(windows) {
+                    b"nonempty\r\n".as_slice()
+                } else {
+                    b"nonempty\n".as_slice()
+                }
             } else {
                 b"nonempty".as_slice()
             };

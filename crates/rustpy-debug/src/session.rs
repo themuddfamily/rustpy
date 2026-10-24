@@ -2548,7 +2548,10 @@ mod console_io_tests {
             }
         }
         assert_eq!(
-            out.iter().map(|c| c.text.as_str()).collect::<String>(),
+            out.iter()
+                .map(|c| c.text.as_str())
+                .collect::<String>()
+                .replace("\r\n", "\n"),
             "Enter your name: ",
             "the prompt arrives while the program waits"
         );
@@ -2566,7 +2569,10 @@ mod console_io_tests {
             push_chunk(&mut out, c);
         }
         assert_eq!(
-            out.iter().map(|c| c.text.as_str()).collect::<String>(),
+            out.iter()
+                .map(|c| c.text.as_str())
+                .collect::<String>()
+                .replace("\r\n", "\n"),
             "Enter your name: Hello, Bob!\n"
         );
         assert!(child.wait().unwrap().success());

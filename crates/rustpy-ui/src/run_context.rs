@@ -733,7 +733,10 @@ mod doctest_gutter_ownership_tests {
         let cfg = config_for_target(root, &path, &selected[0].1);
         assert_eq!(
             RunConfig::split_args(&cfg.parameters),
-            vec!["-v", "/proj/a file.py::Examples.first"]
+            vec![
+                "-v".to_string(),
+                format!("{}::Examples.first", path.display())
+            ]
         );
     }
 }
@@ -995,7 +998,7 @@ mod context_action_tests {
             "def example():\n    \"\"\"Example.\n    >>> 2 + 2\n    4\n    \"\"\"\n    return 4\n";
         assert_eq!(
             RunConfig::split_args(&context_config(root, &path, source, 3).parameters),
-            vec!["-v", "/project/sample.py::example"]
+            vec!["-v".to_string(), format!("{}::example", path.display())]
         );
         let source = "text = '''\nif __name__ == '__main__':\n    not_python()\n'''\n\nif __name__ == '__main__':\n    print(1)\n";
         let targets = gutter_targets(root, &path, source);

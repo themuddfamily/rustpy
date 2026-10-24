@@ -588,6 +588,7 @@ mod tests {
         }
     }
     #[test]
+    #[cfg(unix)] // the fixture roots are Unix absolute paths
     fn virtualenv_and_uv_preserve_argument_boundaries() {
         let root = Path::new("/project space");
         let p = plan(&request(root, Manager::Virtualenv)).unwrap();
@@ -640,6 +641,7 @@ mod tests {
         );
     }
     #[test]
+    #[cfg(unix)] // the fixture roots are Unix absolute paths
     fn existing_and_system_never_install_or_create() {
         let mut request = request(Path::new("/project"), Manager::Virtualenv);
         request.existing = true;

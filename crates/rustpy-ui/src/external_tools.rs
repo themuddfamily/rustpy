@@ -836,10 +836,8 @@ mod tests {
         assert_eq!(e("$FileNameWithoutExtension$"), "a b");
         assert_eq!(e("$FileExt$"), "py");
         assert_eq!(e("$FileDirName$"), "pkg");
-        assert_eq!(
-            e("$FileRelativePath$"),
-            Path::new("pkg").join("a b.py").display().to_string()
-        );
+        // Relative macros always use `/`, whatever the platform separator.
+        assert_eq!(e("$FileRelativePath$"), "pkg/a b.py");
         assert_eq!(e("$FileDirRelativeToProjectRoot$"), "pkg");
         assert_eq!(e("$ProjectName$"), "app");
         assert_eq!(e("$SelectionStartLine$-$SelectionEndLine$"), "3-4");

@@ -39,6 +39,8 @@ impl Http {
             while !stopping.load(Ordering::Acquire) {
                 match listener.accept() {
                     Ok((stream, _)) => {
+                        // BSD sockets inherit the listener's non-blocking mode.
+                        stream.set_nonblocking(false).unwrap();
                         let request = read_request(&stream);
                         received.lock().unwrap().push(request);
                         let body = replies

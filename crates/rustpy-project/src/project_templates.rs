@@ -231,6 +231,12 @@ fn reject_symlinks(path: &Path) -> io::Result<()> {
 }
 fn relative(path: &Path) -> Result<(), String> {
     let text = path.to_string_lossy();
+    // Windows callers build these with `Path::join`, so its separator is accepted there.
+    let text = if cfg!(windows) {
+        std::borrow::Cow::Owned(text.replace('\\', "/"))
+    } else {
+        text
+    };
     if text.is_empty()
         || text
             .split('/')

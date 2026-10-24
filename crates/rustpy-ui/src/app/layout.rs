@@ -1552,6 +1552,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // runs /bin/sh in a terminal session
     fn exiting_asks_about_every_unsaved_editor_before_stopping_anything() {
         let dir = Scratch::new();
         let mut app = test_app();

@@ -1347,7 +1347,9 @@ mod tests {
         );
         assert_eq!(report.errors.len(), 1);
         assert!(
-            report.errors[0].starts_with("Syntaxes/broken.tmLanguage.json: invalid JSON grammar"),
+            report.errors[0]
+                .replace('\\', "/")
+                .starts_with("Syntaxes/broken.tmLanguage.json: invalid JSON grammar"),
             "{:?}",
             report.errors
         );

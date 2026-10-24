@@ -142,10 +142,11 @@ pub fn static_venv(root: &Path) -> Option<InterpreterInfo> {
                 }
             }
         }
-        site.sort();
-        // `lib` and `Lib` are one directory on a case-insensitive file system.
+        // `lib` and `Lib` are one directory on a case-insensitive file system; the
+        // spelling met first (`lib`) is kept.
         let mut seen = std::collections::HashSet::new();
         site.retain(|p| seen.insert(dunce::canonicalize(p).unwrap_or_else(|_| p.clone())));
+        site.sort();
         let version = version.or_else(|| {
             // `lib/python3.12/site-packages`
             site.iter().find_map(|s| {

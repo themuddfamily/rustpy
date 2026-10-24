@@ -55,6 +55,13 @@ pub fn normalize_path(path: &Path) -> PathBuf {
     normalize_path_inner(path, 0)
 }
 fn normalize_path_inner(path: &Path, depth: usize) -> PathBuf {
+    // A rooted path without a drive prefix (`/proj/main.py` on Windows) names no
+    // real location: joining it onto the current directory would move it onto a
+    // drive and canonicalizing `\\` would too. Such paths (in-memory projects,
+    // fixtures) are only cleaned.
+    if path.has_root() && !path.is_absolute() {
+        return clean_components(path);
+    }
     let absolute = if path.is_absolute() {
         path.to_path_buf()
     } else {
@@ -84,8 +91,11 @@ fn normalize_path_inner(path: &Path, depth: usize) -> PathBuf {
     for name in suffix.into_iter().rev() {
         result.push(name);
     }
+    clean_components(&result)
+}
+fn clean_components(path: &Path) -> PathBuf {
     let mut clean = PathBuf::new();
-    for component in result.components() {
+    for component in path.components() {
         match component {
             Component::CurDir => {}
             Component::ParentDir => {

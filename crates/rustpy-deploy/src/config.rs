@@ -798,6 +798,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // sample servers use names that are invalid on Windows
     fn validation() {
         assert!(sample().validate().is_empty(), "{:?}", sample().validate());
         let mut cfg = sample();

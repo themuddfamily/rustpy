@@ -745,7 +745,11 @@ mod tests {
         let target = Target {
             kind: Kind::Docker,
             target: "chosen-container".into(),
-            local_cwd: PathBuf::from("/local/project"),
+            local_cwd: PathBuf::from(if cfg!(windows) {
+                r"C:\local\project"
+            } else {
+                "/local/project"
+            }),
             ..Default::default()
         };
         let command = target.server().unwrap();
@@ -763,7 +767,11 @@ mod tests {
             kind: Kind::Wsl,
             target: "Ubuntu".into(),
             root: "/home/me/project with spaces".into(),
-            local_cwd: PathBuf::from("/local/project"),
+            local_cwd: PathBuf::from(if cfg!(windows) {
+                r"C:\local\project"
+            } else {
+                "/local/project"
+            }),
             ..Default::default()
         };
         let command = target.server().unwrap();

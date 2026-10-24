@@ -842,6 +842,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // Windows has no liveness check yet and keeps every helper directory
     fn helper_dirs_of_dead_processes_are_swept() {
         assert_eq!(helper_dir_pid("rustpy-console-42-0"), Some(42));
         assert_eq!(helper_dir_pid("rustpy-console-panel-42"), None);
