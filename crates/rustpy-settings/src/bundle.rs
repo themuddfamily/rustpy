@@ -383,7 +383,9 @@ mod tests {
             std::fs::read_to_string(dst.join("plugins/com.x/plugin.json")).unwrap(),
             "installed"
         );
-        assert!(!dst.join("plugins/com.y").exists() && !dst.join("Plugins").exists());
+        // `Plugins` is checked by entry: on a case-insensitive file system the
+        // directory itself aliases the legitimately installed `plugins`.
+        assert!(!dst.join("plugins/com.y").exists() && !dst.join("Plugins/com.z").exists());
         let _ = std::fs::remove_dir_all(&src);
         let _ = std::fs::remove_dir_all(&dst);
     }

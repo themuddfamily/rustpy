@@ -6,7 +6,7 @@
 #[path = "actions/reference.rs"]
 mod reference;
 #[path = "actions/shortcuts.rs"]
-mod shortcuts;
+pub(crate) mod shortcuts;
 
 use std::fmt;
 
@@ -813,10 +813,10 @@ impl Keymap {
     pub fn bind(&mut self, chord: KeyChord, action: Action) {
         self.extended.retain(|(_, s)| match s {
             shortcuts::Shortcut::Sequence(keys) => keys.first() != Some(&chord),
-            shortcuts::Shortcut::ControlSequence(keys) if !cfg!(target_os = "macos") => {
+            shortcuts::Shortcut::ControlSequence(keys) if !shortcuts::mac_keymap() => {
                 keys.first() != Some(&chord)
             }
-            shortcuts::Shortcut::PhysicalControl(c) if !cfg!(target_os = "macos") => *c != chord,
+            shortcuts::Shortcut::PhysicalControl(c) if !shortcuts::mac_keymap() => *c != chord,
             shortcuts::Shortcut::Shared(c) => *c != chord,
             _ => true,
         });
@@ -1020,7 +1020,7 @@ impl Keymap {
         physical_key: Option<Key>,
         mods: Modifiers,
     ) -> Option<Action> {
-        if cfg!(target_os = "macos") && mods.ctrl && !mods.mac_cmd {
+        if shortcuts::mac_keymap() && mods.ctrl && !mods.mac_cmd {
             return None;
         }
         self.lookup(KeyChord::new(key, mods)).or_else(|| {
@@ -1044,7 +1044,7 @@ impl Keymap {
             .first()
             .cloned()
             .unwrap_or_default();
-        if cfg!(target_os = "macos") || matches!(self.name.as_str(), "macOS" | "Xcode") {
+        if shortcuts::mac_keymap() || matches!(self.name.as_str(), "macOS" | "Xcode") {
             text.replace("Ctrl+", "⌘")
                 .replace("Alt+", "⌥")
                 .replace("Shift+", "⇧")

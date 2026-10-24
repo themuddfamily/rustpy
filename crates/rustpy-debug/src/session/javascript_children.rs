@@ -370,7 +370,11 @@ mod tests {
         let deadline = Instant::now() + Duration::from_secs(3);
         loop {
             match listener.accept() {
-                Ok((stream, _)) => return stream,
+                Ok((stream, _)) => {
+                    // BSD sockets inherit the listener's non-blocking mode.
+                    stream.set_nonblocking(false).unwrap();
+                    return stream;
+                }
                 Err(error)
                     if error.kind() == std::io::ErrorKind::WouldBlock
                         && Instant::now() < deadline =>

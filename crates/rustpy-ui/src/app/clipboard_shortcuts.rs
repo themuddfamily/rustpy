@@ -42,7 +42,7 @@ impl ClipboardShortcuts {
 /// Alt or Ctrl alone. Ctrl+Alt is AltGr on Windows and Option composes
 /// characters on macOS: their text is real typing.
 fn is_chord(modifiers: egui::Modifiers) -> bool {
-    !cfg!(target_os = "macos") && (modifiers.alt != modifiers.ctrl)
+    !crate::actions::shortcuts::mac_keymap() && (modifiers.alt != modifiers.ctrl)
 }
 
 #[cfg(test)]
@@ -80,7 +80,7 @@ mod tests {
                 _ => None,
             })
             .collect();
-        if cfg!(target_os = "macos") {
+        if crate::actions::shortcuts::mac_keymap() {
             assert_eq!(texts, ["1", "a", "@"]);
         } else {
             assert_eq!(texts, ["a", "@"]);

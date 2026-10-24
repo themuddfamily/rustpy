@@ -239,7 +239,10 @@ impl IdeApp {
                     ..
                 } if !mouse && !crate::actions::is_modifier_key(*key) => {
                     let mut text = KeyChord::new(*key, *modifiers).to_string();
-                    if cfg!(target_os = "macos") && modifiers.ctrl && !modifiers.mac_cmd {
+                    if crate::actions::shortcuts::mac_keymap()
+                        && modifiers.ctrl
+                        && !modifiers.mac_cmd
+                    {
                         text = text.replacen("Ctrl+", "Control+", 1);
                     }
                     strokes.push(text);
@@ -593,7 +596,7 @@ impl IdeApp {
             let physical = mods.ctrl
                 && !mods.mac_cmd
                 && self.keymap.prefix_actions(chord, true).iter().any(eligible);
-            if cfg!(target_os = "macos") && mods.ctrl && !mods.mac_cmd && !physical {
+            if crate::actions::shortcuts::mac_keymap() && mods.ctrl && !mods.mac_cmd && !physical {
                 continue;
             }
             if physical

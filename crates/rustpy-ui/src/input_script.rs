@@ -58,7 +58,7 @@ fn parse_mods(words: &[&str]) -> Modifiers {
         match w.to_ascii_lowercase().as_str() {
             "ctrl" | "control" => {
                 m.ctrl = true;
-                m.command = !cfg!(target_os = "macos");
+                m.command = !crate::actions::shortcuts::mac_keymap();
             }
             "cmd" | "command" => m.command = true,
             "shift" => m.shift = true,

@@ -39,6 +39,24 @@ const TRICKY: [&str; 6] = [
     "back\\slash.py",
 ];
 
+/// The "remote" side runs on this machine: its listing scripts need GNU find
+/// (`-printf`) and the rsync client needs protect-args (`-s`, rsync 3). macOS
+/// ships BSD find and rsync 2.6.9, so those parts are skipped there.
+fn gnu_remote_tools() -> bool {
+    let find = Command::new("find")
+        .arg("--version")
+        .output()
+        .is_ok_and(|o| o.status.success() && String::from_utf8_lossy(&o.stdout).contains("GNU"));
+    let rsync = Command::new("rsync")
+        .arg("--version")
+        .output()
+        .is_ok_and(|o| String::from_utf8_lossy(&o.stdout).contains("version 3"));
+    if !(find && rsync) {
+        eprintln!("GNU find and rsync 3 are required for the fake remote side; skipping");
+    }
+    find && rsync
+}
+
 fn installed(program: &str) -> bool {
     match Command::new(program).arg("-V").output() {
         Ok(_) => true,
@@ -206,6 +224,9 @@ fn exercise(t: &dyn Transport, tmp: &TempDir, root: &Path) {
 
 #[test]
 fn sftp_transport_end_to_end() {
+    if !gnu_remote_tools() {
+        return;
+    }
     let Some(client) = client_scp_mode().filter(|_| installed("scp")) else {
         eprintln!("skipped: the OpenSSH client (ssh, scp) is not installed");
         return;
@@ -240,6 +261,9 @@ fn sftp_transport_end_to_end() {
 
 #[test]
 fn rsync_transport_end_to_end() {
+    if !gnu_remote_tools() {
+        return;
+    }
     if !installed("rsync") {
         eprintln!("skipped: rsync is not installed");
         return;
@@ -266,6 +290,9 @@ fn rsync_transport_end_to_end() {
 /// directory here), wildcard names land where they belong, and the SSH listing plans a sync.
 #[test]
 fn upload_paths_and_sync_over_rsync() {
+    if !gnu_remote_tools() {
+        return;
+    }
     if !installed("rsync") {
         eprintln!("skipped: rsync is not installed");
         return;

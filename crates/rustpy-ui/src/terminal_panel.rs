@@ -142,7 +142,7 @@ impl TerminalTab {
             shortcut,
             self.has_selection(),
             shift,
-            cfg!(target_os = "macos"),
+            crate::actions::shortcuts::mac_keymap(),
         ) {
             ShortcutAction::CopySelection { keep } => {
                 if let Some(text) = self.selected_text() {
@@ -1572,7 +1572,8 @@ impl TerminalPanel {
                         let mods = Mods {
                             ctrl: modifiers.ctrl || modifiers.command,
                             alt: modifiers.alt
-                                && (!cfg!(target_os = "macos") || self.preferences.option_as_meta),
+                                && (!crate::actions::shortcuts::mac_keymap()
+                                    || self.preferences.option_as_meta),
                             shift: modifiers.shift,
                         };
                         if key == egui::Key::Enter && !tab.input_line.trim().is_empty() {

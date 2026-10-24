@@ -97,3 +97,5 @@ tests inside `rustpy-ui`, which are preferable to screenshots because they asser
 - Document limitations and required external tools rather than hiding an unsupported path
   behind a setting.
 - Release preparation follows [release.md](release.md).
+
+On macOS, run the UI tests with `RUSTPY_KEYMAP_PLATFORM=default` and a `TMPDIR` that is not a symlink (for example `$TMPDIR` set to a directory under your home): the keyboard tests are written against the Windows/Linux keymap and compare canonical paths.

@@ -447,7 +447,11 @@ mod tests {
                 let deadline = Instant::now() + Duration::from_secs(10);
                 let mut connection = loop {
                     match listener.accept() {
-                        Ok((connection, _)) => break connection,
+                        Ok((connection, _)) => {
+                            // BSD sockets inherit the listener's non-blocking mode.
+                            connection.set_nonblocking(false).unwrap();
+                            break connection;
+                        }
                         Err(e)
                             if e.kind() == std::io::ErrorKind::WouldBlock
                                 && Instant::now() < deadline =>

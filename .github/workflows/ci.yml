@@ -72,6 +72,8 @@ jobs:
           brew install unixodbc
           echo "LIBRARY_PATH=$(brew --prefix)/lib" >> "$GITHUB_ENV"
           echo "TMPDIR=${RUNNER_TEMP}" >> "$GITHUB_ENV"
+          # The keyboard tests are written against the Windows/Linux keymap semantics.
+          echo "RUSTPY_KEYMAP_PLATFORM=default" >> "$GITHUB_ENV"
       # Interpreter/debugpy/pytest/coverage, fuzz/nightly and cargo-deny are
       # provisioned separately; this recipe never installs Python packages.
       - if: matrix.shard == 'ui'

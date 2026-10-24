@@ -422,6 +422,8 @@ fn accept_until(
         };
         match result {
             Ok((stream, _)) => {
+                // BSD sockets inherit the listener's non-blocking mode.
+                let _ = stream.set_nonblocking(false);
                 listener
                     .lock()
                     .unwrap_or_else(|error| error.into_inner())
@@ -901,7 +903,11 @@ mod worker_retirement_tests {
         let deadline = Instant::now() + Duration::from_secs(3);
         let mut peer = loop {
             match listener.accept() {
-                Ok((peer, _)) => break peer,
+                Ok((peer, _)) => {
+                    // BSD sockets inherit the listener's non-blocking mode.
+                    peer.set_nonblocking(false).unwrap();
+                    break peer;
+                }
                 Err(error)
                     if error.kind() == std::io::ErrorKind::WouldBlock
                         && Instant::now() < deadline =>

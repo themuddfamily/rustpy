@@ -2,6 +2,18 @@
 //! as ordinary chords, so copying, resetting and importing never lose them.
 use super::{Action, KeyChord, Keymap};
 
+/// Whether chords follow the macOS keymap: ⌘ is the primary modifier and Ctrl a
+/// separate physical one. Defaults to the operating system;
+/// `RUSTPY_KEYMAP_PLATFORM=default` selects the Windows/Linux semantics that the
+/// keyboard tests are written against.
+pub(crate) fn mac_keymap() -> bool {
+    static MAC: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *MAC.get_or_init(|| {
+        cfg!(target_os = "macos")
+            && std::env::var_os("RUSTPY_KEYMAP_PLATFORM").is_none_or(|v| v != "default")
+    })
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Shortcut {
     Sequence(Vec<KeyChord>),
@@ -104,7 +116,7 @@ impl Shortcut {
 }
 impl Keymap {
     pub fn primary_modifiers(mods: egui::Modifiers) -> bool {
-        !cfg!(target_os = "macos") || !mods.ctrl || mods.mac_cmd
+        !mac_keymap() || !mods.ctrl || mods.mac_cmd
     }
     pub fn prefix_actions(&self, chord: KeyChord, physical: bool) -> Vec<Action> {
         self.extended
@@ -157,14 +169,12 @@ impl Keymap {
             self.extended.iter().find_map(|(a, s)| match s {
                 Shortcut::Sequence(keys) if keys.first() == Some(&chord) => Some(*a),
                 Shortcut::ControlSequence(keys)
-                    if !cfg!(target_os = "macos") && keys.first() == Some(&chord) =>
+                    if !mac_keymap() && keys.first() == Some(&chord) =>
                 {
                     Some(*a)
                 }
                 Shortcut::Shared(c) if *c == chord => Some(*a),
-                Shortcut::PhysicalControl(c) if !cfg!(target_os = "macos") && *c == chord => {
-                    Some(*a)
-                }
+                Shortcut::PhysicalControl(c) if !mac_keymap() && *c == chord => Some(*a),
                 _ => None,
             })
         })
@@ -191,16 +201,14 @@ impl Keymap {
         if let Some(shortcut) = Shortcut::parse(text) {
             let prefix = match &shortcut {
                 Shortcut::Sequence(keys) => keys.first().copied(),
-                Shortcut::ControlSequence(keys) if !cfg!(target_os = "macos") => {
-                    keys.first().copied()
-                }
-                Shortcut::PhysicalControl(chord) if !cfg!(target_os = "macos") => Some(*chord),
+                Shortcut::ControlSequence(keys) if !mac_keymap() => keys.first().copied(),
+                Shortcut::PhysicalControl(chord) if !mac_keymap() => Some(*chord),
                 _ => None,
             };
             if !leave_conflicts {
                 let control_prefix = match &shortcut {
                     Shortcut::ControlSequence(keys) => keys.first().copied(),
-                    Shortcut::Sequence(keys) if !cfg!(target_os = "macos") => keys.first().copied(),
+                    Shortcut::Sequence(keys) if !mac_keymap() => keys.first().copied(),
                     _ => None,
                 };
                 if let Some(chord) = control_prefix {
@@ -255,7 +263,7 @@ impl Keymap {
             .collect();
         let control_prefix = match &shortcut {
             Some(Shortcut::ControlSequence(keys)) => keys.first().copied(),
-            Some(Shortcut::Sequence(keys)) if !cfg!(target_os = "macos") => keys.first().copied(),
+            Some(Shortcut::Sequence(keys)) if !mac_keymap() => keys.first().copied(),
             _ => None,
         };
         if let Some(chord) = control_prefix {
@@ -265,10 +273,8 @@ impl Keymap {
         }
         let prefix = match &shortcut {
             Some(Shortcut::Sequence(keys)) => keys.first().copied(),
-            Some(Shortcut::ControlSequence(keys)) if !cfg!(target_os = "macos") => {
-                keys.first().copied()
-            }
-            Some(Shortcut::PhysicalControl(chord)) if !cfg!(target_os = "macos") => Some(*chord),
+            Some(Shortcut::ControlSequence(keys)) if !mac_keymap() => keys.first().copied(),
+            Some(Shortcut::PhysicalControl(chord)) if !mac_keymap() => Some(*chord),
             None => KeyChord::parse(text),
             _ => None,
         };
@@ -280,9 +286,9 @@ impl Keymap {
                 for (owner, s) in &self.extended {
                     if matches!(s,Shortcut::Shared(c) if *c == chord)
                         || matches!(s,Shortcut::Sequence(keys) if keys.first() == Some(&chord))
-                        || (!cfg!(target_os = "macos")
+                        || (!mac_keymap()
                             && matches!(s,Shortcut::ControlSequence(keys) if keys.first() == Some(&chord)))
-                        || (!cfg!(target_os = "macos")
+                        || (!mac_keymap()
                             && matches!(s,Shortcut::PhysicalControl(c) if *c == chord))
                     {
                         owners.push(*owner);
@@ -331,7 +337,7 @@ impl Keymap {
                 matches!(s,Shortcut::PhysicalControl(c) if *c == chord).then_some(*a)
             })
             .collect();
-        if !candidates.is_empty() && !cfg!(target_os = "macos") {
+        if !candidates.is_empty() && !mac_keymap() {
             if let Some(owner) = self.lookup(chord) {
                 candidates.push(owner);
             }

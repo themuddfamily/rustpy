@@ -1583,6 +1583,15 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn scripts_run_in_a_local_shell() {
+        // The listing script needs GNU find (`-printf`); BSD find skips the check.
+        if !std::process::Command::new("find")
+            .arg("--version")
+            .output()
+            .is_ok_and(|o| o.status.success())
+        {
+            eprintln!("GNU find not available; skipping");
+            return;
+        }
         use crate::test_util::TempDir;
         let tmp = TempDir::new("ssh-scripts");
         let base = tmp.path().join("my dir 'q'");
