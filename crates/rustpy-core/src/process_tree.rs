@@ -708,6 +708,10 @@ mod unix {
         let group = unsafe { libc::getpgid(pid as i32) };
         if group == pid as i32 {
             Ok(())
+        } else if group < 0 && std::io::Error::last_os_error().raw_os_error() == Some(libc::ESRCH) {
+            // The child already exited (macOS reports no group for a zombie); the
+            // group was created at spawn and its identity stays with the leader.
+            Ok(())
         } else {
             Err(io::Error::other(
                 "Child is not the leader of its owned process group",

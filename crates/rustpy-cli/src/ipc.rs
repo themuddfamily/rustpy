@@ -1807,7 +1807,11 @@ mod control_tests {
             let accept = || -> io::Result<TcpStream> {
                 loop {
                     match listener.accept() {
-                        Ok((stream, _)) => return Ok(stream),
+                        Ok((stream, _)) => {
+                            // BSD sockets inherit the listener's non-blocking mode.
+                            stream.set_nonblocking(false)?;
+                            return Ok(stream);
+                        }
                         Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
                             control_remaining(deadline)?;
                             if stopped.recv_timeout(Duration::from_millis(5)).is_ok() {
