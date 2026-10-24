@@ -1031,6 +1031,7 @@ pub fn plan(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(unix)] // used by the Unix-only provider tests
     fn command(provider: Provider, operation: Operation, args: Arguments) -> CommandPlan {
         plan(
             provider,

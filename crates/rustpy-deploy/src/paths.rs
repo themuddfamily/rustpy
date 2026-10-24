@@ -281,7 +281,9 @@ pub fn percent_encode_segment(segment: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{Server, ServerKind};
+    use crate::config::Server;
+    #[cfg(unix)] // used by the Unix-only special-roots test
+    use crate::config::ServerKind;
 
     #[test]
     fn normalize() {

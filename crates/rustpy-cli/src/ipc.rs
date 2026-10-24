@@ -538,7 +538,7 @@ impl FileLease {
         self._file.metadata()
     }
     /// Fixture-only access for an explicit kernel unlock; never clones a guard.
-    #[cfg(test)]
+    #[cfg(all(test, unix))] // its only use is the Unix-only admission test
     pub(crate) fn borrowed_file_for_test(&self) -> &File {
         &self._file
     }

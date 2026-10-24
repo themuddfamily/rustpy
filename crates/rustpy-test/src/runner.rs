@@ -1684,6 +1684,7 @@ def test_never_runs_with_x():
         assert!(err.to_string().contains("does not exist"), "{err}");
     }
 
+    #[cfg(unix)] // used by the Unix-only runner tests
     fn strings(items: &[&str]) -> Vec<String> {
         items.iter().map(|s| s.to_string()).collect()
     }
