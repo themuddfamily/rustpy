@@ -20,6 +20,7 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 | Git panel Tab order on Windows | The accessibility test that tabs to a retained Git revision row passes most runs and fails some on the Windows runner; ignored there until the focus timing is understood. | Windows |
 | Web preview loopback on Windows | The in-process preview server test's client gets a connection reset on the Windows runner; the server path needs checking against Windows socket close semantics. | Windows |
 | AI streaming on Windows | A server that closes the connection right after the stop reason is reported as "connection interrupted" (WSAECONNRESET) rather than a clean end of stream. | AI Assistant |
+| Stopping a Git job on macOS | A stopped Git job whose SSH helper ignores SIGTERM ends immediately on the macOS runner instead of waiting out the grace period; the process-group observation via proc_pidinfo needs checking on a Mac. | VCS |
 | rsync deployment on stock macOS | Apple's rsync 2.6.9 lacks `-s` (protect-args); install rsync 3 from Homebrew. Remote listing also needs GNU find on the server. | Deployment |
 
 ## Recently fixed
