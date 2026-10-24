@@ -717,6 +717,7 @@ pub(crate) fn read_bundle_file(path: &Path) -> Result<Vec<u8>, PluginError> {
 /// Unix permission bits for an installed plugin file: `rwxr-xr-x` for
 /// programs, `rw-r--r--` for everything else (never setuid/setgid/sticky or
 /// writable by group or others).
+#[cfg(unix)]
 pub(crate) const fn installed_mode(executable: bool) -> u32 {
     if executable {
         0o755
@@ -801,6 +802,7 @@ pub(crate) struct PluginFile {
     pub rel: String,
     pub path: PathBuf,
     /// Device and inode the walk saw (Unix), to notice a file swapped before copying.
+    #[cfg_attr(not(unix), allow(dead_code))]
     pub inode: Option<(u64, u64)>,
 }
 
