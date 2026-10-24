@@ -678,6 +678,7 @@ mod tests {
     use super::*;
     use crate::test_util::{set_mtime, TempDir};
     use crate::LocalTransport;
+    #[cfg(unix)]
     use std::sync::Mutex;
 
     const T: i64 = 1_700_000_000;
@@ -918,11 +919,13 @@ mod tests {
     }
 
     /// Delegates to a [`LocalTransport`] but behaves like scp: the parent directory must exist.
+    #[cfg(unix)] // used by the Unix-only upload test below
     struct StrictParents {
         inner: LocalTransport,
         mkdirs: Mutex<Vec<String>>,
     }
 
+    #[cfg(unix)]
     impl Transport for StrictParents {
         fn upload(&self, local: &Path, remote: &str) -> anyhow::Result<()> {
             let parent = self.inner.resolve(&remote_parent(remote).unwrap())?;
