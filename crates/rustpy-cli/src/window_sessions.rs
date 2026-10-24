@@ -624,6 +624,9 @@ impl RestoreRound {
                 Err(error) if error.kind() == io::ErrorKind::WouldBlock => break,
                 Err(error) => return Err(error.into()),
             };
+            // BSD sockets inherit the listener's non-blocking mode; the receipt is
+            // read with a deadline-bounded blocking read.
+            stream.set_nonblocking(false)?;
             let receipt: ChildReceipt =
                 serde_json::from_slice(&read_message(&mut stream, deadline)?)
                     .map_err(|error| RestoreError::InvalidChild(error.to_string()))?;
