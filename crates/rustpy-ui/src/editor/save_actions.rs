@@ -301,16 +301,19 @@ fn write_impl(
         check()?;
         // Windows refuses to replace a file another handle has open without
         // FILE_SHARE_DELETE (an indexer, a concurrent save): retry briefly.
+        // ERROR_ACCESS_DENIED, ERROR_SHARING_VIOLATION (32) and ERROR_LOCK_VIOLATION
+        // (33) are all transient here; FlushFileBuffers makes concurrent savers hold
+        // the file for a while, so the budget is generous (about two seconds).
+        let transient = |e: &std::io::Error| {
+            e.kind() == std::io::ErrorKind::PermissionDenied
+                || matches!(e.raw_os_error(), Some(32) | Some(33))
+        };
         let mut attempt = 0;
         loop {
             match std::fs::rename(&tmp, &target) {
-                Err(e)
-                    if cfg!(windows)
-                        && e.kind() == std::io::ErrorKind::PermissionDenied
-                        && attempt < 50 =>
-                {
+                Err(e) if cfg!(windows) && transient(&e) && attempt < 200 => {
                     attempt += 1;
-                    std::thread::sleep(std::time::Duration::from_millis(5));
+                    std::thread::sleep(std::time::Duration::from_millis(10));
                 }
                 other => break other,
             }

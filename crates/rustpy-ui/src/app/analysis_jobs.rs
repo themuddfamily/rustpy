@@ -1746,6 +1746,11 @@ mod tests {
                 worst = worst.max(ended.saturating_duration_since(cancelled));
             }
         }
+        // The strict bound is a performance gate for local and performance runs;
+        // shared CI runners only need to show cancellation is not stuck.
+        let perf_gate =
+            std::env::var_os("CI").is_none() || std::env::var_os("RUSTPY_PERF_TESTS").is_some();
+        let bound = if perf_gate { bound } else { bound * 5 };
         assert!(
             worst < bound,
             "cancellation took {worst:?} (bound {bound:?}, full run {total:?})"
