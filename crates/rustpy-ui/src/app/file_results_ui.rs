@@ -488,11 +488,20 @@ mod tests {
         std::fs::write(root.join("main.py"), "x = 1\n").unwrap();
         let mut app = IdeApp::new(Settings::default(), Some(root.clone()));
         app.refresh_find_scope_filters();
-        let revision = app.find_in_files.features.scope_revision;
+        let mut revision = app.find_in_files.features.scope_revision;
         assert!(!app.find_in_files.features.scope_filters.is_empty());
-        // A skipped refresh leaves the captured filters untouched.
-        app.find_in_files.features.scope_filters.clear();
-        app.refresh_find_scope_filters();
+        // A skipped refresh leaves the captured filters untouched. The background
+        // project scan may still be changing the inputs right after startup, so
+        // wait until two consecutive refreshes agree.
+        for _ in 0..100 {
+            app.find_in_files.features.scope_filters.clear();
+            app.refresh_find_scope_filters();
+            if app.find_in_files.features.scope_revision == revision {
+                break;
+            }
+            revision = app.find_in_files.features.scope_revision;
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
         assert!(app.find_in_files.features.scope_filters.is_empty());
         assert_eq!(app.find_in_files.features.scope_revision, revision);
         // Any input change (here the custom scope expression) recaptures them.
