@@ -1,20 +1,22 @@
 # RustPy maintainer status
 
 This page is for whoever picks up RustPy maintenance: what is finished, what is partial, what
-still has to be verified before a first public release, and the known open issues. Feature
+still has to be verified for future releases, and the known open issues. Feature
 detail lives in [roadmap.md](roadmap.md); user-facing issues are listed in
 [docs/review-backlog.md](docs/review-backlog.md).
 
 ## Summary
 
 - Version 1.0.0. [CHANGELOG.md](CHANGELOG.md) has a dated `1.0.0` section for the first public
-  release. The GitHub release records the final package and verification status.
+  release. [RustPy v1.0.0](https://github.com/themuddfamily/rustpy/releases/tag/v1.0.0)
+  is published with Windows x64 and ARM64 setup, MSI and portable packages plus checksums.
 - Roadmap: 291 feature items, 286 done (`[x]`), 5 partial (`[~]`), none untouched. All five
   partial items are implemented; what is missing is verification on macOS (and, for one item,
   on Windows on Arm and as a Snap).
 - Linux is the primary development platform and the best-tested one. Windows 11 (x64) has been
-  checked for interpreters, browsers, the web preview and the installers. macOS builds have not
-  been run on a Mac.
+  checked for interpreters, browsers and the web preview. Native x64 and ARM64 installer
+  automation passed. macOS builds and automated tests passed on hosted Macs; interactive
+  macOS acceptance remains outstanding.
 
 ## Complete
 
@@ -38,59 +40,47 @@ harness on 2026-10-18 (10k- and 100k-file projects, million-line analysis; softw
 | §6 Interpreter discovery | macOS framework and Homebrew interpreter paths not verified on a Mac |
 | §6 Add Interpreter dialog | macOS flows not verified |
 | §6 Web browsers and preview | Safari and the WKWebView built-in preview not verified |
-| §8 Cross-platform builds | Snap package, macOS bundle (universal build, signing, notarisation) and running the Windows arm64 build on Arm hardware |
+| §8 Cross-platform builds | Snap package, macOS bundle (universal build, signing, notarisation) and interactive Windows ARM64 GUI acceptance |
 | §8 Accessibility | NVDA (Windows) and VoiceOver (macOS); Linux was checked with Orca |
 
-## Verification outstanding before a release
+## Published 1.0.0 verification
 
-The 1.0.0 preparation checks on 2026-10-25 used Rust 1.99.1 on Linux x86_64, two CPUs,
-nice 10, two Cargo jobs, two Rayon workers and at most two test threads. Formatting,
-Clippy (`-D warnings`), the application build, QA (6 passed, 1 ignored), Python checks
-(30 passed), distribution contracts (3 passed), dependency checks, notices and the covered
-Cargo source bundle passed. Dark and Light headless smoke screenshots were captured and
-reviewed using isolated settings.
+The published tag points to `6aa113f8b0042985955a7ca518f050d955f34910`.
+All fourteen [CI jobs](https://github.com/themuddfamily/rustpy/actions/runs/40205175886)
+passed on that revision: formatting, Clippy, builds, dependencies and test shards across
+Linux, Windows and macOS. All 77 Python checks passed. The five type-check module tests
+and a fresh isolated Linux headless startup smoke check also passed.
 
-The clean-environment workspace run had **6,701 passed, 2 failed and 164 ignored**.
-The cancellation-latency test exceeded its 250 ms bound (779 ms), and the cancelled-clone
-fixture observed cleanup before transport retirement. Both passed once in isolation with
-one test thread (cancellation 126 ms); this does not establish a clean full-suite gate.
-An earlier console failure was caused by the harness setting `PYTHONDONTWRITEBYTECODE`;
-the console test passed after that flag was removed. The UI snapshot checks were required.
+Both native [Windows packaging jobs](https://github.com/themuddfamily/rustpy/actions/runs/40205173038)
+passed all 21 acceptance steps: portable CLI startup, silent Inno installation/reinstall/removal,
+MSI core and full-feature installation, deleted-executable repair in a remembered custom
+folder, integration checks and uninstall cleanup. Each executable is bound to recorded
+linkage and retained runtime/source evidence. Independent review verified 4,021 evidence
+files per architecture, the original linker records, all six download checksums and GitHub's
+stored SHA-256 digests. The release includes `SHA256SUMS`.
 
-The [packaging dry run](https://github.com/themuddfamily/rustpy/actions/runs/40184646017)
-on revision `05d378ffb31b9d28e729340cd5ca086f6c9d5b61` built Linux x64 successfully, then
-failed native licence staging because the binary-bound runtime manifest was missing.
-The remaining jobs were cancelled; that attempt produced no installers or public tag.
-Subsequent Windows packaging uses the recorded-link evidence generator and silent native
-installation checks described in the release checklist. Those reports must pass before
-publication; the release page records their final result.
+Cancellation now stops both type-check syntax walks. The regression fails without the
+checkpoints and passes with them; the unchanged local cancellation test measured 19.1 ms
+p95 against 250 ms, and all three platform UI CI shards passed.
 
-The source has changed since the last full run (Windows packaging, licence tooling, and the
-public-release clean-up that renamed the colour schemes and replaced the bundled font). Before
-tagging a release:
-
-1. Run every gate in [docs/quality.md](docs/quality.md) on the release revision: fmt, Clippy,
-   unit and doc tests, the `qa/` suite, cargo-deny and the Python script tests.
-2. Review the UI snapshot goldens after the font change (editor font metrics changed), then run
-   the snapshot tests with `RUSTPY_REQUIRE_SNAPSHOTS=1`.
-3. Regenerate and check the licence notices (`packaging/update-notices.py --check`,
-   `scripts/generate-cargo-notices.py --check`).
-4. Run the headless smoke test (`scripts/smoke.sh`) and look at the screenshots in both the
-   Dark and Light schemes.
-5. Corpus, CPython oracle and fuzz gates need provisioned corpora and a nightly toolchain; they
-   have not yet been run in a recorded, reproducible way.
-6. Follow [docs/release.md](docs/release.md) for packaging, installation tests and signing.
+The full local quality gate is **not green**: the unoptimized code/completion typing-frame
+check on the shared Linux host measured 83.5 ms p95 against 60 ms. The release notes disclose
+this result. Packages are unsigned. Interactive Windows GUI, accessibility, embedded-browser
+acceptance and older-version upgrades remain unverified. Linux, macOS and Store installers
+are not published. Corpus, CPython oracle and fuzz gates still need recorded runs with their
+provisioned inputs. Follow [docs/quality.md](docs/quality.md) and [docs/release.md](docs/release.md)
+for subsequent releases.
 
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs fmt, Clippy, tests, the desktop build and cargo-deny on
 Linux, Windows and macOS for every push to `main` and every pull request; all fourteen jobs
-are green as of 2026-10-24. Tests that depend on Unix tools, Unix fixture paths or behaviour
+passed for the published 1.0.0 revision on 2026-10-25. Tests that depend on Unix tools, Unix fixture paths or behaviour
 not yet understood on the hosted Windows and macOS runners are gated or ignored there, each
 with its reason in the source and an entry in the known-issues list.
-`.github/workflows/release.yml` is dispatched by hand: it builds the Linux, Windows and macOS
-packages, and publishing a GitHub release or building Flatpak/Snap packages are opt-in
-inputs. The Microsoft Store (MSIX) steps stay disabled until the package identity is real.
+`.github/workflows/release.yml` is dispatched by hand: its default builds and tests native
+Windows x64 and ARM64 packages. Linux/macOS builds, publication and Flatpak/Snap packaging
+are opt-in inputs. The Microsoft Store (MSIX) steps stay disabled until the package identity is real.
 
 ## Known open issues and limitations
 
@@ -99,7 +89,8 @@ inputs. The Microsoft Store (MSIX) steps stay disabled until the package identit
 - **Windows terminal**: stopping a ConPTY-backed terminal session was the last Windows terminal
   issue found; the fix is integrated but has not been re-run on Windows. PowerShell, cmd and
   WSL terminal profiles, and zsh, fish and pwsh shells, have not been checked end to end.
-- **Windows on Arm**: the arm64 build cross-compiles but has not been run on Arm hardware.
+- **Windows on Arm**: native CLI and installer checks passed on a hosted ARM64 runner;
+  interactive GUI acceptance remains outstanding.
 - **Snap**: the Snap package is defined but has not been built (needs snapd).
 - **Microsoft Store**: the MSIX package is sideload-tested; a Store submission needs a Partner
   Center identity.
