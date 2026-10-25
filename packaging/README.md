@@ -384,17 +384,22 @@ The complete checklist is in [docs/release.md](../docs/release.md); the packagin
 
 1. Bump `version` in the root `Cargo.toml`. Run `cargo clippy --workspace --all-targets`,
    `cargo test --workspace` and the headless smoke test (`scripts/smoke.sh`).
-2. `.github/workflows/release.yml` is manual (`workflow_dispatch`). Enable its Windows
-   and publish job guards for an approved release, dispatch once, then restore
-   both guards to `false`. Other platform and Microsoft Store jobs stay disabled.
-   It builds x64 and ARM64 portable ZIPs, setup executables and MSI installers, checks
-   expected outputs, then generates and independently verifies a combined `SHA256SUMS`.
-3. After both Windows builds succeed, the publisher creates `vX.Y.Z` from the workspace
-   version at the workflow run's exact source revision. It uploads packages and checksums
-   to a draft GitHub Release, then publishes it. A failed build does not publish a release;
-   publication failures may leave a draft for inspection. Existing releases are not replaced.
-4. Check them. Inspect the `.deb` with `dpkg-deb --info` and `--contents`. Install the setup
-   `.exe` in a Windows VM. On macOS, mount the `.dmg` and run `spctl -a -vv RustPy.app`.
+2. Dispatch `.github/workflows/release.yml` by hand (`workflow_dispatch`) with
+   `publish=false` for a dry run. It builds Linux, Windows and macOS packages; only the
+   Windows x64 and ARM64 portable ZIPs, setup executables and MSI installers are uploaded
+   as workflow artifacts. Flatpak/Snap builds require the separate `sandbox_packages`
+   input; Microsoft Store jobs stay disabled.
+3. Inspect the dry-run artifacts and complete the native evidence, installation and signing
+   checks in the full checklist before dispatching with `publish=true`. Inspect `.deb`
+   files with `dpkg-deb --info` and `--contents`, install the setup `.exe` in a Windows VM,
+   and mount the macOS `.dmg` and run `spctl -a -vv RustPy.app` for those distributions.
+4. Publication waits for both Windows builds and uses the workspace version and exact
+   workflow revision. `scripts/publish-release.sh` verifies that `SHA256SUMS` covers exactly
+   the six expected Windows packages and checks their hashes. It creates a draft or resumes
+   an existing unpublished draft, updates its target and notes, uploads packages and
+   checksums, then publishes. Existing tags and published releases are refused; failures
+   may leave a draft for inspection. Linux and macOS assets are not included, and their
+   jobs do not gate Windows publication.
 
 ## Bundled resource notices
 

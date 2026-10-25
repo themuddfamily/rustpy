@@ -6,7 +6,7 @@ and type inference, a debugger, test runners, Git integration, an embedded termi
 language server for other editors and an AI assistant, and it uses the Python interpreters
 and tools already installed on your machine.
 
-> **Status: pre-release (0.1.0, unreleased).** Most day-to-day editing, navigation,
+> **Status: 1.0.0 release preparation (unreleased).** Most day-to-day editing, navigation,
 > refactoring, run/debug, test and version-control features work, and Linux is the
 > best-tested platform. Expect rough edges, especially on macOS, which has not been tested on
 > real hardware yet. See [HANDOFF.md](HANDOFF.md) for the current state and

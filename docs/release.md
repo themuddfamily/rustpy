@@ -1,8 +1,11 @@
 # Release checklist
 
-Use this list when preparing a RustPy release. `.github/workflows/release.yml` is dispatched
-by hand; tick its `publish` input only for the final run, after the artifacts of a dry run
-have been checked.
+Use this list when preparing a RustPy release. Dispatch `.github/workflows/release.yml`
+by hand with `publish=false` for a dry run, then use `publish=true` only after its artifacts
+have been checked. The workflow builds Linux, Windows and macOS packages but uploads and
+publishes Windows assets only. Publication waits for both Windows builds; Linux and macOS
+jobs do not gate it. Flatpak/Snap builds require the separate `sandbox_packages` input;
+Microsoft Store jobs remain disabled.
 
 1. **Pick the revision.** Start from a clean checkout of the commit to release. Update
    `version` in the root `Cargo.toml` and move the `[Unreleased]` entries of
@@ -47,4 +50,9 @@ have been checked.
    honestly (see [review-backlog.md](review-backlog.md)).
 9. **Publish.** Tag `vX.Y.Z` (pre-releases `vX.Y.Z-eap.N` or `vX.Y.Z-beta.N`) on the released
    revision, upload the artifacts and checksums to a draft GitHub release, review it, and
-   publish. Keep local artifacts and evidence until the release is out.
+   publish. For Windows workflow publication, `scripts/publish-release.sh` checks that
+   `SHA256SUMS` covers exactly the six expected x64/ARM64 ZIP, setup EXE and MSI packages
+   and verifies their hashes. It creates a draft or resumes an unpublished one, updates
+   its target revision and notes, uploads all assets and checksums, then publishes.
+   Let the workflow create its tag; existing tags and published releases are refused.
+   Keep local artifacts and evidence until the release is out.

@@ -7,8 +7,9 @@ detail lives in [roadmap.md](roadmap.md); user-facing issues are listed in
 
 ## Summary
 
-- Version 0.1.0, not yet released. [CHANGELOG.md](CHANGELOG.md) has an `[Unreleased]` section
-  prepared for the first pre-release.
+- Version 1.0.0, not yet released. [CHANGELOG.md](CHANGELOG.md) has a dated `1.0.0` section
+  prepared for the first public release; the GitHub release remains a draft until packaging
+  and acceptance checks are complete.
 - Roadmap: 291 feature items, 286 done (`[x]`), 5 partial (`[~]`), none untouched. All five
   partial items are implemented; what is missing is verification on macOS (and, for one item,
   on Windows on Arm and as a Snap).
@@ -42,6 +43,27 @@ harness on 2026-10-18 (10k- and 100k-file projects, million-line analysis; softw
 | §8 Accessibility | NVDA (Windows) and VoiceOver (macOS); Linux was checked with Orca |
 
 ## Verification outstanding before a release
+
+The 1.0.0 preparation checks on 2026-10-25 used Rust 1.99.1 on Linux x86_64, two CPUs,
+nice 10, two Cargo jobs, two Rayon workers and at most two test threads. Formatting,
+Clippy (`-D warnings`), the application build, QA (6 passed, 1 ignored), Python checks
+(30 passed), distribution contracts (3 passed), dependency checks, notices and the covered
+Cargo source bundle passed. Dark and Light headless smoke screenshots were captured and
+reviewed using isolated settings.
+
+The clean-environment workspace run had **6,701 passed, 2 failed and 164 ignored**.
+The cancellation-latency test exceeded its 250 ms bound (779 ms), and the cancelled-clone
+fixture observed cleanup before transport retirement. Both passed once in isolation with
+one test thread (cancellation 126 ms); this does not establish a clean full-suite gate.
+An earlier console failure was caused by the harness setting `PYTHONDONTWRITEBYTECODE`;
+the console test passed after that flag was removed. The UI snapshot checks were required.
+
+The [packaging dry run](https://github.com/themuddfamily/rustpy/actions/runs/40184646017)
+on revision `05d378ffb31b9d28e729340cd5ca086f6c9d5b61` built Linux x64 successfully, then
+failed native licence staging because the binary-bound runtime manifest was missing.
+The remaining jobs were cancelled. No installers, public tag or release were published;
+the 1.0.0 release remains a draft. Native evidence and installation acceptance are still
+required before publication.
 
 The source has changed since the last full run (Windows packaging, licence tooling, and the
 public-release clean-up that renamed the colour schemes and replaced the bundled font). Before

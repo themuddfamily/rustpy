@@ -38,6 +38,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      - name: Fetch packaging source archives
+        shell: bash
+        run: |
+          cargo fetch --locked
+          cargo fetch --locked --manifest-path qa/Cargo.toml
+          cargo fetch --locked --manifest-path qa/fuzz/Cargo.toml
       - name: Native graphics and embedded WebKitGTK dependencies
         run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgtk-3-dev unixodbc-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf rpm dpkg-dev
       - run: cargo build --locked --release -p rustpy --target ${{ matrix.target }} --features native-web-preview
@@ -67,6 +73,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      - name: Fetch packaging source archives
+        shell: bash
+        run: |
+          cargo fetch --locked
+          cargo fetch --locked --manifest-path qa/Cargo.toml
+          cargo fetch --locked --manifest-path qa/fuzz/Cargo.toml
       - uses: Swatinem/rust-cache@v2
         with:
           key: release-${{ matrix.target }}
@@ -99,7 +111,7 @@ jobs:
         with:
           name: windows-${{ matrix.target }}
           path: |
-            target/windows/*.zip
+            target/windows/*-portable.zip
             target/windows/*-setup.exe
             target/windows/*.msi
           if-no-files-found: error
@@ -142,6 +154,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - name: Fetch packaging source archives
+        shell: bash
+        run: |
+          cargo fetch --locked
+          cargo fetch --locked --manifest-path qa/Cargo.toml
+          cargo fetch --locked --manifest-path qa/fuzz/Cargo.toml
       - name: unixODBC
         run: |
           brew install unixodbc
@@ -198,21 +216,12 @@ jobs:
           RELEASE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG"; then
-            echo "Refusing to replace existing tag $RELEASE_TAG" >&2
-            exit 1
-          else
-            status=$?
-            if [ "$status" -ne 2 ]; then exit "$status"; fi
-          fi
-          gh release create "$RELEASE_TAG" target/release-assets/* \
-            --target "$RELEASE_SHA" --title "RustPy $RELEASE_TAG" \
-            --draft --generate-notes
-          gh release view "$RELEASE_TAG" --json body --jq .body > target/release-notes.md
+          bash scripts/release-notes.sh "$RELEASE_TAG" > target/release-notes.md
           cat >> target/release-notes.md <<'NOTES'
 
           Windows x64 and ARM64 packages include portable ZIPs, setup executables and MSI installers. SHA256SUMS contains the download checksums.
 
           These packages are unsigned. Native GUI and install/upgrade/uninstall acceptance checks have not been completed for this release. Linux, macOS and Microsoft Store packages are not included.
           NOTES
-          gh release edit "$RELEASE_TAG" --notes-file target/release-notes.md --draft=false --latest
+          bash scripts/publish-release.sh "$RELEASE_TAG" "$RELEASE_SHA" \
+            target/release-assets target/release-notes.md

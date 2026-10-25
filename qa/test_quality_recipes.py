@@ -11,22 +11,51 @@ def load(name, path):
     return module
 
 class QualityRecipes(unittest.TestCase):
-    def test_automation_is_explicit_and_unconditionally_disabled(self):
-        for name in ("ci.yml", "release.yml"):
-            text = (ROOT / '.github/workflows' / name).read_text()
-            self.assertNotIn('\n  push:', text)
-            self.assertNotIn('\n  pull_request:', text)
-            self.assertIn('workflow_dispatch:', text)
-            jobs = text.split('\njobs:\n', 1)[1]
-            blocks = []
-            for line in jobs.splitlines():
-                if line.startswith('  ') and not line.startswith('   ') and line.endswith(':'):
-                    blocks.append([])
-                if blocks:
-                    blocks[-1].append(line)
-            self.assertTrue(blocks)
-            for block in blocks:
-                self.assertIn('    if: ${{ false }}', block)
+    def test_ci_checks_pushes_and_pull_requests_without_publication(self):
+        text = (ROOT / '.github/workflows/ci.yml').read_text()
+        trigger = text.split('\non:\n', 1)[1].split('\npermissions:\n', 1)[0]
+        self.assertIn('  push:\n    branches: [main]\n', trigger)
+        self.assertIn('  pull_request:\n', trigger)
+        self.assertIn('  workflow_dispatch:', trigger.splitlines())
+        self.assertIn('\npermissions:\n  contents: read\n', text)
+        self.assertNotIn('contents: write', text)
+        for command in ('gh release ', 'git push ', 'cargo publish', 'actions/create-release'):
+            self.assertNotIn(command, text)
+
+    def test_release_publication_requires_explicit_manual_input(self):
+        text = (ROOT / '.github/workflows/release.yml').read_text()
+        trigger = text.split('\non:\n', 1)[1].split('\npermissions:\n', 1)[0]
+        self.assertNotIn('\n  push:', trigger)
+        self.assertNotIn('\n  pull_request:', trigger)
+        self.assertIn('  workflow_dispatch:\n    inputs:\n', trigger)
+        for name in ('publish', 'sandbox_packages'):
+            option = []
+            for line in trigger.split(f'      {name}:\n', 1)[1].splitlines():
+                if line and not line.startswith('        '):
+                    break
+                option.append(line)
+            self.assertIn('        type: boolean', option)
+            self.assertIn('        default: false', option)
+        self.assertIn('\npermissions:\n  contents: read\n', text)
+
+        jobs = {}
+        current = None
+        for line in text.split('\njobs:\n', 1)[1].splitlines():
+            if line.startswith('  ') and not line.startswith('   ') and line.endswith(':'):
+                current = line.strip()[:-1]
+                jobs[current] = []
+            elif current is not None:
+                jobs[current].append(line)
+        self.assertIn('    if: ${{ inputs.publish }}', jobs['publish'])
+        self.assertIn('    permissions:\n      contents: write', '\n'.join(jobs['publish']))
+        self.assertIn('    if: ${{ inputs.sandbox_packages }}', jobs['sandbox-packages'])
+        for name, lines in jobs.items():
+            if name != 'publish':
+                self.assertNotIn('contents: write', '\n'.join(lines))
+        self.assertIn('    if: ${{ false }}', jobs['msix-bundle'])
+        windows = '\n'.join(jobs['windows'])
+        self.assertIn('      - name: MSIX package (Microsoft Store)\n        if: ${{ false }}', windows)
+        self.assertIn('      - uses: actions/upload-artifact@v7\n        if: ${{ false }}\n        with:\n          name: msix-', windows)
 
     def test_expensive_gates_are_explicit_and_fuzz_is_bounded(self):
         recipe = load('quality_recipe', ROOT / 'scripts/quality.py')

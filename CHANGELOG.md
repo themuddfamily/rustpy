@@ -12,9 +12,12 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ## [Unreleased]
 
-First public pre-release. RustPy is new, so this section lists what the IDE can do rather
-than changes against an earlier version. Linux is the best-tested platform; macOS builds have
-not yet been tested on a Mac.
+## [1.0.0] - 2026-10-25
+
+First public release. RustPy is new, so this section lists what the IDE can do rather
+than changes against an earlier version. Linux is the best-tested platform. CI builds and
+automated tests pass on Linux, Windows and macOS; native GUI and installer acceptance checks
+remain incomplete.
 
 ### Added
 

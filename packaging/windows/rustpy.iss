@@ -1,10 +1,10 @@
 ; Inno Setup 6.3+ script for the RustPy Windows installer (https://jrsoftware.org/isinfo.php).
 ;
 ; Build it with packaging\windows\build.ps1 (which builds the release binary first), or run
-;   ISCC.exe /DMyAppVersion=0.1.0 packaging\windows\rustpy.iss
+;   ISCC.exe /DMyAppVersion=1.0.0 packaging\windows\rustpy.iss
 ;
 ; Optional preprocessor defines (ISCC /DName=Value):
-;   MyAppVersion  version shown by the installer (default 0.1.0; build.ps1 passes Cargo.toml's)
+;   MyAppVersion  version shown by the installer (default 1.0.0; build.ps1 passes Cargo.toml's)
 ;   BinDir        directory containing rustpy.exe (default ..\..\target\release)
 ;   OutDir        directory for the setup .exe (default ..\..\target\windows)
 ;   Arch          x86_64 (default) or arm64: allowed architectures and the file name
@@ -22,7 +22,7 @@
 
 #define MyAppName "RustPy"
 #ifndef MyAppVersion
-#define MyAppVersion "0.1.0"
+#define MyAppVersion "1.0.0"
 #endif
 #define MyAppPublisher "RustPy contributors"
 #define MyAppURL "https://github.com/themuddfamily/rustpy"

@@ -4,7 +4,7 @@ members = ["crates/*"]
 exclude = ["vendor/eframe", "vendor/egui_glow", "vendor/accesskit_atspi_common"]
 
 [workspace.package]
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/themuddfamily/rustpy"
@@ -12,46 +12,46 @@ rust-version = "1.95"
 
 [workspace.dependencies]
 dunce = "1.0"
-rustpy-core = { path = "crates/rustpy-core", version = "0.1.0" }
-rustpy-text = { path = "crates/rustpy-text", version = "0.1.0" }
-rustpy-syntax = { path = "crates/rustpy-syntax", version = "0.1.0" }
-rustpy-highlight = { path = "crates/rustpy-highlight", version = "0.1.0" }
-rustpy-settings = { path = "crates/rustpy-settings", version = "0.1.0" }
-rustpy-semantic = { path = "crates/rustpy-semantic", version = "0.1.0" }
-rustpy-project = { path = "crates/rustpy-project", version = "0.1.0" }
-rustpy-analysis = { path = "crates/rustpy-analysis", version = "0.1.0" }
-rustpy-refactor = { path = "crates/rustpy-refactor", version = "0.1.0" }
-rustpy-run = { path = "crates/rustpy-run", version = "0.1.0" }
-rustpy-terminal = { path = "crates/rustpy-terminal", version = "0.1.0" }
-rustpy-vcs = { path = "crates/rustpy-vcs", version = "0.1.0" }
-rustpy-search = { path = "crates/rustpy-search", version = "0.1.0" }
-rustpy-debug = { path = "crates/rustpy-debug", version = "0.1.0" }
-rustpy-templates = { path = "crates/rustpy-templates", version = "0.1.0" }
-rustpy-test = { path = "crates/rustpy-test", version = "0.1.0" }
-rustpy-format = { path = "crates/rustpy-format", version = "0.1.0" }
-rustpy-packages = { path = "crates/rustpy-packages", version = "0.1.0" }
-rustpy-updates = { path = "crates/rustpy-updates", version = "0.1.0" }
-rustpy-http = { path = "crates/rustpy-http", version = "0.1.0" }
-rustpy-db = { path = "crates/rustpy-db", version = "0.1.0" }
-rustpy-regex = { path = "crates/rustpy-regex", version = "0.1.0" }
-rustpy-console = { path = "crates/rustpy-console", version = "0.1.0" }
-rustpy-i18n = { path = "crates/rustpy-i18n", version = "0.1.0" }
-rustpy-plugins = { path = "crates/rustpy-plugins", version = "0.1.0" }
-rustpy-grammar = { path = "crates/rustpy-grammar", version = "0.1.0" }
-rustpy-docker = { path = "crates/rustpy-docker", version = "0.1.0" }
-rustpy-ai = { path = "crates/rustpy-ai", version = "0.1.0" }
-rustpy-emmet = { path = "crates/rustpy-emmet", version = "0.1.0" }
-rustpy-notebook = { path = "crates/rustpy-notebook", version = "0.1.0" }
-rustpy-deploy = { path = "crates/rustpy-deploy", version = "0.1.0" }
-rustpy-gherkin = { path = "crates/rustpy-gherkin", version = "0.1.0" }
-rustpy-spell = { path = "crates/rustpy-spell", version = "0.1.0" }
-rustpy-textmate = { path = "crates/rustpy-textmate", version = "0.1.0" }
-rustpy-index = { path = "crates/rustpy-index", version = "0.1.0" }
-rustpy-net = { path = "crates/rustpy-net", version = "0.1.0" }
-rustpy-secrets = { path = "crates/rustpy-secrets", version = "0.1.0" }
-rustpy-cli = { path = "crates/rustpy-cli", version = "0.1.0" }
-rustpy-ui = { path = "crates/rustpy-ui", version = "0.1.0" }
-rustpy-lsp = { path = "crates/rustpy-lsp", version = "0.1.0" }
+rustpy-core = { path = "crates/rustpy-core", version = "1.0.0" }
+rustpy-text = { path = "crates/rustpy-text", version = "1.0.0" }
+rustpy-syntax = { path = "crates/rustpy-syntax", version = "1.0.0" }
+rustpy-highlight = { path = "crates/rustpy-highlight", version = "1.0.0" }
+rustpy-settings = { path = "crates/rustpy-settings", version = "1.0.0" }
+rustpy-semantic = { path = "crates/rustpy-semantic", version = "1.0.0" }
+rustpy-project = { path = "crates/rustpy-project", version = "1.0.0" }
+rustpy-analysis = { path = "crates/rustpy-analysis", version = "1.0.0" }
+rustpy-refactor = { path = "crates/rustpy-refactor", version = "1.0.0" }
+rustpy-run = { path = "crates/rustpy-run", version = "1.0.0" }
+rustpy-terminal = { path = "crates/rustpy-terminal", version = "1.0.0" }
+rustpy-vcs = { path = "crates/rustpy-vcs", version = "1.0.0" }
+rustpy-search = { path = "crates/rustpy-search", version = "1.0.0" }
+rustpy-debug = { path = "crates/rustpy-debug", version = "1.0.0" }
+rustpy-templates = { path = "crates/rustpy-templates", version = "1.0.0" }
+rustpy-test = { path = "crates/rustpy-test", version = "1.0.0" }
+rustpy-format = { path = "crates/rustpy-format", version = "1.0.0" }
+rustpy-packages = { path = "crates/rustpy-packages", version = "1.0.0" }
+rustpy-updates = { path = "crates/rustpy-updates", version = "1.0.0" }
+rustpy-http = { path = "crates/rustpy-http", version = "1.0.0" }
+rustpy-db = { path = "crates/rustpy-db", version = "1.0.0" }
+rustpy-regex = { path = "crates/rustpy-regex", version = "1.0.0" }
+rustpy-console = { path = "crates/rustpy-console", version = "1.0.0" }
+rustpy-i18n = { path = "crates/rustpy-i18n", version = "1.0.0" }
+rustpy-plugins = { path = "crates/rustpy-plugins", version = "1.0.0" }
+rustpy-grammar = { path = "crates/rustpy-grammar", version = "1.0.0" }
+rustpy-docker = { path = "crates/rustpy-docker", version = "1.0.0" }
+rustpy-ai = { path = "crates/rustpy-ai", version = "1.0.0" }
+rustpy-emmet = { path = "crates/rustpy-emmet", version = "1.0.0" }
+rustpy-notebook = { path = "crates/rustpy-notebook", version = "1.0.0" }
+rustpy-deploy = { path = "crates/rustpy-deploy", version = "1.0.0" }
+rustpy-gherkin = { path = "crates/rustpy-gherkin", version = "1.0.0" }
+rustpy-spell = { path = "crates/rustpy-spell", version = "1.0.0" }
+rustpy-textmate = { path = "crates/rustpy-textmate", version = "1.0.0" }
+rustpy-index = { path = "crates/rustpy-index", version = "1.0.0" }
+rustpy-net = { path = "crates/rustpy-net", version = "1.0.0" }
+rustpy-secrets = { path = "crates/rustpy-secrets", version = "1.0.0" }
+rustpy-cli = { path = "crates/rustpy-cli", version = "1.0.0" }
+rustpy-ui = { path = "crates/rustpy-ui", version = "1.0.0" }
+rustpy-lsp = { path = "crates/rustpy-lsp", version = "1.0.0" }
 
 anyhow = "1"
 thiserror = "2"
