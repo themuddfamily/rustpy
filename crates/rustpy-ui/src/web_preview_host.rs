@@ -91,8 +91,6 @@ impl Host {
         {
             self.reset();
             #[cfg(target_os = "linux")]
-            use wry::raw_window_handle::HasWindowHandle;
-            #[cfg(target_os = "linux")]
             {
                 let handle = frame.window_handle().map_err(|e| e.to_string())?;
                 if matches!(

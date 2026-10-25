@@ -900,7 +900,7 @@ mod worker_retirement_tests {
         )
         .unwrap();
         listener.set_nonblocking(true).unwrap();
-        let deadline = Instant::now() + Duration::from_secs(3);
+        let accept_deadline = Instant::now() + Duration::from_secs(3);
         let mut peer = loop {
             match listener.accept() {
                 Ok((peer, _)) => {
@@ -910,7 +910,7 @@ mod worker_retirement_tests {
                 }
                 Err(error)
                     if error.kind() == std::io::ErrorKind::WouldBlock
-                        && Instant::now() < deadline =>
+                        && Instant::now() < accept_deadline =>
                 {
                     std::thread::yield_now()
                 }
@@ -919,6 +919,9 @@ mod worker_retirement_tests {
         };
         peer.set_write_timeout(Some(Duration::from_secs(3)))
             .unwrap();
+        // These tiny frames must reach the reader without Nagle/delayed-ACK
+        // pacing consuming the fixture's readiness budget on Windows.
+        peer.set_nodelay(true).unwrap();
         let body = serde_json::to_vec(
             &json!({"type":"event","event":"output","body":{"output":"owned π"}}),
         )
@@ -927,18 +930,22 @@ mod worker_retirement_tests {
             write!(peer, "Content-Length: {}\r\n\r\n", body.len()).unwrap();
             peer.write_all(&body).unwrap();
         }
+        let ready_deadline = Instant::now() + Duration::from_secs(3);
         while client.incoming.len() < 16 {
             assert!(
-                Instant::now() < deadline,
+                Instant::now() < ready_deadline,
                 "actual reader never filled its bounded queue"
             );
             std::thread::yield_now();
         }
         assert!(!client.is_retired());
+        // Measure retirement from close, independently of connection setup
+        // and delivery of the messages that establish actual backpressure.
+        let retirement_deadline = Instant::now() + Duration::from_secs(3);
         client.close();
         while !client.poll_retirement() {
             assert!(
-                Instant::now() < deadline,
+                Instant::now() < retirement_deadline,
                 "closed socket/reader backpressure/writer must physically retire"
             );
             std::thread::yield_now();

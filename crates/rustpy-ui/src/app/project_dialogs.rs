@@ -1728,14 +1728,33 @@ mod clone_tests {
     fn transport_retired((pid, start): &(u32, String)) -> bool {
         std::fs::read_to_string(format!("/proc/{pid}/stat"))
             .ok()
-            .and_then(|stat| {
-                stat.rsplit(") ")
-                    .next()?
-                    .split_whitespace()
-                    .nth(19)
-                    .map(str::to_owned)
-            })
-            .is_none_or(|actual| &actual != start)
+            .is_none_or(|stat| transport_stat_retired(&stat, start))
+    }
+
+    #[cfg(target_os = "linux")]
+    fn transport_stat_retired(stat: &str, start: &str) -> bool {
+        let Some((state, actual)) = stat.rsplit(") ").next().and_then(|fields| {
+            let mut fields = fields.split_whitespace();
+            Some((fields.next()?, fields.nth(18)?))
+        }) else {
+            return true;
+        };
+        // A zombie has no running code or pipe owners; its parent may reap
+        // the PID later. Match ProcessTree's physical-retirement contract.
+        actual != start || matches!(state, "Z" | "X" | "x")
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn clone_transport_retirement_distinguishes_running_processes_and_zombies() {
+        let stat = |state| format!("7 (ssh (transport)) {state} 1 7 {}12345", "0 ".repeat(16));
+        for state in ["R", "S"] {
+            assert!(!transport_stat_retired(&stat(state), "12345"));
+        }
+        for state in ["Z", "X", "x"] {
+            assert!(transport_stat_retired(&stat(state), "12345"));
+        }
+        assert!(transport_stat_retired(&stat("R"), "99999"));
     }
 
     /// Review: Cancel during Get from VCS left the partial clone behind, and
@@ -1792,9 +1811,17 @@ mod clone_tests {
             finish_abandoned_clone(job.0.take().unwrap(), target.clone(), ClonePrior::Missing);
         retain_files.0.push(cleanup_id);
         let start = Instant::now();
-        while target.exists() && start.elapsed() < Duration::from_secs(20) {
+        // Git can remove its destination before the cleanup task finishes
+        // retiring the owned transport. Wait for that owner, not the path.
+        while rustpy_core::TaskManager::global().is_running(cleanup_id)
+            && start.elapsed() < Duration::from_secs(20)
+        {
             std::thread::sleep(Duration::from_millis(20));
         }
+        assert!(
+            !rustpy_core::TaskManager::global().is_running(cleanup_id),
+            "the abandoned clone cleanup task completed"
+        );
         assert!(!target.exists(), "the abandoned clone was cleaned up");
         #[cfg(target_os = "linux")]
         assert!(

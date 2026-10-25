@@ -385,17 +385,30 @@ The complete checklist is in [docs/release.md](../docs/release.md); the packagin
 1. Bump `version` in the root `Cargo.toml`. Run `cargo clippy --workspace --all-targets`,
    `cargo test --workspace` and the headless smoke test (`scripts/smoke.sh`).
 2. Dispatch `.github/workflows/release.yml` by hand (`workflow_dispatch`) with
-   `publish=false` for a dry run. It builds Linux, Windows and macOS packages; only the
-   Windows x64 and ARM64 portable ZIPs, setup executables and MSI installers are uploaded
-   as workflow artifacts. Flatpak/Snap builds require the separate `sandbox_packages`
-   input; Microsoft Store jobs stay disabled.
-3. Inspect the dry-run artifacts and complete the native evidence, installation and signing
-   checks in the full checklist before dispatching with `publish=true`. Inspect `.deb`
-   files with `dpkg-deb --info` and `--contents`, install the setup `.exe` in a Windows VM,
-   and mount the macOS `.dmg` and run `spctl -a -vv RustPy.app` for those distributions.
-4. Publication waits for both Windows builds and uses the workspace version and exact
-   workflow revision. `scripts/publish-release.sh` verifies that `SHA256SUMS` covers exactly
-   the six expected Windows packages and checks their hashes. It creates a draft or resumes
+   `publish=false` for a dry run. By default it builds Windows x64 and ARM64 portable ZIPs,
+   setup executables and MSI installers on native runners. Linux/macOS packaging requires
+   `other_platforms=true` (default `false`); those assets are not published. Flatpak/Snap
+   builds require `sandbox_packages`; Microsoft Store jobs stay disabled.
+3. `scripts/build-windows-release.ps1` builds with the static CRT and records the compiler,
+   SDK, final LINK invocation, map and library trace. The native evidence producer verifies
+   the actual executable, retains matching Rust/native crate sources and Microsoft vendor
+   redistribution terms, and supplies `RUSTPY_NATIVE_RUNTIME_MANIFEST` to all three Windows
+   packagers. Missing evidence or unclassified native inputs stop packaging.
+4. `scripts/test-windows-packages.ps1` requires disposable GitHub-hosted Windows runners and
+   isolated settings. It checks archive/licence contents, portable CLI commands, silent fresh
+   install, same-version reinstall, MSI repair, optional associations/context menus/PATH, and
+   uninstall with settings preserved. Review the retained acceptance report and installer logs.
+   GUI, interactive installer, earlier-version upgrades, accessibility, browser integration
+   and signing are separate checks; successful silent acceptance does not establish them.
+5. Inspect the actual six dry-run packages and complete the remaining evidence, installation
+   and signing checks in the full checklist before dispatching with `publish=true`. Record
+   unsigned packages and unperformed checks in the release notes. For other distributions,
+   inspect `.deb` files with `dpkg-deb --info` and `--contents`, and mount the macOS `.dmg`
+   and run `spctl -a -vv RustPy.app`.
+6. Publication waits for both Windows jobs, including their installation checks, using the
+   workspace version and exact workflow revision. `scripts/publish-release.sh` verifies that
+   `SHA256SUMS` covers exactly the six expected Windows packages and checks their hashes.
+   It creates a draft or resumes
    an existing unpublished draft, updates its target and notes, uploads packages and
    checksums, then publishes. Existing tags and published releases are refused; failures
    may leave a draft for inspection. Linux and macOS assets are not included, and their
@@ -404,14 +417,17 @@ The complete checklist is in [docs/release.md](../docs/release.md); the packagin
 ## Bundled resource notices
 
 Every artifact includes `Native-Licenses.zip`, containing exact covered Cargo
-sources and retained native component source/license evidence. `packaging/stage-native-licenses.py`
+sources and retained native component licence evidence. `packaging/stage-native-licenses.py`
 creates it offline from the Cargo cache (or vendored Cargo sources). Any bundled
 release executable requires a reviewed `RUSTPY_NATIVE_RUNTIME_MANIFEST` binding
 its SHA256 and explicitly declaring system/toolchain static native components
 (or an empty list when none are present). Bundled runtime libraries require exact
-source archives, license texts and replacement instructions; unknown runtimes
-stop packaging. Regenerate the binary hash after staging/stripping. Make that manifest and its referenced files available inside
-Flatpak/Snap build environments too. Host libraries are supplied by the system.
+source archives, license texts and replacement instructions. Microsoft runtime records use
+the vendor evidence schema with retained redistribution terms and actual linkage inventories;
+standalone vendor library archives are not included. Unknown runtimes stop packaging.
+Regenerate the binary hash after staging/stripping. Make that manifest and its referenced
+files available inside Flatpak/Snap build environments too. Host libraries are supplied by
+the system.
 
 Every artifact includes the project Apache-2.0 `LICENSE` beside the third-party
 notice bundle. Packaging recipes reject missing or stale retained notices before

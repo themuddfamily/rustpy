@@ -64,7 +64,8 @@ remain incomplete.
 - Windows: builds for Windows on Arm (arm64). The installer can associate `.py`, `.pyw`,
   `.pyi` and `.ipynb` files with RustPy, add *Edit with RustPy* and *Open Folder as RustPy
   Project* to the Explorer context menu and add RustPy to `PATH`; the uninstaller removes
-  all of it again.
+  all of it again. Packages include native-library licences and source material, and link
+  the compiler runtime statically so no separate Visual C++ runtime installation is needed.
 - macOS: one universal app for Apple silicon and Intel Macs. Finder's *Open With* lists
   RustPy for `.py`, `.pyi` and `.ipynb` files, and the app bundle contains a `rustpy`
   command-line launcher.

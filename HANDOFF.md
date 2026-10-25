@@ -7,9 +7,8 @@ detail lives in [roadmap.md](roadmap.md); user-facing issues are listed in
 
 ## Summary
 
-- Version 1.0.0, not yet released. [CHANGELOG.md](CHANGELOG.md) has a dated `1.0.0` section
-  prepared for the first public release; the GitHub release remains a draft until packaging
-  and acceptance checks are complete.
+- Version 1.0.0. [CHANGELOG.md](CHANGELOG.md) has a dated `1.0.0` section for the first public
+  release. The GitHub release records the final package and verification status.
 - Roadmap: 291 feature items, 286 done (`[x]`), 5 partial (`[~]`), none untouched. All five
   partial items are implemented; what is missing is verification on macOS (and, for one item,
   on Windows on Arm and as a Snap).
@@ -61,9 +60,10 @@ the console test passed after that flag was removed. The UI snapshot checks were
 The [packaging dry run](https://github.com/themuddfamily/rustpy/actions/runs/40184646017)
 on revision `05d378ffb31b9d28e729340cd5ca086f6c9d5b61` built Linux x64 successfully, then
 failed native licence staging because the binary-bound runtime manifest was missing.
-The remaining jobs were cancelled. No installers, public tag or release were published;
-the 1.0.0 release remains a draft. Native evidence and installation acceptance are still
-required before publication.
+The remaining jobs were cancelled; that attempt produced no installers or public tag.
+Subsequent Windows packaging uses the recorded-link evidence generator and silent native
+installation checks described in the release checklist. Those reports must pass before
+publication; the release page records their final result.
 
 The source has changed since the last full run (Windows packaging, licence tooling, and the
 public-release clean-up that renamed the colour schemes and replaced the bundled font). Before

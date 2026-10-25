@@ -2,10 +2,10 @@
 
 Use this list when preparing a RustPy release. Dispatch `.github/workflows/release.yml`
 by hand with `publish=false` for a dry run, then use `publish=true` only after its artifacts
-have been checked. The workflow builds Linux, Windows and macOS packages but uploads and
-publishes Windows assets only. Publication waits for both Windows builds; Linux and macOS
-jobs do not gate it. Flatpak/Snap builds require the separate `sandbox_packages` input;
-Microsoft Store jobs remain disabled.
+have been checked. The default run builds and tests Windows x64 and ARM64 packages.
+Linux/macOS packaging requires `other_platforms=true` (default `false`); those assets are
+not published and their jobs do not gate Windows publication. Flatpak/Snap builds require
+the separate `sandbox_packages` input; Microsoft Store jobs remain disabled.
 
 1. **Pick the revision.** Start from a clean checkout of the commit to release. Update
    `version` in the root `Cargo.toml` and move the `[Unreleased]` entries of
@@ -31,6 +31,11 @@ Microsoft Store jobs remain disabled.
    need `APPIMAGETOOL_RUNTIME_FILE` and the evidence for that runtime. Offline vendored builds
    need the original `.crate` archives in the Cargo cache or `RUSTPY_NATIVE_CRATE_CACHE`.
    Packaging stops when notices, covered sources or linkage declarations are missing.
+   The Windows workflow uses `scripts/build-windows-release.ps1` with the static CRT. It
+   records the exact toolchain, final LINK invocation, map and library trace, then calls
+   `scripts/prepare-windows-native-evidence.py` to verify the actual executable and produce
+   its manifest. Evidence includes matching Rust/native crate sources and the recorded
+   Microsoft SDK/runtime redistribution terms; unknown or mismatching inputs fail packaging.
 5. **Build the artifacts** with the [packaging recipes](../packaging/README.md): Linux packages,
    Windows Inno Setup and WiX 5.0.2 (with `WixToolset.UI.wixext/5.0.2`), the macOS bundle and
    DMG. `native-web-preview` needs each platform's browser SDK. A cross-build does not replace
@@ -38,13 +43,23 @@ Microsoft Store jobs remain disabled.
    `Native-Licenses.zip`, and that the archive holds the covered sources and build
    instructions. On macOS the linkage manifest describes the executable before signing
    (`binary_stage: pre-sign`); verify the signed artifact with the release checksums.
+   The Windows build script supplies the generated manifest to the portable ZIP, Inno
+   Setup EXE and MSI packagers. Publication requires all three packages for each architecture.
 6. **Test installation** on each supported OS and architecture: fresh install, upgrade,
    launcher and file associations, uninstall (settings are kept), and a portable
    configuration directory. Test the update check: manifest, hash and signature verification,
    rejection of corrupt or partial downloads, and cancellation. Use a separate test profile,
    not your own settings.
+   `scripts/test-windows-packages.ps1` runs silent native acceptance only on disposable
+   GitHub-hosted Windows runners, using isolated settings. It checks archive/licence contents,
+   portable CLI commands, fresh installation, same-version reinstall, MSI repair, optional
+   associations/context menus/PATH, and uninstall with settings preserved. Review its retained
+   `acceptance.json` and installer logs. These checks do not establish GUI, interactive
+   installer, earlier-version upgrade, accessibility or embedded-browser acceptance.
 7. **Checksums and signing.** Generate `SHA256SUMS` with `scripts/release-checksums.py`,
    verify the candidate artifacts against it independently, then sign and notarise.
+   The Windows workflow does not perform code signing; release notes must record unsigned
+   packages and any unperformed signing/notarisation checks explicitly.
 8. **Release notes.** Generate them from the changelog (`scripts/release-notes.sh`) and make
    sure they state the verified platforms, optional dependencies and known limitations
    honestly (see [review-backlog.md](review-backlog.md)).

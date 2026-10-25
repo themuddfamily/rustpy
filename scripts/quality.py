@@ -6,6 +6,7 @@ import argparse
 import os
 from pathlib import Path
 import shlex
+import subprocess
 import sys
 import tempfile
 import shutil
@@ -25,6 +26,43 @@ STAGES = {
     "bench": ["cargo", "bench", "--locked", "--manifest-path", "qa/Cargo.toml", "--bench", "editor_pipeline"],
     "fuzz": ["cargo", "+nightly", "fuzz", "run", "--fuzz-dir", "qa/fuzz", "python", "--", "-max_total_time=60", "-max_len=65536", "-rss_limit_mb=2048", "-jobs=1", "-workers=1"],
 }
+
+SERIAL_UNIT_TEST = (
+    "app::analysis_jobs::typing_latency_tests::"
+    "an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly"
+)
+SERIAL_UNIT_TESTS = (SERIAL_UNIT_TEST,
+    "app::analysis_jobs::typing_latency_tests::typing_into_a_five_thousand_line_file_keeps_ui_frames_short")
+
+
+def stage_commands(stage):
+    """Keep the strict latency case required, without concurrent test bodies."""
+    command = list(STAGES[stage])
+    if stage != "unit":
+        return [command]
+    cargo_arguments = command[:command.index("--")]
+    for test in SERIAL_UNIT_TESTS:
+        command += ["--skip", test]
+    return [command, *[cargo_arguments + [test, "--", "--exact", "--test-threads=1"]
+                      for test in SERIAL_UNIT_TESTS]]
+
+
+def execute_commands(commands, environment):
+    """Run every required phase and retain the first failing exit status."""
+    status = 0
+    for command in commands:
+        print(shlex.join(command), flush=True)
+        try:
+            result = subprocess.run(command, env=environment, check=False)
+            code = result.returncode
+            if code < 0:
+                code = 128 - code
+        except OSError as error:
+            print(f"Cannot run {command[0]}: {error}", file=sys.stderr, flush=True)
+            code = 127
+        if code and not status:
+            status = code
+    return status
 
 
 def output_root(value):
@@ -96,8 +134,9 @@ def main():
     parser.add_argument("stage", choices=STAGES)
     parser.add_argument("--execute", action="store_true", help="execute the selected final gate; otherwise print only")
     args = parser.parse_args()
-    command = list(STAGES[args.stage])
-    print(shlex.join(command), flush=True)
+    commands = stage_commands(args.stage)
+    for command in commands:
+        print(shlex.join(command), flush=True)
     if not args.execute:
         return 0
     if not hasattr(os, "sched_getaffinity") or not hasattr(os, "sched_setaffinity"):
@@ -124,10 +163,13 @@ def main():
     gate_directory = Path(tempfile.mkdtemp(prefix="rustpy-quality-" + args.stage + "-",dir=temporary))
     environment = gate_environment(os.environ,gate_directory)
     if args.stage == "fuzz":
-        command = fuzz_arguments(command,gate_directory)
+        commands = [fuzz_arguments(commands[0],gate_directory)]
     print("isolated outputs: " + str(gate_directory),flush=True)
-    print(shlex.join(command),flush=True)
     os.chdir(ROOT)
+    if len(commands) > 1:
+        return execute_commands(commands, environment)
+    command = commands[0]
+    print(shlex.join(command),flush=True)
     os.execvpe(command[0], command, environment)
 
 
