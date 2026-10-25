@@ -66,7 +66,11 @@ retains authenticated Rust/native Cargo sources (including ring and blake3).
 Rust's official full source archive is additionally retained when the selected
 compiler-builtins archive contains native C/assembly objects not supplied by
 the rust-src component. Unknown native inputs stop production. The producer
-requires Visual Studio 2022 and rejects VC/debug CRT DLL dependencies for these
+supports the reviewed Visual Studio 2022 (product major 17) and Visual Studio
+2026 (product major 18) terms profiles, selected from the actual installed product
+version. It downloads that product year's distinct build-tool, product/runtime
+EULAs and redistribution list; an unknown major or an unreviewed Preview channel
+is rejected. It rejects VC/debug CRT DLL dependencies for these
 self-contained installers; use the recorded `+crt-static` target build.
 Run `--preflight --toolchain-record TOOLCHAIN --output DIR` before compiling to
 validate installed SDK terms and fetch authenticated Rust sources/vendor terms.
@@ -102,6 +106,7 @@ Primary references:
 https://learn.microsoft.com/en-us/cpp/c-runtime-library/crt-library-features
 https://www.microsoft.com/licensing/guidance/Visual-Studio
 https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution
+https://learn.microsoft.com/en-us/visualstudio/releases/2026/redistribution
 https://visualstudio.microsoft.com/license-terms/
 
 The manifest's `components` array inventories redistributed shared libraries. The script's module documentation

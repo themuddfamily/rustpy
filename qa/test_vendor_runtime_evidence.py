@@ -164,6 +164,18 @@ class VendorEvidenceTests(unittest.TestCase):
 
 
 class WindowsProducerTests(unittest.TestCase):
+    def test_vendor_terms_profile_matches_the_actual_visual_studio_major(self):
+        legacy = PRODUCER.visual_studio_profile('17.14.39222.1')
+        current = PRODUCER.visual_studio_profile('18.0.10517.64')
+        self.assertEqual(legacy['year'], '2022')
+        self.assertEqual(current['year'], '2026')
+        self.assertNotEqual(legacy['tools_terms'], current['tools_terms'])
+        self.assertIn('/2025/10/', current['runtime_terms'])
+        self.assertTrue(current['redist'].endswith('/2026/redistribution'))
+        for version in ('', '19.0.1', '18.0-preview', None):
+            with self.subTest(version=version), self.assertRaises(ValueError):
+                PRODUCER.visual_studio_profile(version)
+
     def test_expired_rustc_import_library_is_bound_to_its_retained_bytes(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

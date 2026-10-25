@@ -30,8 +30,13 @@ New-Item -ItemType Directory -Path $Proof | Out-Null
 if ($env:GITHUB_ENV) { "RUSTPY_NATIVE_EVIDENCE_DIR=$Proof" >> $env:GITHUB_ENV }
 
 $VsWhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
-$Installation = (& $VsWhere -latest -products '*' -version '[17.0,18.0)' -format json | ConvertFrom-Json | Select-Object -First 1)
-if (-not $Installation) { throw 'Visual Studio 2022 is required for reviewed runtime redistribution terms' }
+$VsJson = (& $VsWhere -all -prerelease -products '*' -format json) -join "`n"
+if ($LASTEXITCODE) { throw 'Cannot inventory installed Visual Studio instances' }
+$VsJson | Set-Content -LiteralPath (Join-Path $Proof 'vs-instances.json') -Encoding utf8
+$Instances = @($VsJson | ConvertFrom-Json)
+$Installation = $Instances | Where-Object { $_.installationVersion -match '^17\.' -and $_.isPrerelease -ne $true } | Sort-Object { [version]$_.installationVersion } -Descending | Select-Object -First 1
+if (-not $Installation) { $Installation = $Instances | Where-Object { $_.installationVersion -match '^18\.' -and $_.isPrerelease -ne $true } | Sort-Object { [version]$_.installationVersion } -Descending | Select-Object -First 1 }
+if (-not $Installation) { throw "A reviewed Visual Studio 2022 or 2026 toolchain is required; discovered: $VsJson" }
 $Vs = $Installation.installationPath
 $DevCmd = Join-Path $Vs 'Common7\Tools\VsDevCmd.bat'
 $Command = "`"$DevCmd`" -no_logo -arch=$Arch -host_arch=$Arch >nul && set"
@@ -56,6 +61,8 @@ $Toolchain = @{
     WindowsSdkDir=$env:WindowsSdkDir; WindowsSDKVersion=$env:WindowsSDKVersion
     VCToolsInstallDir=$env:VCToolsInstallDir; VCToolsVersion=$env:VCToolsVersion
     vsinstallation=$Vs; vsproductversion=$Installation.installationVersion
+    vsproductline=$Installation.catalog.productLineVersion; vsproductid=$Installation.productId
+    vsisprerelease=$Installation.isPrerelease; vsiscomplete=$Installation.isComplete; vsislaunchable=$Installation.isLaunchable
     target=$Target; rustc_verbose=$RustVersion; rustc_commit=$Commit
     rustflags=$env:RUSTFLAGS; encoded_rustflags=$env:CARGO_ENCODED_RUSTFLAGS
 }

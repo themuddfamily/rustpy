@@ -138,6 +138,7 @@ jobs:
             ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/link-trace.txt
             ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/rustpy.map
             ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/toolchain.json
+            ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/vs-instances.json
             ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/runtime/*.json
           retention-days: 7
           if-no-files-found: warn

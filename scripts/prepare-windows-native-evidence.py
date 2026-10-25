@@ -32,6 +32,24 @@ VS_REDIST = 'https://learn.microsoft.com/en-us/visualstudio/releases/2022/redist
 VS_GUIDANCE = 'https://www.microsoft.com/licensing/guidance/Visual-Studio'
 CRT_DESCRIPTION = 'https://learn.microsoft.com/en-us/cpp/c-runtime-library/crt-library-features?view=msvc-170'
 CRT_DEPLOYMENT = 'https://raw.githubusercontent.com/microsoft/WindowsAppSDK/main/docs/Coding-Guidelines/HybridCRT.md'
+VISUAL_STUDIO_PROFILES = {
+    17: {'year': '2022', 'tools_terms': VS_TERMS, 'product_terms': VS_PRODUCT_TERMS,
+         'runtime_terms': VS_RUNTIME_TERMS, 'redist': VS_REDIST},
+    18: {'year': '2026',
+         'tools_terms': 'https://visualstudio.microsoft.com/wp-content/uploads/2025/10/Visual_Studio_2026-License-Diagnostic_and_Build_Tools_ENU.docx',
+         'product_terms': 'https://visualstudio.microsoft.com/wp-content/uploads/2025/10/Visual_Studio_2026-License-Enterprise_Professional_ENU.docx',
+         'runtime_terms': 'https://visualstudio.microsoft.com/wp-content/uploads/2025/10/Visual-C-V14-License-Redistributable_and_Runtime_ENU.docx',
+         'redist': 'https://learn.microsoft.com/en-us/visualstudio/releases/2026/redistribution'},
+}
+
+
+def visual_studio_profile(version):
+    if not isinstance(version, str) or not re.fullmatch(r'[0-9]+(?:\.[0-9]+){1,3}', version):
+        raise ValueError('Toolchain record needs the installed Visual Studio product version')
+    major = int(version.split('.', 1)[0])
+    if major not in VISUAL_STUDIO_PROFILES:
+        raise ValueError('Vendor terms need review for this Visual Studio major version')
+    return VISUAL_STUDIO_PROFILES[major]
 
 
 def digest(path):
@@ -83,14 +101,14 @@ def installed_sdk_terms(root, version, explicit=None):
     return paths
 
 
-def prepare_vendor_terms(output, sdk_root, sdk_version, explicit):
+def prepare_vendor_terms(output, sdk_root, sdk_version, explicit, profile):
     sdk_term_names = []
     for index, path in enumerate(installed_sdk_terms(sdk_root, sdk_version, explicit)):
         retained = output / ('windows-sdk-terms-' + str(index) + path.suffix)
         shutil.copyfile(path, retained)
         sdk_term_names.append(retained.name)
-    resources = [('visual-studio-terms.docx', VS_TERMS), ('visual-studio-product-terms.docx', VS_PRODUCT_TERMS),
-                 ('visual-studio-runtime-terms.docx', VS_RUNTIME_TERMS), ('visual-studio-redist.html', VS_REDIST),
+    resources = [('visual-studio-terms.docx', profile['tools_terms']), ('visual-studio-product-terms.docx', profile['product_terms']),
+                 ('visual-studio-runtime-terms.docx', profile['runtime_terms']), ('visual-studio-redist.html', profile['redist']),
                  ('visual-studio-guidance.html', VS_GUIDANCE), ('crt-linkage.html', CRT_DESCRIPTION),
                  ('crt-deployment.md', CRT_DEPLOYMENT)]
     for filename, url in resources:
@@ -378,15 +396,18 @@ def main():
     commit_match = re.search(r'^commit-hash:\s*([0-9a-f]{40})$', verbose, re.M)
     if not release_match or not commit_match:
         raise ValueError('Toolchain record must identify the exact stable Rust compiler')
-    if toolchain.get('target') != args.target or not str(toolchain.get('vsproductversion', '')).startswith('17.'):
-        raise ValueError('This reviewed vendor evidence producer requires the recorded native target and Visual Studio 2022')
+    if toolchain.get('target') != args.target:
+        raise ValueError('The native target differs from the recorded toolchain')
+    profile = visual_studio_profile(toolchain.get('vsproductversion'))
+    if toolchain.get('vsisprerelease') is True:
+        raise ValueError('Preview toolchain redistribution terms need explicit review before a public release')
     vc = Path(toolchain['VCToolsInstallDir'])
     sdk_root = Path(toolchain['WindowsSdkDir'])
     if not vc.is_absolute() or not sdk_root.is_absolute() or not vc.is_dir() or not sdk_root.is_dir():
         raise ValueError('Recorded native toolchain and SDK directories must actually exist')
     rust_root = Path(subprocess.check_output(['rustc', '--print', 'sysroot'], text=True).strip())
     sdk_version = str(toolchain['WindowsSDKVersion']).strip('/\\ ')
-    term_names, redistribution_names, sdk_term_names = prepare_vendor_terms(output, sdk_root, sdk_version, args.windows_sdk_terms)
+    term_names, redistribution_names, sdk_term_names = prepare_vendor_terms(output, sdk_root, sdk_version, args.windows_sdk_terms, profile)
     if args.preflight:
         archives = list((rust_root / 'lib/rustlib' / args.target / 'lib').glob('libcompiler_builtins-*.rlib'))
         if len(archives) != 1:
@@ -394,7 +415,7 @@ def main():
         include_compiler_rt = any(not name.endswith(('.rcgu.o', '.rmeta', '.rmeta-link'))
                                   for name, _ in archive_members(archives[0].read_bytes()))
         source_archives, source_terms = official_rust_source(release_match[1], output, include_compiler_rt)
-        preflight = {'rustc_commit': commit_match[1], 'target': args.target,
+        preflight = {'rustc_commit': commit_match[1], 'target': args.target, 'visual_studio_year': profile['year'],
                      'source_archives': source_archives,
                      'source_terms': {name: digest(output / name) for name in source_terms},
                      'compiler_rt_sources_included': include_compiler_rt}
@@ -484,7 +505,7 @@ def main():
     (output / 'pe-imports.txt').write_text(sanitise(imports, roots))
     build = output / 'build.txt'
     build.write_text(f'Compiler: Rust {release_match[1]} ({commit_match[1]}).\nTarget: {args.target}.\n'
-                     'Use the exact release revision and Cargo.lock with Visual Studio 2022 and the retained toolchain versions.\n'
+                     'Use the exact release revision and Cargo.lock with Visual Studio ' + profile['year'] + ' and the retained toolchain versions.\n'
                      'Run cargo build --locked --release -p rustpy --features native-web-preview --target ' + args.target + '.\n'
                      'Rust standard library/runtime sources and native crate archives are retained alongside this file.\n')
     replace = output / 'replace.txt'
@@ -537,7 +558,7 @@ def main():
             component_version = str(toolchain[field]).strip('/\\ ')
             terms_for_family = sdk_term_names + term_names if family == 'windows-sdk' else term_names
             redist_for_family = redistribution_names
-            urls = [VS_TERMS, VS_PRODUCT_TERMS, VS_RUNTIME_TERMS, VS_REDIST, VS_GUIDANCE, CRT_DESCRIPTION]
+            urls = [profile['tools_terms'], profile['product_terms'], profile['runtime_terms'], profile['redist'], VS_GUIDANCE, CRT_DESCRIPTION]
         linkage = ['link-map.txt', 'link-trace.txt', 'build-record.json', 'pe-imports.txt', inventory.name]
         components.append({'name': COLLECTOR.MICROSOFT_RUNTIME_NAMES[family], 'version': component_version,
                            'evidence_kind': 'microsoft-redistributable', 'vendor': 'Microsoft', 'runtime_family': family,
