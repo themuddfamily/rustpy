@@ -70,6 +70,29 @@ $PortableDir = Join-Path $TestRoot 'portable with spaces'
 $Failure = $null
 $CleanupFailures = [Collections.Generic.List[string]]::new()
 
+function Join-MsiArguments([string[]]$Arguments) {
+    # Msiexec parses property assignments itself. Quote the value, rather than
+    # letting ProcessStartInfo quote the entire NAME=value token as a CRT arg.
+    $Rendered = foreach ($Argument in $Arguments) {
+        $Property = [regex]::Match($Argument, '^([A-Za-z_][A-Za-z0-9_]*)=(.*)$')
+        if ($Property.Success) {
+            $Property.Groups[1].Value + '="' + $Property.Groups[2].Value.Replace('"', '""') + '"'
+        } elseif ($Argument.StartsWith('/')) {
+            $Argument
+        } else {
+            '"' + $Argument.Replace('"', '""') + '"'
+        }
+    }
+    return $Rendered -join ' '
+}
+
+function Save-ChildOutput($Stdout, $Stderr, [string]$Name) {
+    if (-not $Stdout.Wait(5000) -or -not $Stderr.Wait(5000)) { throw "$Name left output pipes open" }
+    $Text = $Stdout.Result
+    ($Text + $Stderr.Result) | Set-Content -LiteralPath (Join-Path $ReportDir "$Name-output.log") -Encoding utf8
+    return $Text
+}
+
 function Invoke-Checked {
     param([string]$Name, [string]$Program, [string[]]$Arguments, [int]$TimeoutSeconds = 240, [int[]]$AllowedCodes = @(0))
     $Info = [Diagnostics.ProcessStartInfo]::new()
@@ -78,7 +101,17 @@ function Invoke-Checked {
     $Info.CreateNoWindow = $true
     $Info.RedirectStandardOutput = $true
     $Info.RedirectStandardError = $true
-    foreach ($Argument in $Arguments) { $Info.ArgumentList.Add($Argument) }
+    $IsMsi = [IO.Path]::GetFileNameWithoutExtension($Program) -ieq 'msiexec'
+    if ($IsMsi) {
+        $Info.Arguments = Join-MsiArguments $Arguments
+        $Info.StandardOutputEncoding = [Text.Encoding]::Unicode
+        $Info.StandardErrorEncoding = [Text.Encoding]::Unicode
+    } else {
+        foreach ($Argument in $Arguments) { $Info.ArgumentList.Add($Argument) }
+    }
+    @{ program=$Program; arguments=$Arguments; msi_command_line=$Info.Arguments } |
+        ConvertTo-Json -Depth 5 |
+        Set-Content -LiteralPath (Join-Path $ReportDir "$Name-invocation.json") -Encoding utf8
     $Child = [Diagnostics.Process]::new()
     $Child.StartInfo = $Info
     try {
@@ -86,13 +119,15 @@ function Invoke-Checked {
         $Stdout = $Child.StandardOutput.ReadToEndAsync()
         $Stderr = $Child.StandardError.ReadToEndAsync()
         if (-not $Child.WaitForExit($TimeoutSeconds * 1000)) {
-            $Child.Kill($true)
+            if (-not $Child.HasExited) { $Child.Kill($true) }
             $null = $Child.WaitForExit(10000)
+            try { $null = Save-ChildOutput $Stdout $Stderr $Name } catch {
+                $_.ToString() | Set-Content -LiteralPath (Join-Path $ReportDir "$Name-output.log") -Encoding utf8
+            }
+            $Steps.Add(@{ name=$Name; timed_out=$true; process_id=$Child.Id })
             throw "$Name exceeded $TimeoutSeconds seconds"
         }
-        if (-not $Stdout.Wait(5000) -or -not $Stderr.Wait(5000)) { throw "$Name left output pipes open" }
-        $Text = $Stdout.Result
-        ($Text + $Stderr.Result) | Set-Content -LiteralPath (Join-Path $ReportDir "$Name-output.log") -Encoding utf8
+        $Text = Save-ChildOutput $Stdout $Stderr $Name
         $Code = $Child.ExitCode
         $Steps.Add(@{ name=$Name; exit_code=$Code })
         if ($Code -notin $AllowedCodes) { throw "$Name exited $Code; see its acceptance log" }

@@ -90,6 +90,11 @@ jobs:
           if ($LASTEXITCODE) { throw 'Native evidence producer cannot load' }
           python -B -m unittest discover -s qa -p test_native_link_recording.py
           if ($LASTEXITCODE) { throw 'Native linker recorder checks failed' }
+          $acceptance = [Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD 'scripts/test-windows-packages.ps1'), [ref]$tokens, [ref]$parseErrors)
+          $renderer = $acceptance.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Join-MsiArguments' }, $true)
+          . ([scriptblock]::Create($renderer.Extent.Text))
+          $actual = Join-MsiArguments @('/i', 'C:\build dirs\rustpy.msi', 'ALLUSERS=', 'INSTALLFOLDER=C:\install dirs\rustpy')
+          if ($actual -cne '/i "C:\build dirs\rustpy.msi" ALLUSERS="" INSTALLFOLDER="C:\install dirs\rustpy"') { throw "Invalid MSI command rendering: $actual" }
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
