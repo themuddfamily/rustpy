@@ -336,7 +336,7 @@ try {
             Assert-True (-not (Test-Path -LiteralPath 'Registry::HKEY_CURRENT_USER\Software\Classes\RustPy.Python')) 'Core-only MSI unexpectedly registered file associations'
             Assert-True (-not (Test-Path -LiteralPath 'Registry::HKEY_CURRENT_USER\Software\Classes\*\shell\RustPy')) 'Core-only MSI unexpectedly registered a context menu'
             Remove-Item -LiteralPath (Join-Path $Directory 'rustpy.exe')
-            $null = Invoke-Checked 'msi-core-repair' 'msiexec.exe' @('/fa', $ProductCode, '/qn', '/norestart', '/L*V', (Join-Path $ReportDir 'msi-core-repair.log'), 'ASSOCIATE_FILES=0', 'CONTEXT_MENU=0', 'ADD_TO_PATH=0') 360 @(0, 3010)
+            $null = Invoke-Checked 'msi-core-repair' 'msiexec.exe' @('/famus', $ProductCode, '/qn', '/norestart', '/L*V', (Join-Path $ReportDir 'msi-core-repair.log'), 'ASSOCIATE_FILES=0', 'CONTEXT_MENU=0', 'ADD_TO_PATH=0') 360 @(0, 3010)
             Assert-Installed $Directory 'msi-repaired'
             Assert-True (-not (Test-Path -LiteralPath (Join-Path $DefaultInstallDir 'rustpy.exe'))) 'MSI repair ignored the remembered custom directory'
         } else {

@@ -133,6 +133,15 @@ jobs:
             if (-not (Test-Path -LiteralPath "target/windows/$name")) { throw "Missing release asset: $name" }
           }
           Get-ChildItem target/windows -File | Where-Object Extension -in '.exe','.msi','.zip' | ForEach-Object { $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); "$h  $($_.Name)" } | Set-Content target/windows/SHA256SUMS
+      - name: Retain candidate Windows packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-${{ matrix.target }}
+          path: |
+            target/windows/*-portable.zip
+            target/windows/*-setup.exe
+            target/windows/*.msi
+          if-no-files-found: error
       - name: Native installation acceptance
         shell: pwsh
         run: scripts/test-windows-packages.ps1 -Target '${{ matrix.target }}'
@@ -157,14 +166,6 @@ jobs:
           name: package-acceptance-${{ matrix.target }}
           path: ${{ env.RUSTPY_PACKAGE_ACCEPTANCE_DIR }}
           retention-days: 7
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v7
-        with:
-          name: windows-${{ matrix.target }}
-          path: |
-            target/windows/*-portable.zip
-            target/windows/*-setup.exe
-            target/windows/*.msi
           if-no-files-found: error
       # Microsoft Store package: unsigned (the Store signs it), identity placeholders from
       # packaging/windows/msix/identity.env unless the RUSTPY_MSIX_* variables are set

@@ -74,3 +74,5 @@ remain incomplete.
 
 - Type checking stops obsolete analysis promptly after an edit instead of continuing
   through the remaining syntax and annotation checks.
+- Windows MSI repair restores the remembered installation directory before resolving
+  the locations of installed files.

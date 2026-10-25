@@ -8,6 +8,7 @@ No empty static-code declaration is inferred from the absence of bundled DLLs.
 import argparse
 from collections import Counter
 import hashlib
+from http.client import HTTPException
 import importlib.util
 import json
 import ntpath
@@ -17,8 +18,10 @@ import re
 import shutil
 import subprocess
 import tarfile
+import time
 import tomllib
-from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -105,8 +108,17 @@ def download(url, path, expected=None):
     if not path.exists() or expected is None or digest(path) != expected:
         partial = path.with_suffix(path.suffix + '.part')
         try:
-            with urlopen(url, timeout=120) as response, partial.open('wb') as output:
-                shutil.copyfileobj(response, output)
+            request = Request(url, headers={'User-Agent': 'RustPy-native-license-evidence/1.0'})
+            for attempt in range(3):
+                try:
+                    with urlopen(request, timeout=120) as response, partial.open('wb') as output:
+                        shutil.copyfileobj(response, output)
+                    break
+                except (HTTPError, URLError, TimeoutError, ConnectionError, HTTPException) as error:
+                    retryable = not isinstance(error, HTTPError) or error.code in (403, 429) or 500 <= error.code <= 599
+                    if not retryable or attempt == 2:
+                        raise RuntimeError(f'Official evidence download failed: {url}: {error}') from error
+                    time.sleep(attempt + 1)
             if expected and digest(partial) != expected:
                 raise ValueError(f'Official download checksum mismatch: {url}')
             if path.suffix.lower() == '.docx':

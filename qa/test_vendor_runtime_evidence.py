@@ -10,6 +10,7 @@ import tarfile
 import tempfile
 import unittest
 from unittest.mock import patch
+from urllib.error import HTTPError, URLError
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -166,6 +167,11 @@ class VendorEvidenceTests(unittest.TestCase):
 
 
 class WindowsProducerTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix='rustpy-windows-evidence-')
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+
     def test_preserved_rustc_rlib_keeps_sdk_objects_and_rejects_unrelated_original_paths(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -288,11 +294,57 @@ class WindowsProducerTests(unittest.TestCase):
     def test_vendor_document_download_does_not_accept_an_html_error_as_a_license(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / 'terms.docx'
-            with patch.object(PRODUCER, 'urlopen', return_value=BytesIO(b'<html>Access denied</html>')):
+            with patch.object(PRODUCER, 'urlopen', return_value=BytesIO(b'<html>Access denied</html>')) as fetch, \
+                    patch.object(PRODUCER.time, 'sleep') as sleep:
                 with self.assertRaisesRegex(ValueError, 'not a DOCX'):
                     PRODUCER.download('https://visualstudio.microsoft.com/terms.docx', path)
+                fetch.assert_called_once()
+                sleep.assert_not_called()
             self.assertFalse(path.exists())
             self.assertFalse(path.with_suffix('.docx.part').exists())
+
+    def test_official_download_retries_transient_denial_with_identifiable_request(self):
+        url = 'https://visualstudio.microsoft.com/fixture.txt'
+        path = self.root / 'download.txt'
+        payload = b'official evidence fixture'
+        with patch.object(PRODUCER, 'urlopen', side_effect=[
+                HTTPError(url, 403, 'Forbidden', {}, None), BytesIO(payload)]) as fetch, \
+                patch.object(PRODUCER.time, 'sleep') as sleep:
+            PRODUCER.download(url, path, hashlib.sha256(payload).hexdigest())
+        self.assertEqual(path.read_bytes(), payload)
+        self.assertEqual(fetch.call_count, 2)
+        self.assertEqual(fetch.call_args.args[0].full_url, url)
+        self.assertEqual(fetch.call_args.args[0].get_header('User-agent'), 'RustPy-native-license-evidence/1.0')
+        sleep.assert_called_once_with(1)
+        self.assertFalse(path.with_suffix('.txt.part').exists())
+
+    def test_official_download_stops_after_three_transient_failures(self):
+        url = 'https://visualstudio.microsoft.com/fixture.txt'
+        path = self.root / 'download.txt'
+        with patch.object(PRODUCER, 'urlopen', side_effect=URLError('connection reset')) as fetch, \
+                patch.object(PRODUCER.time, 'sleep') as sleep:
+            with self.assertRaisesRegex(RuntimeError, url):
+                PRODUCER.download(url, path)
+        self.assertEqual(fetch.call_count, 3)
+        self.assertEqual([call.args[0] for call in sleep.call_args_list], [1, 2])
+        self.assertFalse(path.exists())
+        self.assertFalse(path.with_suffix('.txt.part').exists())
+
+    def test_official_download_does_not_retry_missing_files_or_bad_checksums(self):
+        url = 'https://visualstudio.microsoft.com/fixture.txt'
+        path = self.root / 'download.txt'
+        for failure in (HTTPError(url, 404, 'Not Found', {}, None), BytesIO(b'wrong payload')):
+            with self.subTest(failure=type(failure).__name__), \
+                    patch.object(PRODUCER, 'urlopen', side_effect=[failure] if isinstance(failure, Exception)
+                                 else None, return_value=failure) as fetch, \
+                    patch.object(PRODUCER.time, 'sleep') as sleep:
+                path.write_bytes(b'previous evidence')
+                with self.assertRaisesRegex((RuntimeError, ValueError), url):
+                    PRODUCER.download(url, path, '0' * 64)
+                fetch.assert_called_once()
+                sleep.assert_not_called()
+                self.assertEqual(path.read_bytes(), b'previous evidence')
+                self.assertFalse(path.with_suffix('.txt.part').exists())
 
     def test_sdk_loader_objects_must_match_the_actual_linked_wrapper_archive(self):
         with tempfile.TemporaryDirectory() as temporary:
