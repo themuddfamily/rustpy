@@ -547,7 +547,7 @@ def main():
     build = output / 'build.txt'
     build.write_text(f'Compiler: Rust {release_match[1]} ({commit_match[1]}).\nTarget: {args.target}.\n'
                      'Use the exact release revision and Cargo.lock with Visual Studio ' + profile['year'] + ' and the retained toolchain versions.\n'
-                     'Run cargo build --locked --release -p rustpy --features native-web-preview --target ' + args.target + '.\n'
+                     'Set RUSTFLAGS=-C target-feature=+crt-static, then run cargo build --locked --release -p rustpy --features native-web-preview --target ' + args.target + '.\n'
                      'Rust standard library/runtime sources and native crate archives are retained alongside this file.\n')
     replace = output / 'replace.txt'
     replace.write_text('Rebuild RustPy from its release source with the recorded compiler/SDK versions.\n'

@@ -273,12 +273,15 @@ try {
     Restore-Registry
 
     $Installer = New-Object -ComObject WindowsInstaller.Installer
-    $Database = $Installer.OpenDatabase($Msi, 0)
-    $View = $Database.OpenView("SELECT ``Value`` FROM ``Property`` WHERE ``Property``='ProductCode'")
-    $View.Execute()
-    $Record = $View.Fetch()
-    $ProductCode = $Record.StringData(1)
-    $View.Close()
+    # COM late binding needs plain values, not PowerShell-wrapped arguments.
+    $Database = $Installer.GetType().InvokeMember('OpenDatabase', 'InvokeMethod', $null, $Installer, [object[]]@([string]$Msi, [int]0))
+    $Query = "SELECT ``Value`` FROM ``Property`` WHERE ``Property``='ProductCode'"
+    $View = $Database.GetType().InvokeMember('OpenView', 'InvokeMethod', $null, $Database, [object[]]@([string]$Query))
+    $null = $View.GetType().InvokeMember('Execute', 'InvokeMethod', $null, $View, $null)
+    $Record = $View.GetType().InvokeMember('Fetch', 'InvokeMethod', $null, $View, $null)
+    Assert-True ($null -ne $Record) 'MSI ProductCode property is missing'
+    $ProductCode = [string]$Record.GetType().InvokeMember('StringData', 'GetProperty', $null, $Record, [object[]]@([int]1))
+    $null = $View.GetType().InvokeMember('Close', 'InvokeMethod', $null, $View, $null)
     Assert-True ($ProductCode -match '^\{[0-9A-Fa-f-]{36}\}$') 'Cannot read MSI product code'
     foreach ($Object in @($Record, $View, $Database, $Installer)) { $null = [Runtime.InteropServices.Marshal]::FinalReleaseComObject($Object) }
     $MsiUninstallKey = "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\$ProductCode"

@@ -266,7 +266,7 @@ jobs:
 
           Windows x64 and ARM64 packages include portable ZIPs, setup executables and MSI installers. SHA256SUMS contains the download checksums.
 
-          These packages are unsigned. Native GUI and install/upgrade/uninstall acceptance checks have not been completed for this release. Linux, macOS and Microsoft Store packages are not included.
+          Automated Windows checks cover portable CLI startup, silent installation, reinstall, MSI repair and uninstallation on both architectures. These packages are unsigned. Interactive GUI and upgrades from an older release have not been validated. Linux, macOS and Microsoft Store packages are not included.
           NOTES
           bash scripts/publish-release.sh "$RELEASE_TAG" "$RELEASE_SHA" \
             target/release-assets target/release-notes.md
