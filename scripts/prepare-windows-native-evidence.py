@@ -25,6 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location('native_collector', ROOT / 'scripts/collect-native-licenses.py')
 COLLECTOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(COLLECTOR)
+NOTICE_SPEC = importlib.util.spec_from_file_location('cargo_notice_evidence', ROOT / 'scripts/generate-cargo-notices.py')
+CARGO_NOTICES = importlib.util.module_from_spec(NOTICE_SPEC)
+NOTICE_SPEC.loader.exec_module(CARGO_NOTICES)
 VS_TERMS = 'https://visualstudio.microsoft.com/wp-content/uploads/2024/03/Visual-Studio-2022-Diagnostic-Build-Tools-Agent-License_Update-March-2024_EN.docx'
 VS_PRODUCT_TERMS = 'https://visualstudio.microsoft.com/wp-content/uploads/2021/11/Visual-Studio-2022-Enterprise-Professional-License-EN.docx'
 VS_RUNTIME_TERMS = 'https://visualstudio.microsoft.com/wp-content/uploads/2021/09/Visual-C-Runtime-2015-2022-License-1.docx'
@@ -55,6 +58,43 @@ def visual_studio_profile(version):
 def digest(path):
     with Path(path).open('rb') as source:
         return hashlib.file_digest(source, 'sha256').hexdigest()
+
+
+def native_package_notice(package, archive, notice_manifest, overrides, repository=ROOT):
+    """Retain archive texts and authenticated upstream supplements for that crate.
+
+    The caller validates the complete retained Cargo notice manifest first.
+    Wrapper terms do not replace separately inventoried vendor SDK terms.
+    """
+    key = f"{package['name']}@{package['version']}"
+    records = [record for record in notice_manifest['packages'] if record['package'] == key]
+    if (len(records) != 1 or records[0]['source_sha256'] != package['checksum']
+            or digest(archive) != package['checksum']):
+        raise ValueError(f'Native crate notice evidence differs from the locked archive: {key}')
+    parts = []
+    try:
+        parts.append(COLLECTOR.archive_notices(package, archive))
+    except ValueError as error:
+        if not str(error).endswith(': no license texts'):
+            raise
+    references = {item['path']: item['text_sha256'] for item in records[0]['texts']}
+    for extra in overrides.get(key, {}).get('files', []):
+        path = (repository / extra['path']).resolve()
+        if not path.is_relative_to(repository.resolve()):
+            raise ValueError(f'Pinned native licence supplement escapes the repository: {key}')
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != extra['sha256']:
+            raise ValueError(f'Pinned native licence supplement SHA256 mismatch: {key}')
+        text = raw.decode('utf-8-sig')
+        origin = extra.get('url', extra['path'])
+        if references.get(origin) != hashlib.sha256(text.encode()).hexdigest():
+            raise ValueError(f'Pinned native licence supplement differs from Cargo notice manifest: {key}')
+        parts.append(f'\nSource: {origin}\nSHA256: {extra["sha256"]}\n\n' + text)
+    if not parts:
+        raise ValueError(f'No authenticated native crate licence text or pinned supplement: {key}')
+    return (f'Locked Cargo package: {key}\n'
+            'These package texts do not replace separately retained vendor/native SDK terms.\n'
+            + '\n'.join(parts))
 
 
 def download(url, path, expected=None):
@@ -275,7 +315,7 @@ def linked_inputs(record, trace, directory=None):
         elif Path(token).is_absolute() and Path(token).suffix.lower() in ('.lib', '.rlib'):
             add(Path(token))
     for line in trace.splitlines():
-        paths = re.findall(r'(?:[A-Za-z]:[\\/]|/)[^"\r\n()]+?\.(?:rlib|lib)\b', line, re.I)
+        paths = re.findall(r'(?:[A-Za-z]:[\\/]|/)[^"\r\n]+?\.(?:rlib|lib)\b', line, re.I)
         for token in paths:
             path = Path(token.strip())
             if path.is_file() or str(path).casefold() in aliases:
@@ -444,7 +484,8 @@ def main():
     cargo_home = Path(os.environ.get('CARGO_HOME', Path.home() / '.cargo'))
     target_root = Path(os.environ.get('CARGO_TARGET_DIR', ROOT / 'target')).resolve()
     roots = {'WORKSPACE': ROOT, 'CARGO_HOME': cargo_home, 'RUST_SYSROOT': rust_root,
-             'VC_TOOLS': vc, 'WINDOWS_SDK': sdk_root, 'RUNNER_HOME': Path.home(), 'TARGET_DIR': target_root,
+             'VC_TOOLS': vc, 'VS_ROOT': Path(toolchain['vsinstallation']),
+             'WINDOWS_SDK': sdk_root, 'RUNNER_HOME': Path.home(), 'TARGET_DIR': target_root,
              'TASK_TMP': Path(os.environ.get('TMPDIR') or os.environ.get('TEMP') or args.output.parent)}
     trace = args.link_trace.read_text(errors='replace')
     inputs = linked_inputs(record, trace, args.link_record.parent)
@@ -589,11 +630,13 @@ def main():
                        'license_files': rust_terms, 'source_archives': rust_sources,
                        'provenance_files': provenance,
                        'build_instructions': build.name, 'replacement_instructions': replace.name})
+    notice_manifest = CARGO_NOTICES.check()
+    notice_overrides = json.loads((ROOT / 'packaging/cargo-license-overrides.json').read_text())['packages']
     for package, archive in native_packages:
         retained = output / archive.name
         shutil.copyfile(archive, retained)
-        notice = output / (package['name'] + '-native-notices.txt')
-        notice.write_text(COLLECTOR.archive_notices(package, archive))
+        notice = output / (package['name'] + '-' + package['version'] + '-native-notices.txt')
+        notice.write_text(native_package_notice(package, archive, notice_manifest, notice_overrides))
         components.append({'name': package['name'], 'version': package['version'], 'license_files': [notice.name],
                            'source_archives': {retained.name: digest(retained)},
                            'build_instructions': build.name, 'replacement_instructions': replace.name})

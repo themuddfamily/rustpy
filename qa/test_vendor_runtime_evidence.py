@@ -1,10 +1,12 @@
 """Vendor object-code evidence remains narrow and bound to the actual executable."""
 import copy
+import hashlib
 from io import BytesIO
 import importlib.util
 import json
 from pathlib import Path
 import struct
+import tarfile
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -164,6 +166,56 @@ class VendorEvidenceTests(unittest.TestCase):
 
 
 class WindowsProducerTests(unittest.TestCase):
+    def notice_fixture(self, root):
+        archive = root / 'wrapper-1.0.0.crate'
+        with tarfile.open(archive, 'w:gz') as output:
+            data = b'[package]\nname = "wrapper"\nversion = "1.0.0"\nlicense = "MIT"\n'
+            member = tarfile.TarInfo('wrapper-1.0.0/Cargo.toml')
+            member.size = len(data)
+            output.addfile(member, BytesIO(data))
+        package = {'name': 'wrapper', 'version': '1.0.0', 'checksum': COLLECTOR.digest(archive)}
+        terms = root / 'pinned-LICENSE'
+        terms.write_bytes(b'\xef\xbb\xbfCopyright retained upstream owner\nMIT licence fixture\n')
+        normalized = terms.read_bytes().decode('utf-8-sig').encode()
+        origin = 'https://raw.githubusercontent.com/example/wrapper/' + 'a' * 40 + '/LICENSE'
+        manifest = {'packages': [{'package': 'wrapper@1.0.0', 'source_sha256': package['checksum'],
+                                 'texts': [{'path': origin, 'text_sha256': hashlib.sha256(normalized).hexdigest()}]}]}
+        overrides = {'wrapper@1.0.0': {'files': [{'path': 'pinned-LICENSE', 'url': origin,
+                                                'sha256': COLLECTOR.digest(terms)}]}}
+        return package, archive, manifest, overrides
+
+    def test_missing_crate_licence_uses_the_authenticated_pinned_upstream_text(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            package, archive, manifest, overrides = self.notice_fixture(root)
+            notice = PRODUCER.native_package_notice(package, archive, manifest, overrides, root)
+            self.assertIn('Copyright retained upstream owner', notice)
+            self.assertIn('wrapper@1.0.0', notice)
+            self.assertIn('do not replace separately retained vendor/native SDK terms', notice)
+
+    def test_missing_licence_fallback_rejects_changed_override_or_manifest_text_hash(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            package, archive, manifest, overrides = self.notice_fixture(root)
+            changed = copy.deepcopy(manifest)
+            changed['packages'][0]['texts'][0]['text_sha256'] = '0' * 64
+            with self.assertRaisesRegex(ValueError, 'differs from Cargo notice manifest'):
+                PRODUCER.native_package_notice(package, archive, changed, overrides, root)
+            (root / 'pinned-LICENSE').write_text('modified after review')
+            with self.assertRaisesRegex(ValueError, 'SHA256 mismatch'):
+                PRODUCER.native_package_notice(package, archive, manifest, overrides, root)
+
+    def test_missing_licence_without_verified_supplement_or_wrong_source_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            package, archive, manifest, overrides = self.notice_fixture(root)
+            with self.assertRaisesRegex(ValueError, 'No authenticated native crate licence'):
+                PRODUCER.native_package_notice(package, archive, manifest, {}, root)
+            changed = copy.deepcopy(manifest)
+            changed['packages'][0]['source_sha256'] = '0' * 64
+            with self.assertRaisesRegex(ValueError, 'differs from the locked archive'):
+                PRODUCER.native_package_notice(package, archive, changed, overrides, root)
+
     def test_vendor_terms_profile_matches_the_actual_visual_studio_major(self):
         legacy = PRODUCER.visual_studio_profile('17.14.39222.1')
         current = PRODUCER.visual_studio_profile('18.0.10517.64')
@@ -245,6 +297,14 @@ class WindowsProducerTests(unittest.TestCase):
             self.assertEqual(PRODUCER.linked_inputs(record, 'Loaded ' + str(native) + '(startup.obj)'), [native.resolve()])
             with self.assertRaisesRegex(ValueError, 'Cannot resolve'):
                 PRODUCER.linked_inputs(record, 'Loaded missing.lib(startup.obj)')
+
+    def test_sdk_search_paths_with_spaces_and_parentheses_resolve_loaded_members(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            native = Path(temporary) / 'Program Files (x86)' / 'Windows Kits' / 'libucrt.lib'
+            native.parent.mkdir(parents=True)
+            native.write_bytes(b'actual SDK archive fixture')
+            trace = f'Searching {native}:\n  Loaded libucrt.lib(init.obj)\n'
+            self.assertEqual(PRODUCER.linked_inputs({'expanded_arguments': ['/NOLOGO']}, trace), [native.resolve()])
 
 
 if __name__ == '__main__':

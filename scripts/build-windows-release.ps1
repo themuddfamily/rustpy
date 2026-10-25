@@ -52,6 +52,8 @@ if (-not (Test-Path -LiteralPath $Linker)) { throw "Native linker missing: $Link
 $RustVersion = (& rustc -vV) -join "`n"
 if ($LASTEXITCODE) { throw 'Cannot inspect Rust toolchain' }
 $Commit = ($RustVersion -split "`n" | Where-Object { $_ -like 'commit-hash: *' }) -replace '^commit-hash: ', ''
+$SourceRevision = (& git rev-parse HEAD).Trim()
+if ($LASTEXITCODE -or $SourceRevision -notmatch '^[0-9a-f]{40}$') { throw 'Cannot record the source revision' }
 if ($env:CARGO_ENCODED_RUSTFLAGS) {
     $Separator = [string][char]31
     $env:CARGO_ENCODED_RUSTFLAGS = $env:CARGO_ENCODED_RUSTFLAGS + $Separator + '-C' + $Separator + 'target-feature=+crt-static'
@@ -65,6 +67,7 @@ $Toolchain = @{
     vsproductline=$Installation.catalog.productLineVersion; vsproductid=$Installation.productId
     vsisprerelease=$Installation.isPrerelease; vsiscomplete=$Installation.isComplete; vsislaunchable=$Installation.isLaunchable
     target=$Target; rustc_verbose=$RustVersion; rustc_commit=$Commit
+    source_revision=$SourceRevision
     rustflags=$env:RUSTFLAGS; encoded_rustflags=$env:CARGO_ENCODED_RUSTFLAGS
 }
 $Toolchain | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $Proof 'toolchain.json') -Encoding utf8
