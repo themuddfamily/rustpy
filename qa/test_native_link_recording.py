@@ -2,10 +2,13 @@
 import hashlib
 import importlib.util
 import json
+import ctypes
 from pathlib import Path
+import shlex
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -16,6 +19,35 @@ SPEC.loader.exec_module(RECORD)
 
 
 class NativeLinkRecording(unittest.TestCase):
+    def test_windows_response_lines_preserve_quoted_paths_and_expose_output_argument(self):
+        buffers = []
+        freed = []
+
+        def command_line_to_argv(command, count):
+            # Model the WinAPI distinction that caused the failure: only space
+            # and tab separate arguments. A raw LF remains part of the token.
+            lexer = shlex.shlex(command, posix=False)
+            lexer.whitespace = ' \t'
+            lexer.whitespace_split = True
+            words = [word[1:-1] if word.startswith('"') and word.endswith('"') else word
+                     for word in lexer]
+            ctypes.cast(count, ctypes.POINTER(ctypes.c_int)).contents.value = len(words)
+            array = (ctypes.c_wchar_p * len(words))(*words)
+            buffers.append(array)
+            return array
+
+        def local_free(pointer):
+            freed.append(pointer)
+
+        api = SimpleNamespace(shell32=SimpleNamespace(CommandLineToArgvW=command_line_to_argv),
+                              kernel32=SimpleNamespace(LocalFree=local_free))
+        text = '/NOLOGO\r\n' + r'"C:\Program Files (x86)\SDK\libucrt.lib"' + '\n/OUT:C:/build/rustpy.exe\r\n'
+        with patch.object(RECORD.os, 'name', 'nt'), patch.object(RECORD.ctypes, 'windll', api, create=True):
+            arguments = RECORD.response_arguments(text)
+        self.assertEqual(arguments, ['/NOLOGO', r'C:\Program Files (x86)\SDK\libucrt.lib', '/OUT:C:/build/rustpy.exe'])
+        self.assertEqual(RECORD.linked_output(arguments), Path('C:/build/rustpy.exe'))
+        self.assertEqual(len(freed), 1)
+
     def test_success_records_actual_output_trace_and_expanded_command(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

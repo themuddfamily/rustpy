@@ -20,6 +20,9 @@ def digest(path):
 def response_arguments(text):
     if os.name != 'nt':
         return shlex.split(text)
+    # MSVC response files allow one argument per line. CommandLineToArgvW
+    # recognizes spaces/tabs, not CR/LF, as command-line argument separators.
+    text = text.replace('\r', ' ').replace('\n', ' ')
     shell = ctypes.windll.shell32
     shell.CommandLineToArgvW.argtypes = [ctypes.c_wchar_p, ctypes.POINTER(ctypes.c_int)]
     shell.CommandLineToArgvW.restype = ctypes.POINTER(ctypes.c_wchar_p)
