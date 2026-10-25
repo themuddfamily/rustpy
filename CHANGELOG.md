@@ -69,3 +69,8 @@ remain incomplete.
 - macOS: one universal app for Apple silicon and Intel Macs. Finder's *Open With* lists
   RustPy for `.py`, `.pyi` and `.ipynb` files, and the app bundle contains a `rustpy`
   command-line launcher.
+
+### Fixed
+
+- Type checking stops obsolete analysis promptly after an edit instead of continuing
+  through the remaining syntax and annotation checks.

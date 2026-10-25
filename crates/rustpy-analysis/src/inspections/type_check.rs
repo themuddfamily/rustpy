@@ -53,7 +53,12 @@ pub(super) fn run(inf: &Inferer<'_>, file: &Arc<FileInfo>, version: (u32, u32), 
     } else {
         db.resolver.static_env().for_user_code()
     };
-    for node in root.descendants() {
+    for (index, node) in root.descendants().enumerate() {
+        // Inference observes cancellation, but this walk also performs syntax
+        // and declaration checks. Do not finish the whole file after an edit.
+        if index % 64 == 0 && rustpy_semantic::infer::ambient_cancelled() {
+            return;
+        }
         // Version/platform branches that cannot run on the target interpreter.
         if matches!(
             node.kind(),
@@ -1207,6 +1212,47 @@ fn check_none_attribute(
         format!("Cannot find reference '{}' in 'None'", name_tok.text()),
         Vec::new(),
     );
+}
+
+#[cfg(test)]
+mod cancellation_tests {
+    use super::*;
+    use rustpy_core::CancellationToken;
+    use rustpy_semantic::db::Analysis;
+
+    #[test]
+    fn cancelled_type_walks_do_not_emit_annotation_diagnostics() {
+        let db = Analysis::for_project(std::path::Path::new("/typecheck-cancellation"));
+        let id = db.set_file_text(
+            std::path::Path::new("/typecheck-cancellation/main.py"),
+            "value: b'int' = None\n",
+        );
+        let file = db.file(id).unwrap();
+        for advanced_only in [false, true] {
+            let inspect = |sink: &mut Sink| {
+                let inf = Inferer::new(&db);
+                if advanced_only {
+                    advanced::run(&inf, &file, (3, 12), sink);
+                } else {
+                    run(&inf, &file, (3, 12), sink);
+                }
+            };
+            let mut complete = Sink::new();
+            inspect(&mut complete);
+            assert!(complete.out.iter().any(|problem| {
+                problem.diagnostic.message == "A bytes literal is not a type annotation"
+            }));
+
+            let token = CancellationToken::new();
+            token.cancel();
+            let mut cancelled = Sink::new();
+            rustpy_semantic::infer::with_cancellation(&token, || inspect(&mut cancelled));
+            assert!(
+                cancelled.out.is_empty(),
+                "an obsolete type walk still produced diagnostics (advanced only: {advanced_only})"
+            );
+        }
+    }
 }
 
 #[cfg(test)]

@@ -26,7 +26,18 @@ pub(super) fn run(inf: &Inferer<'_>, file: &Arc<FileInfo>, version: (u32, u32), 
     }
     let env = inf.db.resolver.static_env().for_user_code();
     let mut dead_branches = rustpy_semantic::static_cond::DeadBranchCache::new(&env);
-    for node in file.parse.syntax_node().descendants().take(100_000) {
+    for (index, node) in file
+        .parse
+        .syntax_node()
+        .descendants()
+        .take(100_000)
+        .enumerate()
+    {
+        // This pass must not keep traversing when inference already stopped
+        // for an obsolete analysis, including cancellation in the prior pass.
+        if index % 64 == 0 && rustpy_semantic::infer::ambient_cancelled() {
+            return;
+        }
         if dead_branches.in_dead_branch(&node) {
             continue;
         }
