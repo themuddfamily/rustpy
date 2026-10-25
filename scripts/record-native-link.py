@@ -67,6 +67,20 @@ def linked_output(arguments):
     return None
 
 
+def rustc_temporary_directory(path, target_root):
+    try:
+        relative = path.resolve().relative_to(target_root.resolve())
+    except ValueError:
+        return False
+    return any(re.fullmatch(r'rustc[A-Za-z0-9_]+', part) for part in relative.parts[:-1])
+
+
+def rustc_temporary_archive(path, target_root):
+    return (path.suffix.lower() == '.rlib'
+            and re.fullmatch(r'lib[A-Za-z0-9_]+-[0-9a-f]{16}\.rlib', path.name) is not None
+            and rustc_temporary_directory(path, target_root))
+
+
 def retain_native_inputs(arguments, trace, directory):
     """Capture temporary import libraries before rustc removes its link directory."""
     search = [Path.cwd()]
@@ -100,15 +114,22 @@ def retain_native_inputs(arguments, trace, directory):
                 found[path] = None
     records = []
     temporary = Path(os.environ.get('TMPDIR') or os.environ.get('TEMP') or '/tmp').resolve()
+    target_root = Path(os.environ.get('CARGO_TARGET_DIR', Path(__file__).resolve().parents[1] / 'target')).resolve()
     for path in found:
         record = {'path': str(path), 'sha256': digest(path)}
-        if path.suffix.lower() == '.lib' and path.is_relative_to(temporary) and not path.is_relative_to(directory.resolve()):
-            if path.stat().st_size > 32 * 1024 * 1024:
-                raise ValueError('Unexpectedly large temporary native import library')
+        temporary_rlib = rustc_temporary_archive(path, target_root)
+        temporary_lib = (path.suffix.lower() == '.lib'
+                         and (path.is_relative_to(temporary) or rustc_temporary_directory(path, target_root)))
+        if (temporary_rlib or temporary_lib) and not path.is_relative_to(directory.resolve()):
+            limit = (512 if temporary_rlib else 32) * 1024 * 1024
+            if path.stat().st_size > limit:
+                raise ValueError('Unexpectedly large temporary linker archive')
             copied = directory / 'native-inputs' / f'{len(records)}-{path.name}'
             copied.parent.mkdir(exist_ok=True)
             copied.write_bytes(path.read_bytes())
             record['retained'] = copied.relative_to(directory).as_posix()
+            record['kind'] = ('rustc-temporary-rlib' if temporary_rlib else
+                              'rustc-raw-dylib' if 'raw-dylibs' in path.parts else 'temporary-native-library')
         records.append(record)
     return records
 

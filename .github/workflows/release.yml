@@ -88,6 +88,8 @@ jobs:
           }
           python -B -c "import runpy; runpy.run_path('scripts/prepare-windows-native-evidence.py', run_name='packaging_import_check')"
           if ($LASTEXITCODE) { throw 'Native evidence producer cannot load' }
+          python -B -m unittest discover -s qa -p test_native_link_recording.py
+          if ($LASTEXITCODE) { throw 'Native linker recorder checks failed' }
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}

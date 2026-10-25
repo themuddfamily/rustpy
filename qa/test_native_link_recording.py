@@ -89,7 +89,7 @@ class NativeLinkRecording(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             response = root / 'input.rsp'
-            response.write_text('-o "binary with spaces" input.lib', encoding='utf-16')
+            response.write_text('-o\n"binary with spaces"\ninput.lib', encoding='utf-16')
             records = []
             expanded = RECORD.retain_arguments(['@' + str(response)], root, records)
             self.assertEqual(expanded, ['-o', 'binary with spaces', 'input.lib'])
@@ -118,6 +118,29 @@ class NativeLinkRecording(unittest.TestCase):
             self.assertEqual(records[0]['sha256'], RECORD.digest(source))
             source.unlink()
             self.assertEqual((proof / records[0]['retained']).read_bytes(), b'generated import library')
+
+    def test_rustc_link_time_rlib_is_preserved_without_copying_stable_target_archives(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / 'shared-target'
+            deps = target / 'aarch64-pc-windows-msvc' / 'release' / 'deps'
+            source = deps / 'rustcAgBEAJ' / 'libwebview2_com_sys-0123456789abcdef.rlib'
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b'actual link-time Rust archive')
+            stable = deps / 'libwebview2_com_sys-0123456789abcdef.rlib'
+            stable.write_bytes(b'stable compiled crate')
+            proof = root / 'proof'
+            proof.mkdir()
+            with patch.dict(RECORD.os.environ, {'TMPDIR': str(root / 'separate-system-temp'),
+                                              'CARGO_TARGET_DIR': str(target)}):
+                records = RECORD.retain_native_inputs([str(stable), str(source)], '', proof)
+            self.assertEqual(len(records), 2)
+            copied = next(record for record in records if record['path'] == str(source.resolve()))
+            self.assertEqual(copied['kind'], 'rustc-temporary-rlib')
+            self.assertEqual(copied['sha256'], RECORD.digest(source))
+            self.assertNotIn('retained', next(record for record in records if record['path'] == str(stable.resolve())))
+            source.unlink()
+            self.assertEqual((proof / copied['retained']).read_bytes(), b'actual link-time Rust archive')
 
 
 if __name__ == '__main__':

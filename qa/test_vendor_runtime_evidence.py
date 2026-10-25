@@ -166,6 +166,26 @@ class VendorEvidenceTests(unittest.TestCase):
 
 
 class WindowsProducerTests(unittest.TestCase):
+    def test_preserved_rustc_rlib_keeps_sdk_objects_and_rejects_unrelated_original_paths(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / 'target'
+            name = 'libwebview2_com_sys-0123456789abcdef.rlib'
+            original = target / 'aarch64-pc-windows-msvc' / 'release' / 'deps' / 'rustcAgBEAJ' / name
+            source = root / 'retained-link-input.rlib'
+            native = b'actual SDK loader object fixture'
+            source.write_bytes(ar_archive([('rust.o', b'Rust code'), ('loader.obj', native)]))
+            output = root / 'evidence'
+            output.mkdir()
+            retained = PRODUCER.preserve_rustc_archive(original, source, target, output, 0)
+            self.assertEqual(retained.read_bytes(), source.read_bytes())
+            self.assertEqual(PRODUCER.digest(retained), PRODUCER.digest(source))
+            PRODUCER.verify_bundled_loader(ar_archive([('loader.obj', native)]), [retained])
+            for invalid in (root / 'outside-target' / 'rustcAgBEAJ' / name,
+                            target / 'release' / 'deps' / name):
+                with self.subTest(path=invalid), self.assertRaisesRegex(ValueError, 'rustc temporary archive'):
+                    PRODUCER.preserve_rustc_archive(invalid, source, target, output, 1)
+
     def notice_fixture(self, root):
         archive = root / 'wrapper-1.0.0.crate'
         with tarfile.open(archive, 'w:gz') as output:

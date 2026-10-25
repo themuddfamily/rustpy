@@ -28,6 +28,9 @@ SPEC.loader.exec_module(COLLECTOR)
 NOTICE_SPEC = importlib.util.spec_from_file_location('cargo_notice_evidence', ROOT / 'scripts/generate-cargo-notices.py')
 CARGO_NOTICES = importlib.util.module_from_spec(NOTICE_SPEC)
 NOTICE_SPEC.loader.exec_module(CARGO_NOTICES)
+LINK_SPEC = importlib.util.spec_from_file_location('windows_link_recorder', ROOT / 'scripts/record-native-link.py')
+LINK_RECORDER = importlib.util.module_from_spec(LINK_SPEC)
+LINK_SPEC.loader.exec_module(LINK_RECORDER)
 VS_TERMS = 'https://visualstudio.microsoft.com/wp-content/uploads/2024/03/Visual-Studio-2022-Diagnostic-Build-Tools-Agent-License_Update-March-2024_EN.docx'
 VS_PRODUCT_TERMS = 'https://visualstudio.microsoft.com/wp-content/uploads/2021/11/Visual-Studio-2022-Enterprise-Professional-License-EN.docx'
 VS_RUNTIME_TERMS = 'https://visualstudio.microsoft.com/wp-content/uploads/2021/09/Visual-C-Runtime-2015-2022-License-1.docx'
@@ -252,6 +255,16 @@ def recorded_inputs(record, directory):
             raise ValueError('A recorded linker input is missing or changed after linking')
         aliases[str(original).casefold()] = source.resolve()
     return aliases
+
+
+def preserve_rustc_archive(original, source, target_root, output, index):
+    if not LINK_RECORDER.rustc_temporary_archive(original, target_root):
+        raise ValueError('Retained Rust archive was not a rustc temporary archive inside the target directory')
+    data = source.read_bytes()
+    list(archive_members(data))
+    retained = output / f'rust-link-archive-{index}-{original.name}'
+    retained.write_bytes(data)
+    return retained
 
 
 def generated_import_archive(path):
@@ -498,11 +511,23 @@ def main():
     retained_originals = {}
     for entry in record.get('input_files', []):
         if entry.get('retained'):
-            retained_originals[str((args.link_record.parent / entry['retained']).resolve()).casefold()] = entry['path']
-            retained_originals[str(Path(entry['path']).resolve()).casefold()] = entry['path']
+            retained_originals[str((args.link_record.parent / entry['retained']).resolve()).casefold()] = entry
+            retained_originals[str(Path(entry['path']).resolve()).casefold()] = entry
     for path in inputs:
-        original = retained_originals.get(str(path.resolve()).casefold())
-        if original is not None:
+        snapshot = retained_originals.get(str(path.resolve()).casefold())
+        if snapshot is not None:
+            original = Path(snapshot['path'])
+            if snapshot.get('kind') == 'rustc-temporary-rlib':
+                retained = preserve_rustc_archive(original, path, target_root, output, len(generated_inputs))
+                generated_inputs.append({'name': retained.name, 'sha256': digest(retained), 'kind': snapshot['kind']})
+                if original.name.startswith('libwebview2_com_sys-'):
+                    webview_wrappers.append(retained)
+                if original.name.startswith('libcompiler_builtins-'):
+                    include_compiler_rt = any(not name.endswith(('.rcgu.o', '.rmeta', '.rmeta-link'))
+                                              for name, _ in archive_members(retained.read_bytes()))
+                continue
+            if snapshot.get('kind') not in (None, 'rustc-raw-dylib', 'temporary-native-library'):
+                raise ValueError('Unknown retained native linker input kind')
             if 'raw-dylibs' not in str(original).replace('\\', '/').casefold().split('/'):
                 raise ValueError('Unreviewed temporary native input; only recorded rustc raw-dylib import stubs are supported')
             generated_import_archive(path)
