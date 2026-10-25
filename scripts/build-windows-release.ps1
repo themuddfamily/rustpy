@@ -39,8 +39,9 @@ if (-not $Installation) { $Installation = $Instances | Where-Object { $_.install
 if (-not $Installation) { throw "A reviewed Visual Studio 2022 or 2026 toolchain is required; discovered: $VsJson" }
 $Vs = $Installation.installationPath
 $DevCmd = Join-Path $Vs 'Common7\Tools\VsDevCmd.bat'
-$Command = "`"$DevCmd`" -no_logo -arch=$Arch -host_arch=$Arch >nul && set"
-$Variables = & $env:ComSpec /d /s /c "`"$Command`""
+$CaptureEnvironment = Join-Path $Proof 'capture-vs-environment.cmd'
+@('@echo off', "call `"$DevCmd`" -no_logo -arch=$Arch -host_arch=$Arch >nul", 'if errorlevel 1 exit /b %errorlevel%', 'set') | Set-Content -LiteralPath $CaptureEnvironment -Encoding ascii
+$Variables = & $env:ComSpec /d /c $CaptureEnvironment
 if ($LASTEXITCODE) { throw 'Visual Studio native environment failed' }
 foreach ($Line in $Variables) {
     $Pair = $Line -split '=', 2

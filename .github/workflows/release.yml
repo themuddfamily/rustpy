@@ -101,6 +101,7 @@ jobs:
         with:
           key: release-staticcrt-${{ matrix.target }}
           cache-on-failure: true
+          cache-workspace-crates: true
       - name: Check Inno Setup 6
         shell: pwsh
         run: |
