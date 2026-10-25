@@ -22,7 +22,10 @@
     <Property Id="RUSTPY_INSTALLFOLDER" Secure="yes">
       <RegistrySearch Id="RememberedInstallFolder" Root="HKCU" Key="Software\RustPy" Name="InstallFolder" Type="raw" />
     </Property>
-    <SetDirectory Id="INSTALLFOLDER" Value="[RUSTPY_INSTALLFOLDER]" Condition="Installed AND RUSTPY_INSTALLFOLDER" Sequence="both" />
+    <!-- Restore the property before costing resolves component destinations.
+         A SetDirectory action runs after CostFinalize and can leave repair
+         component actions unset after changing the already-costed directory. -->
+    <SetProperty Id="INSTALLFOLDER" Value="[RUSTPY_INSTALLFOLDER]" Condition="Installed AND RUSTPY_INSTALLFOLDER" Before="CostFinalize" Sequence="both" />
     <StandardDirectory Id="LocalAppDataFolder">
       <Directory Id="ProgramsFolder" Name="Programs"><Directory Id="INSTALLFOLDER" Name="RustPy">
         <!-- Per-user component (ICE38/ICE43/ICE64): its key path is an HKCU value, not the

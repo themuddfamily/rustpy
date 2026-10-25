@@ -14,7 +14,7 @@ log.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 crossbeam-channel.workspace = true
-rustpy-debug = { path = "../rustpy-debug", version = "0.1.0" }
+rustpy-debug = { path = "../rustpy-debug", version = "1.0.0" }
 
 [dev-dependencies]
 which.workspace = true

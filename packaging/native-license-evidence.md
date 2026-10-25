@@ -32,6 +32,83 @@ artifact requires its separate release checksum. `--binary`
 can point outside STAGING_ROOT, allowing a documentation-only packaging stage.
 The declaration is producer evidence, not automatic detection of static code.
 
+Microsoft redistributable object-code evidence
+---------------------------------------------
+
+Windows MSVC startup code remains statically linked even when the UCRT is dynamic.
+Do not declare `system_static_components: []` because no CRT DLL is bundled.
+The collector also accepts the explicit `evidence_kind: microsoft-redistributable`
+category for these exact Microsoft runtime families: `msvc-crt` (Microsoft Visual
+C++ CRT), `windows-sdk` (Microsoft Windows SDK) and `webview2-loader` (Microsoft
+WebView2 Loader). The primary executable must be Windows PE, the vendor must be
+Microsoft, and the component needs an exact numeric version. This category
+records the applicable vendor-supplied object-code redistribution terms instead
+of inventing unavailable source archives. It is not a generic source exemption.
+Existing open-source components still require their exact sources, licences,
+build instructions and replacement instructions.
+
+Each vendor entry requires SHA256 maps named `vendor_terms`,
+`redistribution_evidence` and `linkage_evidence`; `license_files` must reference
+the retained vendor terms. `linkage_records` identifies the final map, trace and
+build record, all retained with hashes. The build record binds the executable,
+compiler commit and original linker outputs. `input_inventory` identifies a
+retained JSON file with the same binary SHA256, runtime family and nonempty
+logical library names/hashes. `provenance_urls` must point to official HTTPS
+Microsoft/NuGet resources, and `review_basis` records the producer's basis for
+redistribution. A completed evidence bundle is not a legal certification.
+
+`scripts/prepare-windows-native-evidence.py --binary EXE --link-map MAP
+--link-trace TRACE --link-record RECORD --toolchain-record TOOLCHAIN --output DIR`
+runs on the native Windows runner after the final link and writes
+`DIR/runtime-manifest.json`. It validates recorded binary/map/trace hashes,
+records actual linked inputs and installed Rust/Visual Studio/SDK versions, and
+retains authenticated Rust/native Cargo sources (including ring and blake3).
+Rust's official full source archive is additionally retained when the selected
+compiler-builtins archive contains native C/assembly objects not supplied by
+the rust-src component. Unknown native inputs stop production. The producer
+supports the reviewed Visual Studio 2022 (product major 17) and Visual Studio
+2026 (product major 18) terms profiles, selected from the actual installed product
+version. It downloads that product year's distinct build-tool, product/runtime
+EULAs and redistribution list; an unknown major or an unreviewed Preview channel
+is rejected. It rejects VC/debug CRT DLL dependencies for these
+self-contained installers; use the recorded `+crt-static` target build.
+Run `--preflight --toolchain-record TOOLCHAIN --output DIR` before compiling to
+validate installed SDK terms and fetch authenticated Rust sources/vendor terms.
+Preflight writes no runtime manifest; final binary and linker binding remain
+mandatory. Full production reuses checksum-verified preflight sources.
+Temporary rustc raw-dylib import archives may disappear after linking. The
+recorder must preserve their bytes and hashes before returning to rustc. The
+producer accepts only recorded raw-dylib archives containing COFF import
+descriptors/short import objects, rejects native function-code substitutes and
+retains the generated archives as provenance, not as invented source archives.
+Ordinary components may attach additional checksum-bound `provenance_files`;
+their actual `source_archives` requirement remains mandatory.
+SDK terms are retained from its dedicated installed `Licenses` directory (or an
+explicit `--windows-sdk-terms` path). Missing SDK terms stop the producer; Visual
+Studio's redistribution list is not substituted for a Windows SDK licence.
+Downloaded Microsoft terms must be actual DOCX licence documents, not HTML error
+pages. The retained documents describe the producer's review basis; the tool does
+not claim that a generic REDIST list individually names every static CRT object.
+
+WebView2's native loader is covered by its matching official SDK terms, not the
+Rust wrapper's MIT declaration. The producer derives the SDK version from the
+locked wrapper's upstream generator revision, compares the official NuGet loader
+with the authenticated crate payload and the actual linked wrapper archive's
+object members, then retains the SDK's licence, notices, package metadata and
+payload hashes. The current SDK uses Microsoft BSD-style binary/source
+redistribution terms. Its notices remain part of the distribution evidence;
+the producer does not manufacture a nonexistent REDIST file or assert that the
+SDK source is included. Vendor object archives are hashed, not redistributed
+as standalone `.lib` files. Reviewed source/replacement obligations for any
+open-source runtime components remain unchanged.
+
+Primary references:
+https://learn.microsoft.com/en-us/cpp/c-runtime-library/crt-library-features
+https://www.microsoft.com/licensing/guidance/Visual-Studio
+https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution
+https://learn.microsoft.com/en-us/visualstudio/releases/2026/redistribution
+https://visualstudio.microsoft.com/license-terms/
+
 The manifest's `components` array inventories redistributed shared libraries. The script's module documentation
 contains the schema. Library paths are relative to STAGING_ROOT; all evidence
 paths are relative to the JSON. File and source archive SHA256 values bind the
@@ -40,7 +117,9 @@ in corresponding source, with exact package version/revision in `version`.
 License files must be the actual package copyright/license files, including all
 applicable exceptions, third-party notices and attribution. The collector
 requires source, build instructions and replacement instructions for every
-component, conservatively including permissive libraries. It rejects any
+ordinary component, conservatively including permissive libraries; only the
+explicit Microsoft vendor category above uses its retained redistribution evidence.
+It rejects any
 uncovered ELF/PE/Mach-O files (including executables and extensionless AppImage
 runtime), and .dll/.so/.dylib paths even when format detection is inconclusive.
 Only the exact primary --binary path and collector output are excluded. When

@@ -1,7 +1,7 @@
 {
   "format": 1,
   "input_sha256": {
-    "Cargo.lock": "79d58364ac2f0b136f3feb41e2bb8a92389335dd813932cd3db74857686b0531",
+    "Cargo.lock": "481990138317e57e87724f1383c4f89b133ce4130bd1fd0877e24d0c006281a7",
     "packaging/cargo-license-overrides.json": "f9d05dd780cd432ca703c910dccb174ff0f5ac3b203bdbc8177860f9c29312ca",
     "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/AUTHORS": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502",
     "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE-APACHE": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
@@ -74,8 +74,8 @@
     "packaging/cargo-license-overrides/wravery--webview2-rs-edc2caf88617/LICENSE": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73",
     "packaging/cargo-license-overrides/zrzka--anes-rs-378ac7461eca/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
     "packaging/cargo-license-overrides/zrzka--anes-rs-378ac7461eca/LICENSE-MIT": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
-    "qa/Cargo.lock": "aaeb30c6fb8959d455485638b8fcbb19640ea3a1b0ae04e420f7a445cae00b32",
-    "qa/fuzz/Cargo.lock": "8ea13c9eb722fea1fdc5045bdcbc29ac788c5658db5868d06760e21a6c721cdb",
+    "qa/Cargo.lock": "38b2c076f4cc644c2b0410bd6333a600331079a5c05471648e34b2e65553a093",
+    "qa/fuzz/Cargo.lock": "6a0d8e3e5e7c251976f591230ad1ae35fa0c34275ffa614b10019795d55cfbf6",
     "scripts/generate-cargo-notices.py": "ca14542340a9fc7166175e295163e565f696b7c5be347d48c6a7daec72984b5e"
   },
   "packages": [
@@ -4307,7 +4307,9 @@
       "source_url": "https://crates.io/api/v1/crates/dunce/1.0.5/download",
       "source_sha256": "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813",
       "lockfiles": [
-        "Cargo.lock"
+        "Cargo.lock",
+        "qa/Cargo.lock",
+        "qa/fuzz/Cargo.lock"
       ],
       "covered_source_bundled": false,
       "texts": [

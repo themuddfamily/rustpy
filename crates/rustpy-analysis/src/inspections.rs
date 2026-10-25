@@ -332,6 +332,7 @@ pub fn inspect_cancellable(
     if opts.type_checker {
         token.check()?;
         type_check::run(&inf, file, opts.python_version, &mut sink);
+        token.check()?;
         type_capability_checks::run(&inf, file, &mut sink);
     }
     if opts.compatibility {

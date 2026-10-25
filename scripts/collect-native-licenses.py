@@ -31,9 +31,99 @@ import re
 import shutil
 import tarfile
 import tomllib
+from urllib.parse import urlparse
 
 NATIVE = {'libgit2-sys', 'libssh2-sys', 'libz-sys', 'libsqlite3-sys', 'openssl-src'}
 ROOT = Path(__file__).resolve().parents[1]
+MICROSOFT_RUNTIME_FAMILIES = {'msvc-crt', 'windows-sdk', 'webview2-loader'}
+MICROSOFT_RUNTIME_NAMES = {'msvc-crt': 'Microsoft Visual C++ CRT',
+                           'windows-sdk': 'Microsoft Windows SDK',
+                           'webview2-loader': 'Microsoft WebView2 Loader'}
+
+
+def pe_binary(path):
+    """Vendor runtime evidence is only admitted for an actual Windows PE image."""
+    with path.open('rb') as source:
+        header = source.read(64)
+        if len(header) != 64 or header[:2] != b'MZ':
+            return False
+        source.seek(int.from_bytes(header[60:64], 'little'))
+        return source.read(4) == b'PE\0\0'
+
+
+def vendor_evidence_files(item, base, binary, binary_sha256):
+    """Validate the narrow Microsoft object-code redistribution evidence category.
+
+    This checks retained producer evidence, not legal compatibility. It never
+    converts an open-source component into a source-free component implicitly.
+    """
+    if item.get('evidence_kind') != 'microsoft-redistributable':
+        raise ValueError('unknown native evidence_kind')
+    if not pe_binary(binary) or item.get('vendor') != 'Microsoft':
+        raise ValueError('Microsoft redistribution evidence requires a Windows PE binary and vendor Microsoft')
+    family = item.get('runtime_family')
+    if family not in MICROSOFT_RUNTIME_FAMILIES:
+        raise ValueError('unsupported Microsoft runtime family')
+    if (item.get('name') != MICROSOFT_RUNTIME_NAMES[family]
+            or not re.fullmatch(r'[0-9]+(?:\.[0-9]+){2,3}', item.get('version', ''))):
+        raise ValueError('vendor evidence requires the named Microsoft runtime and exact numeric version')
+    if item.get('source_archives'):
+        raise ValueError('vendor evidence must not disguise binaries as source archives')
+    if not item.get('review_basis'):
+        raise ValueError('vendor evidence needs an explicit redistribution review basis')
+    urls = item.get('provenance_urls')
+    allowed = {'visualstudio.microsoft.com', 'learn.microsoft.com', 'www.microsoft.com',
+               'download.microsoft.com', 'api.nuget.org', 'aka.ms'}
+    if not isinstance(urls, list) or not urls or any(
+            urlparse(url).scheme != 'https' or urlparse(url).hostname not in allowed for url in urls):
+        raise ValueError('vendor evidence needs official HTTPS Microsoft/NuGet provenance URLs')
+    files = {}
+    for key in ('vendor_terms', 'redistribution_evidence', 'linkage_evidence'):
+        entries = item.get(key)
+        if not isinstance(entries, dict) or not entries:
+            raise ValueError(f'vendor evidence needs SHA256-bound {key}')
+        for name, sha in entries.items():
+            if Path(name).is_absolute() or '..' in Path(name).parts or '\\' in name or ':' in name:
+                raise ValueError('vendor evidence paths must stay relative to the evidence directory')
+            if not isinstance(sha, str) or not re.fullmatch('[0-9a-f]{64}', sha):
+                raise ValueError(f'invalid {key} SHA256: {name}')
+            checked_file(base, name, sha)
+            if name in files and files[name] != sha:
+                raise ValueError('conflicting vendor evidence hashes')
+            files[name] = sha
+    linkage_records = item.get('linkage_records', {})
+    if not isinstance(linkage_records, dict) or set(linkage_records) != {'map', 'trace', 'build_record'}:
+        raise ValueError('vendor evidence needs final map, trace and build_record references')
+    if any(name not in item['linkage_evidence'] for name in linkage_records.values()):
+        raise ValueError('vendor linkage records must be retained with SHA256 digests')
+    build = json.loads(checked_file(base, linkage_records['build_record'], files[linkage_records['build_record']]).read_text())
+    link = build.get('link', {})
+    if (link.get('binary_sha256') != binary_sha256
+            or not re.fullmatch('[0-9a-f]{40}', link.get('rustc_commit', ''))
+            or not all(re.fullmatch('[0-9a-f]{64}', link.get(key, ''))
+                       for key in ('link_map_sha256', 'link_trace_sha256'))):
+        raise ValueError('vendor build record must bind the final executable, compiler and linker outputs')
+    inventory_path = item.get('input_inventory')
+    if inventory_path not in item['linkage_evidence']:
+        raise ValueError('vendor input_inventory must be retained as linkage evidence')
+    inventory = json.loads(checked_file(base, inventory_path, files[inventory_path]).read_text())
+    if inventory.get('binary_sha256') != binary_sha256:
+        raise ValueError('vendor input inventory is not bound to this executable')
+    if inventory.get('runtime_family') != family:
+        raise ValueError('vendor input inventory family differs from component')
+    inputs = inventory.get('inputs')
+    if not isinstance(inputs, list) or not inputs:
+        raise ValueError('vendor input inventory must identify actual linked inputs')
+    for entry in inputs:
+        name = entry.get('name', '')
+        if (not isinstance(name, str) or not name.startswith(family + '/')
+                or '..' in Path(name).parts or '\\' in name or ':' in name
+                or not name.lower().endswith(('.lib', '.dll'))
+                or not re.fullmatch('[0-9a-f]{64}', entry.get('sha256', ''))):
+            raise ValueError('vendor input inventory needs logical names and SHA256 digests')
+    if not item.get('license_files') or not set(item['license_files']).issubset(item['vendor_terms']):
+        raise ValueError('vendor license_files must identify the retained SHA256-bound vendor terms')
+    return list(files.items())
 
 
 def digest(path):
@@ -188,13 +278,20 @@ def collect_runtime(manifest, runtime, output, binary, binary_stage):
             if rel in covered:
                 raise ValueError(f'duplicate runtime evidence: {rel}')
             covered[rel] = item['name']
-        if not item.get('license_files') or not item.get('source_archives'):
-            raise ValueError(f'{item["name"]}: license files AND exact corresponding source archives required')
-        files = [(name, None) for name in item['license_files']]
-        for name, sha in item['source_archives'].items():
+        if 'evidence_kind' in item:
+            files = vendor_evidence_files(item, manifest.parent, binary, evidence['binary_sha256'])
+        else:
+            if not item.get('license_files') or not item.get('source_archives'):
+                raise ValueError(f'{item["name"]}: license files AND exact corresponding source archives required')
+            files = [(name, None) for name in item['license_files']]
+            for name, sha in item['source_archives'].items():
+                if not isinstance(sha, str) or not re.fullmatch('[0-9a-f]{64}', sha):
+                    raise ValueError(f'invalid source SHA256: {name}')
+            files += list(item['source_archives'].items())
+        for name, sha in item.get('provenance_files', {}).items():
             if not isinstance(sha, str) or not re.fullmatch('[0-9a-f]{64}', sha):
-                raise ValueError(f'invalid source SHA256: {name}')
-        files += list(item['source_archives'].items())
+                raise ValueError(f'invalid provenance SHA256: {name}')
+            files.append((name, sha))
         for key in ('build_instructions', 'replacement_instructions'):
             if not item.get(key):
                 raise ValueError(f'{item["name"]}: {key} required')

@@ -1,5 +1,5 @@
 name: Release builds
-# Manual release workflow: dispatching it builds the Linux, Windows and macOS artifacts.
+# Manual Windows release workflow; other platform packaging is an explicit opt-in.
 # Publishing a GitHub release and building the Flatpak/Snap packages are opt-in inputs.
 # The Microsoft Store (MSIX) steps stay disabled until the package identity in
 # packaging/windows/msix/identity.env is replaced with real Partner Center values.
@@ -14,6 +14,10 @@ on:
         description: Build Flatpak and Snap packages (needs preprovisioned runners)
         type: boolean
         default: false
+      other_platforms:
+        description: Build Linux and macOS packages (requires platform-specific native evidence)
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -25,6 +29,7 @@ env:
   RUST_TEST_THREADS: '2'
 jobs:
   linux:
+    if: ${{ inputs.other_platforms }}
     strategy:
       matrix:
         include:
@@ -38,6 +43,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      - name: Fetch packaging source archives
+        shell: bash
+        run: |
+          cargo fetch --locked
+          cargo fetch --locked --manifest-path qa/Cargo.toml
+          cargo fetch --locked --manifest-path qa/fuzz/Cargo.toml
       - name: Native graphics and embedded WebKitGTK dependencies
         run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgtk-3-dev unixodbc-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf rpm dpkg-dev
       - run: cargo build --locked --release -p rustpy --target ${{ matrix.target }} --features native-web-preview
@@ -53,6 +64,8 @@ jobs:
         run: python3 scripts/release-checksums.py target/dist target/appimage target/debian target/generate-rpm --output target/SHA256SUMS
   windows:
     timeout-minutes: 180
+    env:
+      RUSTFLAGS: -C target-feature=+crt-static
     strategy:
       fail-fast: false
       matrix:
@@ -64,12 +77,38 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
+      - name: Validate native packaging scripts
+        shell: pwsh
+        run: |
+          foreach ($path in @('scripts/build-windows-release.ps1', 'scripts/test-windows-packages.ps1')) {
+            $parseErrors = $null
+            $tokens = $null
+            $null = [Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD $path), [ref]$tokens, [ref]$parseErrors)
+            if ($parseErrors.Count) { throw ($parseErrors | Out-String) }
+          }
+          python -B -c "import runpy; runpy.run_path('scripts/prepare-windows-native-evidence.py', run_name='packaging_import_check')"
+          if ($LASTEXITCODE) { throw 'Native evidence producer cannot load' }
+          python -B -m unittest discover -s qa -p test_native_link_recording.py
+          if ($LASTEXITCODE) { throw 'Native linker recorder checks failed' }
+          $acceptance = [Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD 'scripts/test-windows-packages.ps1'), [ref]$tokens, [ref]$parseErrors)
+          $renderer = $acceptance.Find({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Join-MsiArguments' }, $true)
+          . ([scriptblock]::Create($renderer.Extent.Text))
+          $actual = Join-MsiArguments @('/i', 'C:\build dirs\rustpy.msi', 'ALLUSERS=', 'INSTALLFOLDER=C:\install dirs\rustpy')
+          if ($actual -cne '/i "C:\build dirs\rustpy.msi" ALLUSERS="" INSTALLFOLDER="C:\install dirs\rustpy"') { throw "Invalid MSI command rendering: $actual" }
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      - name: Fetch packaging source archives
+        shell: bash
+        run: |
+          cargo fetch --locked
+          cargo fetch --locked --manifest-path qa/Cargo.toml
+          cargo fetch --locked --manifest-path qa/fuzz/Cargo.toml
       - uses: Swatinem/rust-cache@v2
         with:
-          key: release-${{ matrix.target }}
+          key: release-staticcrt-${{ matrix.target }}
+          cache-on-failure: true
+          cache-workspace-crates: true
       - name: Check Inno Setup 6
         shell: pwsh
         run: |
@@ -86,8 +125,7 @@ jobs:
           if ($LASTEXITCODE) { throw "WiX UI extension installation failed" }
       - shell: pwsh
         run: |
-          packaging/windows/build.ps1 -Target '${{ matrix.target }}'
-          packaging/windows/build-msi.ps1 -Target '${{ matrix.target }}' -NoBuild
+          scripts/build-windows-release.ps1 -Target '${{ matrix.target }}'
           $version = (Select-String -Path Cargo.toml -Pattern '^version = "([^"]+)"' | Select-Object -First 1).Matches.Groups[1].Value
           $arch = if ('${{ matrix.target }}' -like 'aarch64-*') { 'arm64' } else { 'x86_64' }
           $msiArch = if ($arch -eq 'arm64') { 'arm64' } else { 'x64' }
@@ -95,13 +133,39 @@ jobs:
             if (-not (Test-Path -LiteralPath "target/windows/$name")) { throw "Missing release asset: $name" }
           }
           Get-ChildItem target/windows -File | Where-Object Extension -in '.exe','.msi','.zip' | ForEach-Object { $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); "$h  $($_.Name)" } | Set-Content target/windows/SHA256SUMS
-      - uses: actions/upload-artifact@v7
+      - name: Retain candidate Windows packages
+        uses: actions/upload-artifact@v7
         with:
           name: windows-${{ matrix.target }}
           path: |
-            target/windows/*.zip
+            target/windows/*-portable.zip
             target/windows/*-setup.exe
             target/windows/*.msi
+          if-no-files-found: error
+      - name: Native installation acceptance
+        shell: pwsh
+        run: scripts/test-windows-packages.ps1 -Target '${{ matrix.target }}'
+      - name: Retain native linkage evidence
+        if: ${{ always() && env.RUSTPY_NATIVE_EVIDENCE_DIR != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-evidence-${{ matrix.target }}
+          path: |
+            ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/link-*.json
+            ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/link-trace.txt
+            ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/rustpy.map
+            ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/toolchain.json
+            ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/vs-instances.json
+            ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/runtime/*.json
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Retain native installation acceptance
+        if: ${{ always() && env.RUSTPY_PACKAGE_ACCEPTANCE_DIR != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: package-acceptance-${{ matrix.target }}
+          path: ${{ env.RUSTPY_PACKAGE_ACCEPTANCE_DIR }}
+          retention-days: 7
           if-no-files-found: error
       # Microsoft Store package: unsigned (the Store signs it), identity placeholders from
       # packaging/windows/msix/identity.env unless the RUSTPY_MSIX_* variables are set
@@ -136,12 +200,19 @@ jobs:
           path: target/msix/*.msixbundle
           if-no-files-found: error
   macos:
+    if: ${{ inputs.other_platforms }}
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - name: Fetch packaging source archives
+        shell: bash
+        run: |
+          cargo fetch --locked
+          cargo fetch --locked --manifest-path qa/Cargo.toml
+          cargo fetch --locked --manifest-path qa/fuzz/Cargo.toml
       - name: unixODBC
         run: |
           brew install unixodbc
@@ -198,21 +269,12 @@ jobs:
           RELEASE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG"; then
-            echo "Refusing to replace existing tag $RELEASE_TAG" >&2
-            exit 1
-          else
-            status=$?
-            if [ "$status" -ne 2 ]; then exit "$status"; fi
-          fi
-          gh release create "$RELEASE_TAG" target/release-assets/* \
-            --target "$RELEASE_SHA" --title "RustPy $RELEASE_TAG" \
-            --draft --generate-notes
-          gh release view "$RELEASE_TAG" --json body --jq .body > target/release-notes.md
+          bash scripts/release-notes.sh "$RELEASE_TAG" > target/release-notes.md
           cat >> target/release-notes.md <<'NOTES'
 
           Windows x64 and ARM64 packages include portable ZIPs, setup executables and MSI installers. SHA256SUMS contains the download checksums.
 
-          These packages are unsigned. Native GUI and install/upgrade/uninstall acceptance checks have not been completed for this release. Linux, macOS and Microsoft Store packages are not included.
+          Automated Windows checks cover portable CLI startup, silent installation, reinstall, MSI repair and uninstallation on both architectures. These packages are unsigned. Interactive GUI and upgrades from an older release have not been validated. Linux, macOS and Microsoft Store packages are not included.
           NOTES
-          gh release edit "$RELEASE_TAG" --notes-file target/release-notes.md --draft=false --latest
+          bash scripts/publish-release.sh "$RELEASE_TAG" "$RELEASE_SHA" \
+            target/release-assets target/release-notes.md

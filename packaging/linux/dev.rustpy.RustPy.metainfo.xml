@@ -81,7 +81,7 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
-    <release version="0.1.0" date="2026-10-10" type="development">
+    <release version="1.0.0" date="2026-10-25" type="stable">
       <url type="details">https://github.com/themuddfamily/rustpy/releases</url>
     </release>
   </releases>

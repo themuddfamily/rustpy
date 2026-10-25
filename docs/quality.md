@@ -54,6 +54,13 @@ Run the gates one after another, not in parallel. Dependencies must already be f
 (`cargo fetch --locked`), because the gates run offline. `python3 -m unittest discover -s qa
 -p 'test_*.py'` runs the Python checks of the packaging, licence and quality scripts.
 
+The unit gate runs the cancellation and typing-frame latency cases in separate processes
+with one test thread, after the ordinary workspace tests. All phases are required; any
+failure fails the gate. The 250 ms cancellation and 60 ms typing-frame bounds are unchanged.
+CI also runs cancellation separately in its UI shard; the existing hosted-runner guard for
+typing-frame timings remains in place. Other test bodies cannot consume the local latency
+measurements' CPU budget.
+
 The separate `qa/Cargo.toml` and `qa/fuzz/Cargo.toml` manifests have their own lockfiles
 (Criterion 0.5.1, libfuzzer-sys 0.4.13); shared dependency versions match the main lockfile.
 cargo-fuzz with a nightly toolchain and cargo-deny with its advisory database must be

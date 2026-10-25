@@ -12,9 +12,12 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ## [Unreleased]
 
-First public pre-release. RustPy is new, so this section lists what the IDE can do rather
-than changes against an earlier version. Linux is the best-tested platform; macOS builds have
-not yet been tested on a Mac.
+## [1.0.0] - 2026-10-25
+
+First public release. RustPy is new, so this section lists what the IDE can do rather
+than changes against an earlier version. Linux is the best-tested platform. CI builds and
+automated tests pass on Linux, Windows and macOS; native GUI and installer acceptance checks
+remain incomplete.
 
 ### Added
 
@@ -61,7 +64,15 @@ not yet been tested on a Mac.
 - Windows: builds for Windows on Arm (arm64). The installer can associate `.py`, `.pyw`,
   `.pyi` and `.ipynb` files with RustPy, add *Edit with RustPy* and *Open Folder as RustPy
   Project* to the Explorer context menu and add RustPy to `PATH`; the uninstaller removes
-  all of it again.
+  all of it again. Packages include native-library licences and source material, and link
+  the compiler runtime statically so no separate Visual C++ runtime installation is needed.
 - macOS: one universal app for Apple silicon and Intel Macs. Finder's *Open With* lists
   RustPy for `.py`, `.pyi` and `.ipynb` files, and the app bundle contains a `rustpy`
   command-line launcher.
+
+### Fixed
+
+- Type checking stops obsolete analysis promptly after an edit instead of continuing
+  through the remaining syntax and annotation checks.
+- Windows MSI repair restores the remembered installation directory before resolving
+  the locations of installed files.

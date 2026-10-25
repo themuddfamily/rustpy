@@ -11,8 +11,11 @@ concurrency:
   cancel-in-progress: true
 env:
   CARGO_TERM_COLOR: always
-  # Performance bounds are checked locally and in the performance stage, not on
-  # shared hosted runners (see typing_latency_tests.rs).
+  CARGO_BUILD_JOBS: '2'
+  RAYON_NUM_THREADS: '2'
+  RUST_TEST_THREADS: '2'
+  # Typing-frame bounds are checked locally and in the performance stage, not on
+  # shared hosted runners. The strict cancellation bound runs separately below.
   CI: 'true'
 jobs:
   fmt:
@@ -87,8 +90,12 @@ jobs:
           "TEMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
       # Interpreter/debugpy/pytest/coverage, fuzz/nightly and cargo-deny are
       # provisioned separately; this recipe never installs Python packages.
-      - if: matrix.shard == 'ui'
-        run: cargo test --locked -p rustpy-ui --no-fail-fast
+      - name: UI tests
+        if: matrix.shard == 'ui'
+        run: cargo test --locked -p rustpy-ui --no-fail-fast -- --test-threads=2 --skip app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly
+      - name: Cancellation latency (isolated)
+        if: matrix.shard == 'ui'
+        run: cargo test --locked -p rustpy-ui --lib app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly -- --exact --test-threads=1
       - if: matrix.shard == 'rest'
         run: cargo test --locked --workspace --exclude rustpy-ui --no-fail-fast
   build:
