@@ -11,7 +11,6 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 |---|---|---|
 | Terminal profiles | WSL profiles and fish as a shell have not been exercised end to end: the hosted CI runners have no WSL distribution and no fish. (cmd, Windows PowerShell, pwsh, bash and zsh profiles are tested end to end on CI.) | Untested. |
 | Certificates (macOS) | Importing CAs that an administrator or user marked as trusted in the macOS keychain trust settings has not been checked against a Mac that has such settings; the CI runner has none. (The Windows store, the macOS system roots and the trust-export parser are tested against live stores.) | Untested. |
-| Closing a project with a corrupt workspace file on Windows | The test that closes a project whose `.rustpy/workspace.json` is corrupt hung for an hour in one Windows CI run and passed in others; no cause has been found on its path (workspace store waits are bounded). It now runs on Windows with a watchdog that reports the stuck stage and aborts after five minutes, so a recurrence identifies where it hangs. | Windows |
 
 ## Recently fixed
 

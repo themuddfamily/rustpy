@@ -78,7 +78,7 @@ bitflags = "2"
 dirs = "6"
 
 pulldown-cmark = { version = "0.13", default-features = false }
-notify = "8"
+notify = "9"
 ignore = "0.4"
 walkdir = "2"
 which = "8"
