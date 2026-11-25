@@ -460,10 +460,7 @@ fn is_terminal_candidate(e: &ast::Expr, annotated_functions: &HashSet<SmolStr>) 
         ast::Expr::Attribute(a) => a.attr_text(),
         _ => return false,
     };
-    if !NO_RETURN_NAMES.contains(&last.as_str()) && !annotated_functions.contains(last.as_str()) {
-        return false;
-    }
-    true
+    NO_RETURN_NAMES.contains(&last.as_str()) || annotated_functions.contains(last.as_str())
 }
 
 /// Conservatively retire a stub-member fallback when any explicit store or

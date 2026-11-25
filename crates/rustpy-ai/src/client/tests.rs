@@ -99,15 +99,16 @@ fn refusal_fallback_only_on_the_first_party_api_for_supported_models() {
 }
 
 #[test]
-#[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
 fn chunked_stream_cut_after_the_stop_reason_still_finishes() {
     use std::io::{Read as _, Write as _};
     let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let addr = listener.local_addr().unwrap();
     std::thread::spawn(move || {
         let (mut sock, _) = listener.accept().unwrap();
-        let mut req = [0u8; 8192];
-        let _ = sock.read(&mut req);
+        // Read the whole request (headers and body): closing a socket with unread
+        // received data makes Windows reset the connection, and the reset discards the
+        // reply the client has not read yet.
+        let _ = crate::mock_server::read_request(&sock);
         let events = concat!(
             "event: message_start\ndata: {\"type\":\"message_start\",\"message\":{\"usage\":{\"input_tokens\":25,\"output_tokens\":1}}}\n\n",
             "event: content_block_delta\ndata: {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"Hi\"}}\n\n",
@@ -118,8 +119,11 @@ fn chunked_stream_cut_after_the_stop_reason_still_finishes() {
         let _ = sock.write_all(head.as_bytes());
         let _ = sock.write_all(chunk.as_bytes());
         let _ = sock.flush();
-        // Close without the terminating 0-size chunk (and without message_stop).
-        let _ = sock.shutdown(std::net::Shutdown::Both);
+        // Close without the terminating 0-size chunk (and without message_stop), then
+        // wait for the client to hang up.
+        let _ = sock.shutdown(std::net::Shutdown::Write);
+        let _ = sock.set_read_timeout(Some(Duration::from_secs(5)));
+        let _ = sock.read_to_end(&mut Vec::new());
     });
     let cfg = AiConfig {
         provider: crate::Provider::Anthropic,

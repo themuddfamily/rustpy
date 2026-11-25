@@ -11,6 +11,7 @@ ignore = [
     { id = "RUSTSEC-2026-0370", reason = "zvariant: unmaintained transitive dependency of zbus via accesskit_unix/atspi; no alternative" },
     { id = "RUSTSEC-2026-0371", reason = "zbus_names: unmaintained transitive dependency of zbus via accesskit_unix/atspi; no alternative" },
     { id = "RUSTSEC-2026-0372", reason = "zvariant_derive: unmaintained transitive dependency of zbus via accesskit_unix/atspi; no alternative" },
+    { id = "RUSTSEC-2026-0543", reason = "chrono: flagged unmaintained with no safe upgrade; no drop-in replacement, revisit when a maintained fork or fix is published" },
 ]
 [licenses]
 confidence-threshold = 0.93
