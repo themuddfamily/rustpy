@@ -178,11 +178,17 @@ impl Drains {
                         if stop.load(Ordering::Acquire) {
                             break;
                         }
+                        // Read the flag before looking at the pipe: everything
+                        // the reaped child wrote is already in the pipe then. An
+                        // empty look that started before the child finished (on
+                        // Windows it also sleeps) must not end the drain, or
+                        // output written in that window was dropped.
+                        let finished_before = finished.load(Ordering::Acquire);
                         match ready(&pipe)? {
                             #[cfg(windows)]
                             Ready::End => break,
                             Ready::Empty => {
-                                if finished.load(Ordering::Acquire) {
+                                if finished_before {
                                     break;
                                 }
                                 continue;

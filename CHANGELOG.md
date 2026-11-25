@@ -14,6 +14,17 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
+- **Debugger (Windows):** stopping a debug session whose adapter is idle now closes the
+  adapter connection at once instead of waiting until the adapter disconnects.
+- **Run:** a running process's PID (used by attach actions and the Run console) no longer
+  briefly disappears while the IDE checks whether the process is still alive.
+- **Run:** a program run in the terminal emulator that is killed by a signal is now reported
+  as terminated, naming the signal, instead of "exit code 1".
+- **Run and Terminal (Linux, macOS):** a program that cannot be started in the terminal
+  emulator is now reported with the reason it could not start, instead of finishing with
+  "exit code 1" and no explanation.
+- **Windows:** inspecting compiled extension modules (generated stubs and documentation)
+  no longer occasionally fails with an empty result when the inspection finishes quickly.
 - **Windows:** closing a project, or opening and closing editors outside it, can no longer
   freeze the IDE when a folder is created or deleted at the same moment; the file watcher
   stopped by the change could take over that folder's handle and block it forever.
