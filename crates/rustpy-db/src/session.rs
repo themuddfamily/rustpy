@@ -498,11 +498,10 @@ impl Backend {
                 let start = Instant::now();
                 let deadline = std::time::Duration::from_secs(timeout.clamp(1, 300) as u64);
                 c.conn
-                    .progress_handler(10000, Some(move || start.elapsed() > deadline));
+                    .progress_handler(10000, Some(move || start.elapsed() > deadline))?;
                 let mut stmt = c.conn.prepare(sql)?;
                 let columns = stmt
                     .column_names()
-                    .into_iter()
                     .map(str::to_string)
                     .collect::<Vec<_>>();
                 if columns.is_empty() {
@@ -579,7 +578,7 @@ impl Backend {
             let timeout =
                 std::time::Duration::from_secs(settings.timeout_seconds.clamp(1, 300) as u64);
             c.conn
-                .progress_handler(10000, Some(move || start.elapsed() > timeout));
+                .progress_handler(10000, Some(move || start.elapsed() > timeout))?;
         }
         if let Self::Odbc(c) = self {
             if !settings.auto_commit
@@ -892,7 +891,7 @@ impl Backend {
                         settings.timeout_seconds.clamp(1, 300) as u64,
                     );
                     c.conn
-                        .progress_handler(10000, Some(move || start.elapsed() > timeout));
+                        .progress_handler(10000, Some(move || start.elapsed() > timeout))?;
                     c.execute_script("PRAGMA foreign_keys=OFF")?;
                     if let Err(error) = c.execute_script("BEGIN IMMEDIATE") {
                         c.execute_script(if foreign_keys {

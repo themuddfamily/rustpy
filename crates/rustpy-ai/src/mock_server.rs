@@ -163,7 +163,7 @@ fn serve(mut stream: TcpStream, reply: Reply, requests: &mpsc::Sender<Recorded>)
     Ok(())
 }
 
-fn read_request(stream: &TcpStream) -> io::Result<Recorded> {
+pub(crate) fn read_request(stream: &TcpStream) -> io::Result<Recorded> {
     let mut reader = BufReader::new(stream.try_clone()?);
     let mut line = String::new();
     reader.read_line(&mut line)?;

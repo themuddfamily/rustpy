@@ -414,12 +414,12 @@ Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: LICENSE-MIT
 Text SHA-256: 23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3
 
-async-executor@1.14.0
+async-executor@1.14.1
 ------------------------------------------------------------------------
 Declared: Apache-2.0 OR MIT
 Selected: MIT
-Source: https://crates.io/api/v1/crates/async-executor/1.14.0/download
-Source SHA-256: c96bf972d85afc50bf5ab8fe2d54d1586b4e0b46c97c50a0c9e71e2f7bcd812a
+Source: https://crates.io/api/v1/crates/async-executor/1.14.1/download
+Source SHA-256: f426a31126c735126297bc5ea7a521263c9faff4f63ca415267ee625651c4f37
 Notice: LICENSE-APACHE
 Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: LICENSE-MIT
@@ -1333,12 +1333,12 @@ Source SHA-256: 633458d4ef8c78b72454de2d54fd6ab2e60f9e02be22f3c6104cdc8a4e0fceb9
 Notice: LICENSE
 Text SHA-256: aed7b1758e35afa0cd0fde059d61950747ca11cd0e5e169cb21c11608daed772
 
-cookie@0.18.2
+cookie@0.18.3
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
 Selected: MIT
-Source: https://crates.io/api/v1/crates/cookie/0.18.2/download
-Source SHA-256: 1a373e3602691c3cdea496d2f0ee5935151e6168fe87739483c463db1b2f2f87
+Source: https://crates.io/api/v1/crates/cookie/0.18.3/download
+Source SHA-256: d55f2d6c30eeec7d5c6f98bd4395d4abb1895629eab97ee6522d340623615f8a
 Notice: LICENSE-APACHE
 Text SHA-256: 2773e20df8f4c52a026b5b578c7f2457341f5aa3fb6612fd87e1d2e1bd8f48ad
 Notice: LICENSE-MIT
@@ -2616,12 +2616,12 @@ Text SHA-256: c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08
 Notice: LICENSE-MIT
 Text SHA-256: 333ea3aaa3cadb819f4acd9f9153f9feee060a995ca8710f32bc5bd9a4b91734
 
-form_urlencoded@1.2.2
+form_urlencoded@1.2.3
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
 Selected: MIT
-Source: https://crates.io/api/v1/crates/form_urlencoded/1.2.2/download
-Source SHA-256: cb4cb245038516f5f85277875cdaa4f7d2c9a0fa0468de06ed190163b1581fcf
+Source: https://crates.io/api/v1/crates/form_urlencoded/1.2.3/download
+Source SHA-256: afa489199eaffb1211795df1c6236ce1ad0d41a6fa45250add73e3b02420f06e
 Notice: LICENSE-APACHE
 Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: LICENSE-MIT
@@ -3164,17 +3164,6 @@ Notice: LICENSE-APACHE
 Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: LICENSE-MIT
 Text SHA-256: ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2
-
-hashlink@0.10.0
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/hashlink/0.10.0/download
-Source SHA-256: 7382cf6263419f2d8df38c55d7da83da5c18aef87fc7a7fc1fb1e344edfe14c1
-Notice: LICENSE-APACHE
-Text SHA-256: c144680885b29e4719e2a51f0aab5439a1e02d980692b5aaf086cae12727f28b
-Notice: LICENSE-MIT
-Text SHA-256: e915669a595b11a200873df8286561881b0e04932f6412a585db6297ba0bc97c
 
 hashlink@0.12.2
 ------------------------------------------------------------------------
@@ -3839,16 +3828,14 @@ Source SHA-256: 61ff90caf6077a803a240f62fdbe88645a890bbca49ef8174c3cb0404362171d
 Notice: LICENSE
 Text SHA-256: 8d073a6a80d1ef2d2fc2bc6c809aa221161bf1906c76d4aeef55fd2b999d9413
 
-libsqlite3-sys@0.35.0
+libsqlite3-sys@0.40.0
 ------------------------------------------------------------------------
 Declared: MIT
 Selected: MIT
-Source: https://crates.io/api/v1/crates/libsqlite3-sys/0.35.0/download
-Source SHA-256: 133c182a6a2c87864fe97778797e46c7e999672690dc9fa3ee8e241aa4a9c13f
+Source: https://crates.io/api/v1/crates/libsqlite3-sys/0.40.0/download
+Source SHA-256: b06e69070b7e12262b0cd90832f0a7396f142a2b330181255562decf9f0c6215
 Notice: LICENSE
 Text SHA-256: c10c1f27337546471e5f7e4e97fdd398b35b9d4e126115dcd22de8d8e65abf6f
-Notice: sqlcipher/LICENSE
-Text SHA-256: ea4fcb309f14a22065e1ea45362d494d320012249ed865fe9c7c0946db754131
 
 libssh2-sys@0.3.3
 ------------------------------------------------------------------------
@@ -3863,12 +3850,12 @@ Text SHA-256: 378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397
 Notice: libssh2/COPYING
 Text SHA-256: f7f9633cf9ff2f1333f3d7ce46973a8716a4d2a2815ad56f30d437d5fea7bafe
 
-libz-sys@1.1.29
+libz-sys@1.1.33
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
 Selected: MIT
-Source: https://crates.io/api/v1/crates/libz-sys/1.1.29/download
-Source SHA-256: 85bc9657773828b90eeb625adff10eeac83cc21bbfd8e23a03eaa8a33c9e28d9
+Source: https://crates.io/api/v1/crates/libz-sys/1.1.33/download
+Source SHA-256: fee3f59f4321dab0c78d828942e7aa09d0bd8ad6e78a501977e6bf3d02938045
 Notice: LICENSE-APACHE
 Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: LICENSE-MIT
@@ -5336,12 +5323,12 @@ Source SHA-256: 007d8adb5ddab6f8e3f491ac63566a7d5002cc7ed73901f72057943fa71ae1ae
 Notice: LICENSE
 Text SHA-256: c4f10f55904bdb9f27d3fbf94c354926d6cfe8b982276e556238c258941b243b
 
-pulldown-cmark@0.13.4
+pulldown-cmark@0.13.6
 ------------------------------------------------------------------------
 Declared: MIT
 Selected: MIT
-Source: https://crates.io/api/v1/crates/pulldown-cmark/0.13.4/download
-Source SHA-256: e9f068eba8e7071c5f9511831b44f32c740d5adf574e990f946ddb53db2f314e
+Source: https://crates.io/api/v1/crates/pulldown-cmark/0.13.6/download
+Source SHA-256: 3db2be46835f013dd3f4fa7f5f7402c537787b54ebb6fe2b94bbdd7e2669bb7b
 Notice: LICENSE
 Text SHA-256: c4f10f55904bdb9f27d3fbf94c354926d6cfe8b982276e556238c258941b243b
 
@@ -5765,12 +5752,21 @@ Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: LICENSE-MIT
 Text SHA-256: fffe218c1e349e1d482a05677f2ce850502f88298174d77f6ac7c04821db7899
 
-rusqlite@0.37.0
+rsqlite-vfs@0.2.0
 ------------------------------------------------------------------------
 Declared: MIT
 Selected: MIT
-Source: https://crates.io/api/v1/crates/rusqlite/0.37.0/download
-Source SHA-256: 165ca6e57b20e1351573e3729b958bc62f0e48025386970b6e4d29e7a7e71f3f
+Source: https://crates.io/api/v1/crates/rsqlite-vfs/0.2.0/download
+Source SHA-256: 353b74f9810d5b085b6c42c9d86a5f0fdb795553235cdd48753b32e3809d18a7
+Notice: https://raw.githubusercontent.com/Spxg/sqlite-wasm-rs/3d8318430bacd7d6a1aafdf5b5e54fb0fee8d451/LICENSE
+Text SHA-256: e1c1975c3474cce31722836f101a40ffaf1cc784e4d2f38ce3e77b9712934e78
+
+rusqlite@0.43.0
+------------------------------------------------------------------------
+Declared: MIT
+Selected: MIT
+Source: https://crates.io/api/v1/crates/rusqlite/0.43.0/download
+Source SHA-256: f172c4812a19b26d1c23cdb0070e69db335503dfa378b910eb857386e5b8beba
 Notice: LICENSE
 Text SHA-256: c10c1f27337546471e5f7e4e97fdd398b35b9d4e126115dcd22de8d8e65abf6f
 
@@ -6487,6 +6483,15 @@ Notice: LICENSE-APACHE
 Text SHA-256: a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
 Notice: LICENSE-MIT
 Text SHA-256: c995204cc6bad2ed67dd41f7d89bb9f1a9d48e0edd745732b30640d7912089a4
+
+sqlite-wasm-rs@0.6.3
+------------------------------------------------------------------------
+Declared: MIT
+Selected: MIT
+Source: https://crates.io/api/v1/crates/sqlite-wasm-rs/0.6.3/download
+Source SHA-256: a6cd504cecbfe7eef649988840f9a6cb768d11085efec138f8e99f160632d867
+Notice: LICENSE
+Text SHA-256: e1c1975c3474cce31722836f101a40ffaf1cc784e4d2f38ce3e77b9712934e78
 
 stable_deref_trait@1.2.1
 ------------------------------------------------------------------------
@@ -7359,12 +7364,12 @@ Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: src/chunked/LICENSE-MIT
 Text SHA-256: 5eda8c6538e7d543efe31ebad3fc0e66a7c4df056ddb901a5bdfbf5ef397e116
 
-url@2.5.8
+url@2.5.9
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
 Selected: MIT
-Source: https://crates.io/api/v1/crates/url/2.5.8/download
-Source SHA-256: ff67a8a4397373c3ef660812acab3268222035010ab8680ec4215f38ba3d0eed
+Source: https://crates.io/api/v1/crates/url/2.5.9/download
+Source SHA-256: f00cd2407bb42c0ef17be88d4cf020f5cceffd121665bac9b8b9493a369b3b1a
 Notice: LICENSE-APACHE
 Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: LICENSE-MIT
@@ -37698,6 +37703,30 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+Text SHA-256: e1c1975c3474cce31722836f101a40ffaf1cc784e4d2f38ce3e77b9712934e78
+========================================================================
+MIT License
+
+Copyright (c) 2024 Spxg
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
 Text SHA-256: e20fa2b8e0a2565f24a792b94b4bf4b6c2b9d36f781d8a9516e218a036e6677a
 ========================================================================
 Copyright (c) 2017 quininer kel
@@ -38541,33 +38570,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-Text SHA-256: ea4fcb309f14a22065e1ea45362d494d320012249ed865fe9c7c0946db754131
-========================================================================
-Copyright (c) 2008-2020 Zetetic LLC
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the ZETETIC LLC nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY ZETETIC LLC ''AS IS'' AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL ZETETIC LLC BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Text SHA-256: eaf40297c75da471f7cda1f3458e8d91b4b2ec866e609527a13acfa93b638652
 ========================================================================
