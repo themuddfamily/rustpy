@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mode: [single, module, full4, full2]
+        mode: [regress, module, full4, full2]
     runs-on: windows-2025
     timeout-minutes: 340
     steps:
@@ -41,15 +41,16 @@ jobs:
           if (-not $exe) { throw 'no test executable' }
           Write-Host "test executable: $exe"
           "TEST_EXE=$exe" >> $env:GITHUB_ENV
-      - name: Watchdog dump probe
-        if: matrix.mode == 'single'
+      - name: Thread dump probe
+        if: matrix.mode == 'regress'
         shell: pwsh
         continue-on-error: true
-        env:
-          RUSTPY_TEST_WATCHDOG_SECS: '0'
         run: |
-          Set-Location crates\rustpy-ui
-          & $env:TEST_EXE app::session_ui::workspace_persistence_tests::corrupt_workspace_is_reported_and_never_overwritten_by_actual_close --exact --nocapture 2>&1 | Select-Object -Last 120
+          $p = Start-Process -FilePath $env:TEST_EXE -ArgumentList @('--test-threads=4') -WorkingDirectory crates\rustpy-ui -NoNewWindow -PassThru -RedirectStandardOutput "$env:RUNNER_TEMP\probe-out.txt" -RedirectStandardError "$env:RUNNER_TEMP\probe-err.txt"
+          Start-Sleep -Seconds 20
+          & "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe" -pv -p $p.Id -y (Split-Path $env:TEST_EXE) -logo "$env:RUNNER_TEMP\probe-stacks.txt" -c ".lines -e; ~*kn 80; qd" | Out-Null
+          Stop-Process -Id $p.Id -Force
+          Get-Content "$env:RUNNER_TEMP\probe-stacks.txt" | Select-Object -First 200
       - name: Stress
         shell: pwsh
         env:
@@ -64,7 +65,8 @@ jobs:
           $target = 'app::session_ui::workspace_persistence_tests::corrupt_workspace_is_reported_and_never_overwritten_by_actual_close'
           $skip = 'app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly'
           switch ($env:MODE) {
-            'single' { $max = 600; $timeout = 240; $argv = @($target, '--exact') }
+            'regress' { $max = 400; $timeout = 100; $argv = @('app::file_sync::tests::dropping_a_busy_project_watcher_before_deleting_the_tree_never_hangs', '--exact') }
+            'single' { $max = 8000; $timeout = 240; $argv = @($target, '--exact') }
             'module' { $max = 300; $timeout = 400; $argv = @('app::session_ui', 'app::project_dialogs', 'app::workspace_ui', '--test-threads=4') }
             'full4'  { $max = 40;  $timeout = 1800; $argv = @('--test-threads=4', '--skip', $skip) }
             'full2'  { $max = 40;  $timeout = 1800; $argv = @('--test-threads=2', '--skip', $skip) }
