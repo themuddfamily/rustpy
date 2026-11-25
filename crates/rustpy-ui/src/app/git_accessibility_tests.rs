@@ -221,10 +221,6 @@ fn actual_branch_replacement_does_not_inherit_focused_target() {
 }
 
 #[test]
-#[cfg_attr(
-    windows,
-    ignore = "Tab order to the Git revision row is flaky on the Windows runner; see known issues"
-)]
 fn actual_retained_git_revision_cannot_activate_behind_settings() {
     let mut f = fixture();
     f.app.bottom = Some(BottomTool::Git);
@@ -276,4 +272,81 @@ fn actual_retained_git_revision_cannot_activate_behind_settings() {
     assert_eq!(f.app.git_panel.checked, checked);
     assert!(matches!(f.app.dialog, Dialog::Settings));
     assert!(!f.app.tabs[f.app.active.unwrap()].state.doc.can_undo());
+}
+
+/// A log index run finishing in the background (a slow machine, a large
+/// history) shows and then hides its status row above the log. The row must
+/// not renumber the controls below it: keyboard focus on one of them stays
+/// put instead of falling back to the start of the Tab order.
+#[test]
+fn background_log_indexing_keeps_focus_on_the_log_toolbar() {
+    let mut f = fixture();
+    f.app.bottom = Some(BottomTool::Git);
+    f.app.git_panel.tab = crate::git_panel::GitTab::Log;
+    fn paint(f: &mut Fixture, events: Vec<egui::Event>) -> egui::accesskit::TreeUpdate {
+        let output = f.ctx.run_ui(
+            egui::RawInput {
+                events,
+                focused: true,
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1400.0, 850.0))),
+                ..Default::default()
+            },
+            |ui| f.app.bottom_panel(ui),
+        );
+        let update = output.platform_output.accesskit_update.clone().unwrap();
+        output.drop_without_applying_deltas();
+        update
+    }
+    let toolbar_focused = |f: &Fixture, update: &egui::accesskit::TreeUpdate| {
+        update.nodes.iter().any(|(id, node)| {
+            node.label() == Some("All branches")
+                && f.ctx
+                    .memory(|memory| memory.focused())
+                    .is_some_and(|focus| focus.accesskit_id() == *id)
+        })
+    };
+    let settle = |f: &mut Fixture| {
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+        while f.app.git_panel.log_indexing() && std::time::Instant::now() < deadline {
+            std::thread::sleep(std::time::Duration::from_millis(5));
+            paint(f, vec![]);
+        }
+        assert!(!f.app.git_panel.log_indexing(), "the log index settles");
+    };
+    paint(&mut f, vec![]);
+    settle(&mut f);
+    let mut found = false;
+    for _ in 0..100 {
+        let update = paint(&mut f, key(egui::Key::Tab, egui::Modifiers::NONE));
+        if toolbar_focused(&f, &update) {
+            found = true;
+            break;
+        }
+    }
+    assert!(found, "real Tab reaches the log toolbar");
+    let focused = f.ctx.memory(|memory| memory.focused());
+    // A new query starts an index run: its status row shows above the log
+    // while it runs and disappears when it ends.
+    let mut saw_indexing = false;
+    for _ in 0..20 {
+        f.app.git_panel.log_workspace.case_sensitive =
+            !f.app.git_panel.log_workspace.case_sensitive;
+        paint(&mut f, vec![]);
+        saw_indexing |= f.app.git_panel.log_indexing();
+        assert_eq!(
+            f.ctx.memory(|memory| memory.focused()),
+            focused,
+            "the status row appearing keeps the focused control"
+        );
+        settle(&mut f);
+        assert_eq!(
+            f.ctx.memory(|memory| memory.focused()),
+            focused,
+            "the status row disappearing keeps the focused control"
+        );
+        if saw_indexing {
+            break;
+        }
+    }
+    assert!(saw_indexing, "an index run was observed while it ran");
 }
