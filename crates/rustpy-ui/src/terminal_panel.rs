@@ -2084,13 +2084,20 @@ mod profile_end_to_end {
         }
         eprintln!("terminal profiles exercised: {exercised:?}");
         assert!(!exercised.is_empty(), "no shell available");
-        if cfg!(windows) {
-            // Both ship with Windows; only pwsh is optional there.
-            assert!(exercised.iter().any(|name| name == "cmd"), "{exercised:?}");
-            assert!(
-                exercised.iter().any(|name| name == "powershell"),
-                "{exercised:?}"
-            );
+        // Shells that ship with the system, plus pwsh, which every hosted
+        // GitHub Actions runner image provides.
+        let mut expected = if cfg!(windows) {
+            vec!["cmd", "powershell"]
+        } else if cfg!(target_os = "macos") {
+            vec!["bash", "zsh"]
+        } else {
+            vec!["bash"]
+        };
+        if std::env::var_os("GITHUB_ACTIONS").is_some() {
+            expected.push("pwsh");
+        }
+        for name in expected {
+            assert!(exercised.iter().any(|n| n == name), "{name}: {exercised:?}");
         }
     }
 }
