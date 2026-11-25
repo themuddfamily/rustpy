@@ -2638,15 +2638,6 @@ Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: LICENSE-MIT
 Text SHA-256: 6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb
 
-fsevent-sys@4.1.0
-------------------------------------------------------------------------
-Declared: MIT
-Selected: MIT
-Source: https://crates.io/api/v1/crates/fsevent-sys/4.1.0/download
-Source SHA-256: 76ee7a02da4d231650c7cea31349b889be2f45ddb3ef3032d2ec8185f6313fd2
-Notice: LICENSE
-Text SHA-256: c4d64f0ce17c85d4a14e22d224fbbd76dbb1e03eb38f0d3c209fb38bdc8dc646
-
 funty@2.0.0
 ------------------------------------------------------------------------
 Declared: MIT
@@ -4275,23 +4266,23 @@ Text SHA-256: cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
 Notice: LICENSE-MIT
 Text SHA-256: ec353d4fecf7963b4c054384557e5dbc3c7a717997eb4a3815b315721a6aa75a
 
-notify-types@2.1.0
+notify-types@2.3.1
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
 Selected: MIT
-Source: https://crates.io/api/v1/crates/notify-types/2.1.0/download
-Source SHA-256: 42b8cfee0e339a0337359f3c88165702ac6e600dc01c0cc9579a92d62b08477a
+Source: https://crates.io/api/v1/crates/notify-types/2.3.1/download
+Source SHA-256: cbd044e85df3d939d8e32a1c35a3b737c7d0a4eeb7acd737bd207644e00f4e5f
 Notice: LICENSE-APACHE
 Text SHA-256: b5b413d7421d728c14f33d78198d6e255a0018beef717d78c4c3f6188be3dfb4
 Notice: LICENSE-MIT
 Text SHA-256: b63e167d61ced1d872a588c5ac764b0dda477d62209dc4f6b6bfea5517d0a24c
 
-notify@8.2.0
+notify@9.0.0
 ------------------------------------------------------------------------
 Declared: CC0-1.0
 Selected: CC0-1.0
-Source: https://crates.io/api/v1/crates/notify/8.2.0/download
-Source SHA-256: 4d3d07927151ff8575b7087f245456e549fea62edf0ec4e565a5ee50c8402bc3
+Source: https://crates.io/api/v1/crates/notify/9.0.0/download
+Source SHA-256: 5482d5bd11b91a337521980e5d52fe115bdccfb4c217099daaf0abd69159dc4e
 Notice: LICENSE-CC0
 Text SHA-256: e0456cbab4f7b5e7203e678faff37eadbdfef02e822db3b7a52a1dd9d3dc514a
 
@@ -4529,6 +4520,15 @@ Source: https://crates.io/api/v1/crates/objc2-core-location/0.2.2/download
 Source SHA-256: 000cfee34e683244f284252ee206a27953279d370e309649dc3ee317b37e5781
 Notice: https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt
 Text SHA-256: e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5
+
+objc2-core-services@0.3.2
+------------------------------------------------------------------------
+Declared: Zlib OR Apache-2.0 OR MIT
+Selected: MIT
+Source: https://crates.io/api/v1/crates/objc2-core-services/0.3.2/download
+Source SHA-256: 583300ad934cba24ff5292aee751ecc070f7ca6b39a574cc21b7b5e588e06a0b
+Notice: https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md
+Text SHA-256: 7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54
 
 objc2-encode@4.1.0
 ------------------------------------------------------------------------
@@ -32235,31 +32235,6 @@ Except as otherwise noted (below and/or in individual files), Rust is
 licensed under the Apache License, Version 2.0 <LICENSE-APACHE> or
 <http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 <LICENSE-MIT> or <http://opensource.org/licenses/MIT>, at your option.
-
-Text SHA-256: c4d64f0ce17c85d4a14e22d224fbbd76dbb1e03eb38f0d3c209fb38bdc8dc646
-========================================================================
-The MIT License (MIT)
-
-Copyright (c) 2015 Pierre Baillet
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
 
 Text SHA-256: c4f10f55904bdb9f27d3fbf94c354926d6cfe8b982276e556238c258941b243b
 ========================================================================
