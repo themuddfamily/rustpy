@@ -1,6 +1,6 @@
 //! Debug Adapter Protocol transport: `Content-Length` framed JSON over TCP.
 
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -257,7 +257,8 @@ impl DapClient {
                         return;
                     }
                 }
-                if let Err(error) = read_messages(stream, &in_tx) {
+                let reader = ClosableStream::new(stream, stop.clone());
+                if let Err(error) = read_messages(reader, &in_tx) {
                     let _ = in_tx.try_send(Message::TransportError(error.to_string()));
                 }
                 stop.store(true, Ordering::SeqCst);
@@ -551,7 +552,59 @@ pub fn read_frame(reader: &mut impl BufRead) -> std::io::Result<Value> {
     }
     Ok(value)
 }
-fn read_messages(stream: TcpStream, tx: &Sender<Message>) -> std::io::Result<()> {
+/// How long the reader waits for adapter data before it rechecks `closed`.
+const READ_POLL: Duration = Duration::from_millis(100);
+
+/// The reader's end of the transport socket, which stops once the client is
+/// closed on every platform.
+///
+/// Closing shuts the socket down, but Windows does not wake a `recv` that is
+/// already blocked in another thread, so a reader waiting on a silent adapter
+/// stayed alive (and the transport unretired) until the adapter disconnected.
+/// The reader therefore waits for data with a bounded `MSG_PEEK`, which consumes
+/// nothing (a timed-out wait cannot lose bytes), and checks the flag between waits.
+struct ClosableStream {
+    stream: TcpStream,
+    closed: Arc<AtomicBool>,
+}
+impl ClosableStream {
+    fn new(stream: TcpStream, closed: Arc<AtomicBool>) -> Self {
+        // Without a timeout the peek blocks as a plain read would: close then
+        // still works wherever shutdown wakes blocked reads.
+        let _ = stream.set_read_timeout(Some(READ_POLL));
+        Self { stream, closed }
+    }
+}
+impl Read for ClosableStream {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        use std::io::ErrorKind;
+        let waiting = |error: &std::io::Error| {
+            matches!(
+                error.kind(),
+                ErrorKind::WouldBlock | ErrorKind::TimedOut | ErrorKind::Interrupted
+            )
+        };
+        loop {
+            if self.closed.load(Ordering::SeqCst) {
+                return Err(std::io::Error::new(
+                    ErrorKind::ConnectionAborted,
+                    "DAP transport closed",
+                ));
+            }
+            match self.stream.peek(&mut [0u8]) {
+                // Data or end of stream is ready: this read does not wait.
+                Ok(_) => match self.stream.read(buf) {
+                    Err(error) if waiting(&error) => continue,
+                    result => return result,
+                },
+                Err(error) if waiting(&error) => continue,
+                Err(error) => return Err(error),
+            }
+        }
+    }
+}
+
+fn read_messages(stream: impl Read, tx: &Sender<Message>) -> std::io::Result<()> {
     let mut reader = BufReader::new(stream);
     loop {
         let value = read_frame(&mut reader)?;
@@ -954,6 +1007,40 @@ mod worker_retirement_tests {
             client.workers.0.lock().unwrap().is_empty(),
             "both actual worker handles were joined"
         );
+    }
+
+    /// Windows does not wake a recv already blocked when the socket is shut
+    /// down, so the reader must notice close by itself. No shutdown here: the
+    /// flag alone retires a reader waiting on a silent, still-connected peer,
+    /// and data that arrives after timed-out waits is still read intact.
+    #[test]
+    fn reader_waiting_on_a_silent_peer_stops_on_close_without_shutdown() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let stream = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        let (mut peer, _) = listener.accept().unwrap();
+        let closed = Arc::new(AtomicBool::new(false));
+        let mut reader = ClosableStream::new(stream, closed.clone());
+        let (done_tx, done) = crossbeam_channel::bounded(1);
+        let worker = std::thread::spawn(move || {
+            let mut first = [0u8; 5];
+            reader.read_exact(&mut first).unwrap();
+            assert_eq!(&first, b"hello");
+            let _ = done_tx.send(reader.read(&mut [0u8; 16]));
+        });
+        // Several poll intervals pass before the data arrives.
+        std::thread::sleep(READ_POLL * 3);
+        peer.write_all(b"hello").unwrap();
+        std::thread::sleep(READ_POLL * 2);
+        closed.store(true, Ordering::SeqCst);
+        let result = done
+            .recv_timeout(Duration::from_secs(5))
+            .expect("closed reader must stop although the peer stays connected and silent");
+        assert_eq!(
+            result.unwrap_err().kind(),
+            std::io::ErrorKind::ConnectionAborted
+        );
+        worker.join().unwrap();
+        drop(peer);
     }
 
     #[test]
