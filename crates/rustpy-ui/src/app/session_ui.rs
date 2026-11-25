@@ -359,12 +359,19 @@ mod workspace_persistence_tests {
     }
     /// Names the step a stuck test is in and ends the test process, so a hang
     /// fails within minutes and says where instead of exhausting the CI job.
+    /// On Windows it first writes every thread's stack with the console
+    /// debugger when one is installed (`RUSTPY_TEST_CDB` or the Windows SDK
+    /// location). `RUSTPY_TEST_WATCHDOG_SECS` shortens the limit for stress runs.
     struct StageWatchdog {
         stage: std::sync::Arc<std::sync::Mutex<&'static str>>,
         done: Option<std::sync::mpsc::Sender<()>>,
     }
     impl StageWatchdog {
         fn start(test: &'static str, limit: std::time::Duration) -> Self {
+            let limit = std::env::var("RUSTPY_TEST_WATCHDOG_SECS")
+                .ok()
+                .and_then(|secs| secs.parse().ok())
+                .map_or(limit, std::time::Duration::from_secs);
             let stage = std::sync::Arc::new(std::sync::Mutex::new("start"));
             let (done, finished) = std::sync::mpsc::channel::<()>();
             let observed = stage.clone();
@@ -374,6 +381,7 @@ mod workspace_persistence_tests {
                 {
                     let stage = *observed.lock().unwrap_or_else(|e| e.into_inner());
                     eprintln!("{test} exceeded {limit:?} in stage `{stage}`; aborting");
+                    dump_thread_stacks();
                     std::process::abort();
                 }
             });
@@ -393,6 +401,46 @@ mod workspace_persistence_tests {
             }
         }
     }
+    /// Prints the stack of every thread in this process by attaching the
+    /// console debugger non-invasively. Its output goes to a file rather than
+    /// a pipe: the debugger suspends this process, including the reader.
+    #[cfg(windows)]
+    fn dump_thread_stacks() {
+        let cdb = std::env::var_os("RUSTPY_TEST_CDB")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| {
+                PathBuf::from(r"C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe")
+            });
+        if !cdb.is_file() {
+            eprintln!("no console debugger at {}; no thread stacks", cdb.display());
+            return;
+        }
+        let log = std::env::temp_dir().join(format!("rustpy-stacks-{}.txt", std::process::id()));
+        let symbols = std::env::current_exe()
+            .ok()
+            .and_then(|exe| exe.parent().map(Path::to_path_buf))
+            .unwrap_or_default();
+        let status = std::process::Command::new(&cdb)
+            .arg("-pv")
+            .arg("-p")
+            .arg(std::process::id().to_string())
+            .arg("-y")
+            .arg(&symbols)
+            .arg("-logo")
+            .arg(&log)
+            .arg("-c")
+            .arg(".lines -e; ~*kn 80; qd")
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status();
+        match (status, std::fs::read_to_string(&log)) {
+            (Ok(_), Ok(text)) => eprintln!("thread stacks:\n{text}"),
+            (status, text) => eprintln!("thread stack dump failed: {status:?} {text:?}"),
+        }
+    }
+    #[cfg(not(windows))]
+    fn dump_thread_stacks() {}
     #[test]
     fn corrupt_workspace_is_reported_and_never_overwritten_by_actual_close() {
         let watchdog = StageWatchdog::start(
