@@ -88,8 +88,37 @@ jobs:
         run: |
           "TMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
           "TEMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
+      # The framework run-action check against genuine Pyramid and web2py
+      # (configured_legacy_tests.rs; it skips where these are not provided):
+      # hash-pinned Pyramid in a private venv and web2py at a pinned commit.
+      - name: Linux Pyramid and web2py for the framework run-action check
+        if: runner.os == 'Linux' && matrix.shard == 'ui'
+        env:
+          WEB2PY_TAG: v3.4.1
+          WEB2PY_COMMIT: f49922687c72c4c135d325333e40003f2c9aba08
+        run: |
+          set -euo pipefail
+          base="$RUNNER_TEMP/legacy-frameworks"
+          python3 -m venv "$base/venv"
+          "$base/venv/bin/pip" install --quiet --require-hashes --only-binary=:all: -r qa/legacy-frameworks-requirements.txt
+          git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$WEB2PY_TAG" \
+            --recurse-submodules --shallow-submodules https://github.com/web2py/web2py "$base/web2py"
+          test "$(git -C "$base/web2py" rev-parse HEAD)" = "$WEB2PY_COMMIT"
+          git -C "$base/web2py" submodule status
+          sha() { sha256sum "$1" | cut -d' ' -f1; }
+          {
+            echo "RUSTPY_LEGACY_FRAMEWORKS_ADMITTED=1"
+            echo "RUSTPY_LEGACY_FRAMEWORK_PYTHON=$base/venv/bin/python"
+            echo "RUSTPY_LEGACY_FRAMEWORK_PYTHON_SHA256=$(sha "$base/venv/bin/python")"
+            echo "RUSTPY_WEB2PY_FRAMEWORK=$base/web2py"
+            echo "RUSTPY_WEB2PY_ENTRY=$base/web2py/web2py.py"
+            echo "RUSTPY_WEB2PY_ENTRY_SHA256=$(sha "$base/web2py/web2py.py")"
+            echo "RUSTPY_WEB2PY_MAIN=$base/web2py/gluon/main.py"
+            echo "RUSTPY_WEB2PY_MAIN_SHA256=$(sha "$base/web2py/gluon/main.py")"
+          } >> "$GITHUB_ENV"
       # Interpreter/debugpy/pytest/coverage, fuzz/nightly and cargo-deny are
-      # provisioned separately; this recipe never installs Python packages.
+      # provisioned separately; apart from the step above this recipe never
+      # installs Python packages.
       - name: UI tests
         if: matrix.shard == 'ui'
         run: cargo test --locked -p rustpy-ui --no-fail-fast -- --test-threads=2 --skip app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly

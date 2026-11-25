@@ -608,6 +608,12 @@ global_settings.gluon_parent = str(FRAMEWORK)
 global_settings.applications_parent = str(ROOT)
 global_settings.web2py_runtime_handler = True
 
+# Importing the gluon package already loaded routes.py from the framework
+# directory; load this project's routes (its default application) instead.
+from gluon.rewrite import load as load_routes
+
+load_routes()
+
 from gluon.main import wsgibase
 
 if __name__ == '__main__':
@@ -767,6 +773,26 @@ mod tests {
                 assert!(!plan.entry_files.is_empty(), "{kind:?}");
             }
         }
+    }
+    #[test]
+    fn web2py_entry_loads_the_project_routes_after_choosing_its_folder() {
+        let framework = tempfile::tempdir().unwrap();
+        std::fs::write(framework.path().join("web2py.py"), "").unwrap();
+        std::fs::create_dir(framework.path().join("gluon")).unwrap();
+        let options = TemplateOptions {
+            project_name: "ownedapp".into(),
+            web2py_framework: Some(framework.path().to_path_buf()),
+            ..Default::default()
+        };
+        let plan = plan(ProjectKind::Web2py, &options).unwrap();
+        assert!(contents(&plan, "routes.py").contains("default_application = 'ownedapp'"));
+        // Importing gluon loads routes from the framework folder; the entry must
+        // reload them once applications_parent names the project.
+        let entry = contents(&plan, "run_web2py.py");
+        let parent = entry.find("applications_parent = str(ROOT)").unwrap();
+        let reload = entry.find("\nload_routes()\n").unwrap();
+        let serve = entry.find("make_server(").unwrap();
+        assert!(parent < reload && reload < serve, "{entry}");
     }
     #[test]
     fn django_options_wire_custom_app_template_backend_admin_and_routes() {

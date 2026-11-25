@@ -69,9 +69,18 @@ fn response(port: u16) -> std::io::Result<String> {
     Ok(String::from_utf8(bytes).unwrap())
 }
 
+/// Runs against a genuine Pyramid installation and web2py source tree named
+/// by the environment (CI provisions pinned, checksummed copies on Linux; see
+/// `.github/workflows/ci.yml`). Without them the test skips: nothing is
+/// installed or downloaded by the test itself.
 #[test]
-#[ignore = "explicit genuine Pyramid SDK and web2py3 source tree with dependencies; no installation/download by fixture"]
 fn configured_pyramid_web2py_scaffolds_serve_unicode_through_framework_actions_and_retire() {
+    if std::env::var_os("RUSTPY_LEGACY_FRAMEWORKS_ADMITTED").is_none() {
+        eprintln!(
+            "RUSTPY_LEGACY_FRAMEWORKS_ADMITTED is not set; genuine Pyramid/web2py check skipped"
+        );
+        return;
+    }
     assert_eq!(required("RUSTPY_LEGACY_FRAMEWORKS_ADMITTED"), "1");
     assert!(!rustpy_settings::trust_all_from_env());
     let python = admitted_file("RUSTPY_LEGACY_FRAMEWORK_PYTHON");
