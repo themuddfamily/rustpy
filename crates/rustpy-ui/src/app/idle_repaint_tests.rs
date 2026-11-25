@@ -26,10 +26,6 @@ fn frame(app: &mut IdeApp, ctx: &egui::Context, time: f64, events: Vec<egui::Eve
 }
 
 #[test]
-#[cfg_attr(
-    windows,
-    ignore = "the idle frame delay reaches a full blink period on the Windows runner; see known issues"
-)]
 fn an_idle_app_with_no_pending_work_waits_for_the_caret_blink() {
     let root = tempfile::tempdir().unwrap();
     let path = root.path().join("main.py");
@@ -89,5 +85,63 @@ fn an_idle_app_with_no_pending_work_waits_for_the_caret_blink() {
     assert!(
         last <= Duration::from_millis(600),
         "blink not scheduled: {last:?}"
+    );
+}
+
+/// The freeze notice reports a stall after the fact; it must not trap the
+/// keyboard like a modal dialog. A frame on a busy machine that crosses the
+/// watchdog threshold used to take focus from the editor (no caret blink,
+/// Tab confined to the notice) for the notice's lifetime.
+#[test]
+fn a_freeze_notice_leaves_the_keyboard_with_the_editor() {
+    let root = tempfile::tempdir().unwrap();
+    let path = root.path().join("main.py");
+    std::fs::write(&path, "print(1)\n").unwrap();
+    let mut settings = Settings::default();
+    settings.trust_project(root.path());
+    let mut app = IdeApp::new(settings, Some(root.path().to_path_buf()));
+    app.open_file(&path);
+    let ctx = egui::Context::default();
+    crate::theme::install_fonts(&ctx);
+    let click = |pressed| egui::Event::PointerButton {
+        pos: Pos2::new(700.0, 300.0),
+        button: egui::PointerButton::Primary,
+        pressed,
+        modifiers: egui::Modifiers::NONE,
+    };
+    frame(&mut app, &ctx, 0.0, vec![]);
+    frame(
+        &mut app,
+        &ctx,
+        0.1,
+        vec![
+            egui::Event::PointerMoved(Pos2::new(700.0, 300.0)),
+            click(true),
+        ],
+    );
+    frame(&mut app, &ctx, 0.2, vec![click(false)]);
+    let editor = app.tabs[app.active.unwrap()].view.id;
+    assert!(
+        ctx.memory(|m| m.has_focus(editor)),
+        "the click focuses the editor"
+    );
+    // Every frame now counts as a freeze: the next frame shows the notice.
+    app.bg.freeze = crate::freeze::FreezeDetector::new(Duration::ZERO, Duration::ZERO);
+    frame(&mut app, &ctx, 0.3, vec![]);
+    frame(&mut app, &ctx, 0.4, vec![]);
+    let notice = egui::LayerId::new(egui::Order::Middle, egui::Id::new("freeze_notice"));
+    assert!(
+        ctx.memory(|m| m.areas().is_visible(&notice)),
+        "the freeze notice is shown"
+    );
+    let delay = frame(&mut app, &ctx, 0.5, vec![]);
+    assert_eq!(ctx.memory(|m| m.top_modal_layer()), None);
+    assert!(
+        ctx.memory(|m| m.has_focus(editor)),
+        "the notice leaves the keyboard with the editor"
+    );
+    assert!(
+        delay <= Duration::from_millis(600),
+        "the caret keeps blinking under the notice: {delay:?}"
     );
 }
