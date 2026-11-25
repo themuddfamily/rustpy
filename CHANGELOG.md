@@ -22,6 +22,11 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
   ending its process, instead of reporting a connection error.
 - **Backups before save:** a backup folder that cannot be created is reported as a backup
   failure; on Windows it was mistaken for an external change and blocked later saves.
+- **Freeze notice:** the "UI Freeze" notice no longer takes the keyboard from the editor or
+  tool window you are working in: the caret keeps blinking and Tab keeps moving through the
+  IDE while it is shown.
+- **Git log:** keyboard focus in the log toolbar is no longer lost when a log search or
+  indexing run finishes in the background.
 
 ## [1.0.0] - 2026-10-25
 

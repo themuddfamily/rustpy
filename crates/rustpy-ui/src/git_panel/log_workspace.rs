@@ -744,6 +744,10 @@ impl GitPanel {
             job.stop();
         }
     }
+    /// Whether a background log index run (a new query or filter) is going on.
+    pub fn log_indexing(&self) -> bool {
+        self.log_workspace.index.is_some()
+    }
     pub fn log_modal_active(&self) -> bool {
         self.log_workspace.pending.is_some()
             || self.log_workspace.plan.is_some()
@@ -829,19 +833,25 @@ impl GitPanel {
             reload = true;
         }
         events.extend(self.poll_log_job());
-        if let Some(job) = &mut self.log_workspace.job {
-            if job.is_running() {
-                ui.horizontal(|ui| {
-                    crate::a11y::spinner(ui);
-                    ui.label(&job.command_line);
-                    if ui.button("Cancel operation").clicked() {
-                        job.stop();
-                    }
-                });
-                ui.ctx()
-                    .request_repaint_after(std::time::Duration::from_millis(50));
+        // The status rows come and go with background work. Each one always
+        // takes exactly one child `Ui`, so the automatic ids of the controls
+        // after it (and so the keyboard focus held by one of them) do not
+        // change when a job or an index run starts or finishes.
+        ui.push_id("git-log-job-status", |ui| {
+            if let Some(job) = &mut self.log_workspace.job {
+                if job.is_running() {
+                    ui.horizontal(|ui| {
+                        crate::a11y::spinner(ui);
+                        ui.label(&job.command_line);
+                        if ui.button("Cancel operation").clicked() {
+                            job.stop();
+                        }
+                    });
+                    ui.ctx()
+                        .request_repaint_after(std::time::Duration::from_millis(50));
+                }
             }
-        }
+        });
         ui.horizontal_wrapped(|ui| {
             let mut select = None;
             let mut close = None;
@@ -1161,32 +1171,34 @@ impl GitPanel {
                 self.log_limit,
             ));
         }
-        if let Some(index) = &self.log_workspace.index {
-            if let Some(result) = index.poll() {
-                match result {
-                    Ok(page) => {
-                        self.log = page.graph.iter().map(|g| g.to_info()).collect();
-                        self.graph = page.graph;
-                        self.log_workspace.my_email = page.email;
-                        self.log_workspace.members = page.current;
-                        self.log_workspace.nonpicked = page.nonpicked;
+        ui.push_id("git-log-index-status", |ui| {
+            if let Some(index) = &self.log_workspace.index {
+                if let Some(result) = index.poll() {
+                    match result {
+                        Ok(page) => {
+                            self.log = page.graph.iter().map(|g| g.to_info()).collect();
+                            self.graph = page.graph;
+                            self.log_workspace.my_email = page.email;
+                            self.log_workspace.members = page.current;
+                            self.log_workspace.nonpicked = page.nonpicked;
+                        }
+                        Err(e) => self.log_workspace.error = e,
                     }
-                    Err(e) => self.log_workspace.error = e,
+                    self.log_workspace.index = None;
+                } else {
+                    ui.horizontal(|ui| {
+                        crate::a11y::spinner(ui);
+                        ui.label(format!(
+                            "Indexing: {} commits · {:.1}s",
+                            index.visited.load(std::sync::atomic::Ordering::Relaxed),
+                            index.started.elapsed().as_secs_f32()
+                        ));
+                    });
+                    ui.ctx()
+                        .request_repaint_after(std::time::Duration::from_millis(30));
                 }
-                self.log_workspace.index = None;
-            } else {
-                ui.horizontal(|ui| {
-                    crate::a11y::spinner(ui);
-                    ui.label(format!(
-                        "Indexing: {} commits · {:.1}s",
-                        index.visited.load(std::sync::atomic::Ordering::Relaxed),
-                        index.started.elapsed().as_secs_f32()
-                    ));
-                });
-                ui.ctx()
-                    .request_repaint_after(std::time::Duration::from_millis(30));
             }
-        }
+        });
         if self.log_workspace.branches_visible {
             egui::Panel::left("git-log-branches")
                 .resizable(true)
@@ -1224,16 +1236,22 @@ impl GitPanel {
                     }
                 });
         }
-        if !self.log_workspace.error.is_empty() {
-            ui.colored_label(theme.error, &self.log_workspace.error);
-            if ui.small_button("Dismiss").clicked() {
-                self.log_workspace.error.clear();
+        ui.push_id("git-log-index-error", |ui| {
+            if !self.log_workspace.error.is_empty() {
+                ui.colored_label(theme.error, &self.log_workspace.error);
+                if ui.small_button("Dismiss").clicked() {
+                    self.log_workspace.error.clear();
+                }
             }
-        }
+        });
         self.log_dialogs(ui, repo, events);
         self.all_branches = self.log_workspace.query.all;
         let available = !self.log_modal_active();
-        ui.add_enabled_ui(available, |ui| self.log_ui(ui, theme, repo, events));
+        // A fixed id for the log itself: its rows keep their ids (and focus)
+        // whatever was shown above them in this frame.
+        ui.push_id("git-log-view", |ui| {
+            ui.add_enabled_ui(available, |ui| self.log_ui(ui, theme, repo, events))
+        });
         self.log_workspace.save_preferences();
     }
     fn log_dialogs(&mut self, ui: &mut egui::Ui, repo: &GitRepo, events: &mut Vec<GitEvent>) {
