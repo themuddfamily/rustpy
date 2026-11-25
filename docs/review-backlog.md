@@ -9,10 +9,8 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 
 | Area | Symptom | State |
 |---|---|---|
-| Terminal (Windows) | Stopping a terminal session backed by ConPTY can leave its output reader running after the process has exited, so the session does not finish cleanly. | Fix in source; needs a re-run on Windows. |
-| Frameworks (Pyramid, web2py) | For projects created by the New Project wizard, the framework run actions picked the conventional entry files (`development.ini`, `web2py.py`) instead of the generated `app.py` / `run_web2py.py`. | Fix in source; needs a check against real Pyramid and web2py installs. |
-| Terminal profiles | PowerShell, cmd and WSL profiles, and zsh, fish and pwsh as shells, have not been exercised end to end. | Untested. |
-| Certificates (Windows, macOS) | Importing trusted roots from the Windows certificate store and the macOS keychain is covered by tests but has not been checked against live system stores. | Untested. |
+| Terminal profiles | WSL profiles and fish as a shell have not been exercised end to end: the hosted CI runners have no WSL distribution and no fish. (cmd, Windows PowerShell, pwsh, bash and zsh profiles are tested end to end on CI.) | Untested. |
+| Certificates (macOS) | Importing CAs that an administrator or user marked as trusted in the macOS keychain trust settings has not been checked against a Mac that has such settings; the CI runner has none. (The Windows store, the macOS system roots and the trust-export parser are tested against live stores.) | Untested. |
 | Closing a project with a corrupt workspace file on Windows | The test that closes a project whose `.rustpy/workspace.json` is corrupt hung for an hour in one Windows CI run and passed in others; no cause has been found on its path (workspace store waits are bounded). It now runs on Windows with a watchdog that reports the stuck stage and aborts after five minutes, so a recurrence identifies where it hangs. | Windows |
 
 ## Recently fixed

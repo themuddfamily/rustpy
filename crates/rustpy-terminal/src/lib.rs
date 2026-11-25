@@ -236,6 +236,74 @@ pub fn buffer_text(screen: &mut vt100::Screen, start: BufferPos, end: BufferPos)
     out
 }
 
+/// Terminal queries that programs send and then wait for an answer to (as
+/// PowerShell's line editor does for the cursor position).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Query {
+    /// DSR 6: cursor position report.
+    CursorPosition,
+    /// DSR 5: device status.
+    Status,
+    /// Primary device attributes.
+    Attributes,
+}
+
+const QUERIES: &[(&[u8], Query)] = &[
+    (b"\x1b[6n", Query::CursorPosition),
+    (b"\x1b[5n", Query::Status),
+    (b"\x1b[c", Query::Attributes),
+    (b"\x1b[0c", Query::Attributes),
+];
+
+impl Query {
+    fn reply(self, screen: &vt100::Screen) -> String {
+        match self {
+            Query::CursorPosition => {
+                let (row, col) = screen.cursor_position();
+                format!("\x1b[{};{}R", row + 1, col + 1)
+            }
+            Query::Status => "\x1b[0n".into(),
+            // A VT100 with advanced video, as xterm-compatible terminals report.
+            Query::Attributes => "\x1b[?1;2c".into(),
+        }
+    }
+}
+
+/// Splits program output into segments, each ending with the query (if any)
+/// that the terminal must answer once that segment is shown. A possible query
+/// cut off at the end of `data` is kept in `held` for the next read.
+fn split_queries(held: &mut Vec<u8>, data: &[u8]) -> Vec<(Vec<u8>, Option<Query>)> {
+    let mut all = std::mem::take(held);
+    all.extend_from_slice(data);
+    let mut out = Vec::new();
+    let (mut start, mut i) = (0, 0);
+    while i < all.len() {
+        if all[i] != 0x1b {
+            i += 1;
+            continue;
+        }
+        let rest = &all[i..];
+        if let Some((text, query)) = QUERIES.iter().find(|(text, _)| rest.starts_with(text)) {
+            i += text.len();
+            out.push((all[start..i].to_vec(), Some(*query)));
+            start = i;
+        } else if QUERIES
+            .iter()
+            .any(|(text, _)| rest.len() < text.len() && text.starts_with(rest))
+        {
+            *held = rest.to_vec();
+            all.truncate(i);
+            break;
+        } else {
+            i += 1;
+        }
+    }
+    if start < all.len() {
+        out.push((all[start..].to_vec(), None));
+    }
+    out
+}
+
 /// The default interactive shell for this platform.
 pub fn default_shell() -> String {
     if cfg!(windows) {
@@ -297,7 +365,7 @@ pub struct Terminal {
     tracker: Arc<Mutex<integration::Tracker>>,
     pub cwd: std::path::PathBuf,
     parser: Arc<Mutex<vt100::Parser>>,
-    writer: Box<dyn Write + Send>,
+    writer: Arc<Mutex<Box<dyn Write + Send>>>,
     master: Arc<Mutex<Box<dyn MasterPty + Send>>>,
     exited: Arc<AtomicBool>,
     pub cols: u16,
@@ -366,7 +434,7 @@ impl Terminal {
         let mut child = parts.child;
         let pid = child.process_id();
         let mut reader = parts.reader;
-        let writer = parts.writer;
+        let writer = Arc::new(Mutex::new(parts.writer));
         let master = Arc::new(Mutex::new(parts.master));
         let parser = Arc::new(Mutex::new(vt100::Parser::new(
             rows,
@@ -381,8 +449,14 @@ impl Terminal {
             let tracker = tracker.clone();
             let exited = exited.clone();
             let generation = generation.clone();
+            let replies = writer.clone();
             std::thread::spawn(move || {
                 let mut buf = [0u8; 8192];
+                let mut held = Vec::new();
+                let output = |bytes: &[u8]| {
+                    tracker.lock().process(bytes);
+                    parser.lock().process(bytes);
+                };
                 loop {
                     match reader.read(&mut buf) {
                         Ok(0) => break,
@@ -396,12 +470,21 @@ impl Terminal {
                         }
                         Err(_) => return,
                         Ok(n) => {
-                            tracker.lock().process(&buf[..n]);
-                            parser.lock().process(&buf[..n]);
+                            for (bytes, query) in split_queries(&mut held, &buf[..n]) {
+                                output(&bytes);
+                                if let Some(query) = query {
+                                    // Answer after the preceding output, as a terminal would.
+                                    let reply = query.reply(parser.lock().screen());
+                                    let mut writer = replies.lock();
+                                    let _ = writer.write_all(reply.as_bytes());
+                                    let _ = writer.flush();
+                                }
+                            }
                             generation.fetch_add(1, Ordering::Relaxed);
                         }
                     }
                 }
+                output(&std::mem::take(&mut held));
                 exited.store(true, Ordering::Release);
                 generation.fetch_add(1, Ordering::Relaxed);
             })
@@ -515,8 +598,9 @@ impl Terminal {
 
     /// Sends raw bytes to the shell.
     pub fn write(&mut self, bytes: &[u8]) {
-        let _ = self.writer.write_all(bytes);
-        let _ = self.writer.flush();
+        let mut writer = self.writer.lock();
+        let _ = writer.write_all(bytes);
+        let _ = writer.flush();
     }
 
     pub fn send_key(&mut self, key: Key, mods: Mods) {
@@ -731,63 +815,163 @@ mod workspace_regressions {
         assert!(parser.screen().bracketed_paste());
         assert!(parser.screen().contents().is_empty());
     }
-    #[cfg(unix)]
+    #[test]
+    fn terminal_queries_are_answered_after_the_output_before_them() {
+        let mut held = Vec::new();
+        let parts = split_queries(&mut held, b"ab\x1b[6ncd\x1b[");
+        assert_eq!(
+            parts,
+            vec![
+                (b"ab\x1b[6n".to_vec(), Some(Query::CursorPosition)),
+                (b"cd".to_vec(), None)
+            ]
+        );
+        assert_eq!(held, b"\x1b[");
+        let parts = split_queries(&mut held, b"5n\x1b[31mx\x1b[c");
+        assert_eq!(
+            parts,
+            vec![
+                (b"\x1b[5n".to_vec(), Some(Query::Status)),
+                (b"\x1b[31mx\x1b[c".to_vec(), Some(Query::Attributes))
+            ]
+        );
+        assert!(held.is_empty());
+        let mut parser = vt100::Parser::new(5, 20, 0);
+        parser.process(b"one\r\ntwo");
+        assert_eq!(Query::CursorPosition.reply(parser.screen()), "\x1b[2;4R");
+    }
+
+    /// A shell that starts a background descendant, prints `CHILD:` and then
+    /// waits: `/bin/sh` on Unix, an interactive `cmd.exe` under ConPTY on Windows.
+    fn waiting_shell() -> Terminal {
+        #[cfg(unix)]
+        {
+            Terminal::spawn_command(
+                "/bin/sh",
+                &[
+                    "-c".into(),
+                    "sleep 30 & printf 'CHILD:%s\\n' \"$!\"; wait".into(),
+                ],
+                Path::new("/"),
+                &[],
+                40,
+                5,
+            )
+            .unwrap()
+        }
+        #[cfg(windows)]
+        {
+            let mut terminal = Terminal::spawn_command(
+                "cmd.exe",
+                &[],
+                &std::env::temp_dir(),
+                &[("RUSTPY_TERMINAL_MARK".into(), "ready".into())],
+                80,
+                5,
+            )
+            .unwrap();
+            terminal.write(b"start /B ping -n 30 127.0.0.1 >NUL\r");
+            terminal.write(b"echo CHILD:%RUSTPY_TERMINAL_MARK%\r");
+            terminal
+        }
+    }
+
     #[test]
     fn stopping_owned_terminal_reaps_leader_and_drains_reader() {
-        let mut terminal = Terminal::spawn_command(
-            "/bin/sh",
-            &[
-                "-c".into(),
-                "sleep 30 & printf 'CHILD:%s\\n' \"$!\"; wait".into(),
-            ],
-            Path::new("/"),
-            &[],
-            40,
-            5,
-        )
-        .unwrap();
-        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(3);
-        while !terminal.contents().contains("CHILD:") && std::time::Instant::now() < deadline {
+        let mut terminal = waiting_shell();
+        // The Windows shell echoes its typed command; only the output expands the mark.
+        let needle = if cfg!(windows) {
+            "CHILD:ready"
+        } else {
+            "CHILD:"
+        };
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+        while !terminal.contents().contains(needle) && std::time::Instant::now() < deadline {
             std::thread::sleep(std::time::Duration::from_millis(10));
         }
-        assert!(terminal.contents().contains("CHILD:"));
+        assert!(
+            terminal.contents().contains(needle),
+            "screen: {}",
+            terminal.contents()
+        );
         let before = std::time::Instant::now();
         terminal.kill();
         assert!(before.elapsed() < std::time::Duration::from_secs(1));
         while terminal.is_alive() && std::time::Instant::now() < deadline {
             std::thread::sleep(std::time::Duration::from_millis(10));
         }
-        assert!(!terminal.is_alive());
         let stamp = terminal.lifecycle_stamp();
-        assert!(stamp.contains("reaped=true"));
-        assert!(stamp.contains("reader-drained=true"));
+        assert!(
+            !terminal.is_alive(),
+            "stopped terminal did not finish: {stamp}"
+        );
+        assert!(stamp.contains("reaped=true"), "{stamp}");
+        assert!(stamp.contains("reader-drained=true"), "{stamp}");
     }
 
-    #[cfg(unix)]
     #[test]
     fn dropping_terminal_retains_waiter_until_pty_retirement() {
-        let terminal = Terminal::spawn_command(
+        let terminal = waiting_shell();
+        let state = terminal.retirement.clone();
+        let before = std::time::Instant::now();
+        drop(terminal);
+        assert!(before.elapsed() < std::time::Duration::from_secs(1));
+        assert!(state.stop.load(Ordering::Acquire));
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+        while !state.complete.load(Ordering::Acquire) && std::time::Instant::now() < deadline {
+            poll_retiring_terminals();
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+        assert!(
+            state.complete.load(Ordering::Acquire),
+            "dropped terminal did not retire: {}",
+            state.stamp.lock()
+        );
+        assert!(state.stamp.lock().contains("reaped=true"));
+        poll_retiring_terminals();
+    }
+
+    /// A shell that exits by itself must also finish: on Windows the reader
+    /// only reaches EOF once the pseudoconsole is closed after the exit.
+    #[test]
+    fn exited_shell_finishes_with_its_reader_drained() {
+        #[cfg(unix)]
+        let mut terminal = Terminal::spawn_command(
             "/bin/sh",
-            &["-c".into(), "sleep 30 & wait".into()],
+            &["-c".into(), "echo DONE:ready".into()],
             Path::new("/"),
             &[],
             40,
             5,
         )
         .unwrap();
-        let state = terminal.retirement.clone();
-        let before = std::time::Instant::now();
-        drop(terminal);
-        assert!(before.elapsed() < std::time::Duration::from_secs(1));
-        assert!(state.stop.load(Ordering::Acquire));
-        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(3);
-        while !state.complete.load(Ordering::Acquire) && std::time::Instant::now() < deadline {
-            poll_retiring_terminals();
+        #[cfg(windows)]
+        let mut terminal = Terminal::spawn_command(
+            "cmd.exe",
+            &[],
+            &std::env::temp_dir(),
+            &[("RUSTPY_TERMINAL_MARK".into(), "ready".into())],
+            80,
+            5,
+        )
+        .unwrap();
+        #[cfg(windows)]
+        terminal.write(b"echo DONE:%RUSTPY_TERMINAL_MARK%& exit\r");
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+        while terminal.is_alive() && std::time::Instant::now() < deadline {
             std::thread::sleep(std::time::Duration::from_millis(10));
         }
-        assert!(state.complete.load(Ordering::Acquire));
-        assert!(state.stamp.lock().contains("reaped=true"));
-        poll_retiring_terminals();
+        let stamp = terminal.lifecycle_stamp();
+        assert!(
+            !terminal.is_alive(),
+            "exited terminal did not finish: {stamp}"
+        );
+        assert!(stamp.contains("reader-drained=true"), "{stamp}");
+        assert!(
+            terminal.contents().contains("DONE:ready"),
+            "screen: {}",
+            terminal.contents()
+        );
     }
 }
 

@@ -566,23 +566,15 @@ mod tests {
             unsafe { WaitForSingleObject(self.handle.as_raw_handle(), 0) == WAIT_OBJECT_0 }
         }
     }
+    /// A real ConPTY session through RunSession: input, output, resize, and
+    /// Stop (or Drop) retiring the process tree with the output reader joined.
     #[test]
-    #[ignore = "requires admitted actual Windows console supervisor and private case"]
     fn conpty_input_output_resize_and_owned_retirement() {
-        assert_eq!(
-            std::env::var("RUSTPY_WINDOWS_ACCEPTANCE").as_deref(),
-            Ok("1")
-        );
-        let root = PathBuf::from(
-            std::env::var_os("RUSTPY_WINDOWS_CASE").expect("private Windows case required"),
-        );
-        assert!(root.is_absolute() && root.is_dir());
+        let root = tempfile::tempdir().unwrap();
         for drop_session in [false, true] {
-            let directory = root.join(format!(
-                "conpty-{}-{}",
-                std::process::id(),
-                u8::from(drop_session)
-            ));
+            let directory = root
+                .path()
+                .join(format!("conpty-{}", u8::from(drop_session)));
             std::fs::create_dir(&directory).unwrap();
             assert!(std::env::var_os("RUSTPY_WINDOWS_PTY_GRANDCHILD").is_none());
             let environment: BTreeMap<String, String> = [(
