@@ -1324,18 +1324,18 @@ fn journal_lock(
 }
 fn same_journal_lock(lock: &JournalLock) -> Result<bool, RestoreError> {
     let metadata = std::fs::symlink_metadata(&lock.path)?;
-    if !metadata.is_file() {
-        return Ok(false);
-    }
     #[cfg(unix)]
     {
         use std::os::unix::fs::MetadataExt;
+        if !metadata.is_file() {
+            return Ok(false);
+        }
         let held = lock.file.metadata()?;
         Ok(metadata.ino() == held.ino() && metadata.dev() == held.dev())
     }
     #[cfg(not(unix))]
     {
-        Ok(true)
+        Ok(metadata.is_file())
     }
 }
 fn publish_journal(

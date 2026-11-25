@@ -14,7 +14,7 @@ anyhow.workspace = true
 log.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-rusqlite = { version = "0.37", features = ["bundled", "hooks"] }
+rusqlite = { version = "0.43", features = ["bundled", "hooks"] }
 # Wide (UTF-16) ODBC calls: narrow calls are decoded in the process locale by
 # drivers such as Microsoft's SQL Server driver, corrupting non-ASCII SQL text
 # and results unless the process happens to run setlocale with UTF-8.

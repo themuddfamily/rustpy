@@ -12,6 +12,11 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ## [Unreleased]
 
+### Fixed
+
+- **Web preview (Windows):** the built-in preview server no longer resets connections, so
+  pages and assets load reliably instead of failing with a connection reset.
+
 ## [1.0.0] - 2026-10-25
 
 First public release. RustPy is new, so this section lists what the IDE can do rather
