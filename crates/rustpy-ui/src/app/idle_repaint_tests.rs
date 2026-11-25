@@ -30,12 +30,17 @@ const IDLE_CHILD: &str = "RUSTPY_IDLE_REPAINT_CHILD";
 /// Background tasks are process-wide (`TaskManager::global`), and the status
 /// bar keeps polling while any of them runs, so a task of a test running
 /// concurrently kept this app awake for as long as that test ran. The check
-/// therefore runs alone in a child process of this test binary.
+/// therefore runs alone in a child process of this test binary, with its own
+/// configuration directory: the per-process test directory is inherited
+/// through `RUSTPY_CONFIG_DIR`, and the parent's tests kept saving settings
+/// there, which this app's watcher (it covers the template store's parent,
+/// the configuration directory) reported as a stream of file changes.
 #[test]
 fn an_idle_app_with_no_pending_work_waits_for_the_caret_blink() {
     if std::env::var_os(IDLE_CHILD).is_some() {
         return idle_app_waits_for_the_caret_blink();
     }
+    let config = tempfile::tempdir().unwrap();
     let output = std::process::Command::new(std::env::current_exe().unwrap())
         .args([
             "--exact",
@@ -44,6 +49,7 @@ fn an_idle_app_with_no_pending_work_waits_for_the_caret_blink() {
             "--test-threads=1",
         ])
         .env(IDLE_CHILD, "1")
+        .env("RUSTPY_CONFIG_DIR", config.path())
         .stdin(std::process::Stdio::null())
         .output()
         .unwrap();
@@ -141,6 +147,42 @@ fn idle_app_waits_for_the_caret_blink() {
     assert!(
         last <= Duration::from_millis(600),
         "blink not scheduled: {last:?}"
+    );
+    // An idle app does not rewrite its settings.
+    let settings = Settings::settings_path();
+    let stamp = || {
+        std::fs::metadata(&settings)
+            .ok()
+            .map(|m| (m.len(), m.modified().ok()))
+    };
+    let before = stamp();
+    let _ = crate::performance_trace::take_recorded();
+    for _ in 0..6 {
+        let delay = frame(&mut app, &ctx, now(), vec![]);
+        std::thread::sleep(delay.min(Duration::from_millis(600)));
+    }
+    let config = Settings::config_dir();
+    let config_events: Vec<_> = crate::performance_trace::take_recorded()
+        .into_iter()
+        .filter(|(kind, data)| {
+            kind == "watcher_event"
+                && data["paths"].as_array().is_some_and(|paths| {
+                    paths.iter().any(|path| {
+                        path.as_str()
+                            .is_some_and(|path| Path::new(path).starts_with(&config))
+                    })
+                })
+        })
+        .collect();
+    assert_eq!(
+        stamp(),
+        before,
+        "an idle app rewrote {}",
+        settings.display()
+    );
+    assert!(
+        config_events.is_empty(),
+        "an idle app changed its configuration directory: {config_events:?}"
     );
 }
 

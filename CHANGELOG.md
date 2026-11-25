@@ -14,6 +14,9 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
+- **Project:** saving settings (in this or another RustPy window) no longer counts as a
+  project change: the project is no longer rescanned, the IDE no longer keeps waking up, and
+  the settings files are no longer queued for upload to deployment servers.
 - **Debugger (Windows):** stopping a debug session whose adapter is idle now closes the
   adapter connection at once instead of waiting until the adapter disconnects.
 - **Run:** a running process's PID (used by attach actions and the Run console) no longer
