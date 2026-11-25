@@ -162,6 +162,16 @@ def main():
         run("security", "add-certificates", "-k", LOGIN, user[0])
         untrusted.append(user[2])
 
+    # What the import sees: the keychain search list, whether each
+    # certificate is found there, and its exported trust settings.
+    run("security", "list-keychains")
+    found = subprocess.run(["security", "find-certificate", "-a", "-Z"],
+                           capture_output=True, text=True).stdout.upper()
+    settings = {**exported(True), **exported(False)}
+    for sha1 in trusted + untrusted:
+        print(sha1, "in search list:", sha1 in found,
+              "trust settings:", settings.get(sha1, {}).get("trustSettings"), flush=True)
+
     with open(os.environ["GITHUB_ENV"], "a") as env:
         env.write(f"RUSTPY_TEST_MACOS_TRUSTED_CAS={','.join(trusted)}\n")
         env.write(f"RUSTPY_TEST_MACOS_UNTRUSTED_CAS={','.join(untrusted)}\n")

@@ -748,11 +748,52 @@ mod live_store_tests {
             eprintln!("no keychain trust settings were provisioned; skipped");
             return;
         }
-        let imported: Vec<String> = super::platform_certificates()
+        // The import as platform_certificates runs it, recording each
+        // `security` call so a failure shows which step lost the CAs.
+        let calls = std::cell::RefCell::new(Vec::new());
+        let roots = super::keychain_roots(&|args| {
+            let output = std::process::Command::new("/usr/bin/security")
+                .args(args)
+                .output()
+                .ok();
+            let mut record = format!("{args:?}: ");
+            match &output {
+                Some(o) => {
+                    record += &format!("{} {} bytes", o.status, o.stdout.len());
+                    if let Some(path) = args.last().filter(|_| args[0] == "trust-settings-export") {
+                        let xml = std::fs::read_to_string(path).unwrap_or_default();
+                        record += &format!(
+                            "; decisions {:?}",
+                            super::trust_settings::root_decisions(&xml)
+                                .into_iter()
+                                .filter(|(f, _)| trusted.contains(f) || untrusted.contains(f))
+                                .collect::<Vec<_>>()
+                        );
+                        if !trusted.iter().all(|f| xml.contains(f.as_str())) {
+                            record += &format!("; export:\n{xml}");
+                        }
+                    }
+                }
+                None => record += "not run",
+            }
+            calls.borrow_mut().push(record);
+            output.filter(|o| o.status.success()).map(|o| o.stdout)
+        });
+        let imported: Vec<String> = roots
             .iter()
             .map(|der| super::trust_settings::sha1_hex(der.as_slice()))
             .collect();
-        eprintln!("keychain import: {imported:?}; trusted {trusted:?}; untrusted {untrusted:?}");
+        eprintln!(
+            "keychain import: {imported:?}; trusted {trusted:?}; untrusted {untrusted:?}; calls:\n{}",
+            calls.borrow().join("\n")
+        );
+        assert_eq!(
+            imported,
+            super::platform_certificates()
+                .iter()
+                .map(|der| super::trust_settings::sha1_hex(der.as_slice()))
+                .collect::<Vec<_>>()
+        );
         for fingerprint in &trusted {
             assert_eq!(
                 imported.iter().filter(|f| *f == fingerprint).count(),
