@@ -236,6 +236,74 @@ pub fn buffer_text(screen: &mut vt100::Screen, start: BufferPos, end: BufferPos)
     out
 }
 
+/// Terminal queries that programs send and then wait for an answer to (as
+/// PowerShell's line editor does for the cursor position).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Query {
+    /// DSR 6: cursor position report.
+    CursorPosition,
+    /// DSR 5: device status.
+    Status,
+    /// Primary device attributes.
+    Attributes,
+}
+
+const QUERIES: &[(&[u8], Query)] = &[
+    (b"\x1b[6n", Query::CursorPosition),
+    (b"\x1b[5n", Query::Status),
+    (b"\x1b[c", Query::Attributes),
+    (b"\x1b[0c", Query::Attributes),
+];
+
+impl Query {
+    fn reply(self, screen: &vt100::Screen) -> String {
+        match self {
+            Query::CursorPosition => {
+                let (row, col) = screen.cursor_position();
+                format!("\x1b[{};{}R", row + 1, col + 1)
+            }
+            Query::Status => "\x1b[0n".into(),
+            // A VT100 with advanced video, as xterm-compatible terminals report.
+            Query::Attributes => "\x1b[?1;2c".into(),
+        }
+    }
+}
+
+/// Splits program output into segments, each ending with the query (if any)
+/// that the terminal must answer once that segment is shown. A possible query
+/// cut off at the end of `data` is kept in `held` for the next read.
+fn split_queries(held: &mut Vec<u8>, data: &[u8]) -> Vec<(Vec<u8>, Option<Query>)> {
+    let mut all = std::mem::take(held);
+    all.extend_from_slice(data);
+    let mut out = Vec::new();
+    let (mut start, mut i) = (0, 0);
+    while i < all.len() {
+        if all[i] != 0x1b {
+            i += 1;
+            continue;
+        }
+        let rest = &all[i..];
+        if let Some((text, query)) = QUERIES.iter().find(|(text, _)| rest.starts_with(text)) {
+            i += text.len();
+            out.push((all[start..i].to_vec(), Some(*query)));
+            start = i;
+        } else if QUERIES
+            .iter()
+            .any(|(text, _)| rest.len() < text.len() && text.starts_with(rest))
+        {
+            *held = rest.to_vec();
+            all.truncate(i);
+            break;
+        } else {
+            i += 1;
+        }
+    }
+    if start < all.len() {
+        out.push((all[start..].to_vec(), None));
+    }
+    out
+}
+
 /// The default interactive shell for this platform.
 pub fn default_shell() -> String {
     if cfg!(windows) {
@@ -297,7 +365,7 @@ pub struct Terminal {
     tracker: Arc<Mutex<integration::Tracker>>,
     pub cwd: std::path::PathBuf,
     parser: Arc<Mutex<vt100::Parser>>,
-    writer: Box<dyn Write + Send>,
+    writer: Arc<Mutex<Box<dyn Write + Send>>>,
     master: Arc<Mutex<Box<dyn MasterPty + Send>>>,
     exited: Arc<AtomicBool>,
     pub cols: u16,
@@ -366,7 +434,7 @@ impl Terminal {
         let mut child = parts.child;
         let pid = child.process_id();
         let mut reader = parts.reader;
-        let writer = parts.writer;
+        let writer = Arc::new(Mutex::new(parts.writer));
         let master = Arc::new(Mutex::new(parts.master));
         let parser = Arc::new(Mutex::new(vt100::Parser::new(
             rows,
@@ -381,8 +449,14 @@ impl Terminal {
             let tracker = tracker.clone();
             let exited = exited.clone();
             let generation = generation.clone();
+            let replies = writer.clone();
             std::thread::spawn(move || {
                 let mut buf = [0u8; 8192];
+                let mut held = Vec::new();
+                let output = |bytes: &[u8]| {
+                    tracker.lock().process(bytes);
+                    parser.lock().process(bytes);
+                };
                 loop {
                     match reader.read(&mut buf) {
                         Ok(0) => break,
@@ -396,12 +470,21 @@ impl Terminal {
                         }
                         Err(_) => return,
                         Ok(n) => {
-                            tracker.lock().process(&buf[..n]);
-                            parser.lock().process(&buf[..n]);
+                            for (bytes, query) in split_queries(&mut held, &buf[..n]) {
+                                output(&bytes);
+                                if let Some(query) = query {
+                                    // Answer after the preceding output, as a terminal would.
+                                    let reply = query.reply(parser.lock().screen());
+                                    let mut writer = replies.lock();
+                                    let _ = writer.write_all(reply.as_bytes());
+                                    let _ = writer.flush();
+                                }
+                            }
                             generation.fetch_add(1, Ordering::Relaxed);
                         }
                     }
                 }
+                output(&std::mem::take(&mut held));
                 exited.store(true, Ordering::Release);
                 generation.fetch_add(1, Ordering::Relaxed);
             })
@@ -515,8 +598,9 @@ impl Terminal {
 
     /// Sends raw bytes to the shell.
     pub fn write(&mut self, bytes: &[u8]) {
-        let _ = self.writer.write_all(bytes);
-        let _ = self.writer.flush();
+        let mut writer = self.writer.lock();
+        let _ = writer.write_all(bytes);
+        let _ = writer.flush();
     }
 
     pub fn send_key(&mut self, key: Key, mods: Mods) {
@@ -731,6 +815,32 @@ mod workspace_regressions {
         assert!(parser.screen().bracketed_paste());
         assert!(parser.screen().contents().is_empty());
     }
+    #[test]
+    fn terminal_queries_are_answered_after_the_output_before_them() {
+        let mut held = Vec::new();
+        let parts = split_queries(&mut held, b"ab\x1b[6ncd\x1b[");
+        assert_eq!(
+            parts,
+            vec![
+                (b"ab\x1b[6n".to_vec(), Some(Query::CursorPosition)),
+                (b"cd".to_vec(), None)
+            ]
+        );
+        assert_eq!(held, b"\x1b[");
+        let parts = split_queries(&mut held, b"5n\x1b[31mx\x1b[c");
+        assert_eq!(
+            parts,
+            vec![
+                (b"\x1b[5n".to_vec(), Some(Query::Status)),
+                (b"\x1b[31mx\x1b[c".to_vec(), Some(Query::Attributes))
+            ]
+        );
+        assert!(held.is_empty());
+        let mut parser = vt100::Parser::new(5, 20, 0);
+        parser.process(b"one\r\ntwo");
+        assert_eq!(Query::CursorPosition.reply(parser.screen()), "\x1b[2;4R");
+    }
+
     /// A shell that starts a background descendant, prints `CHILD:` and then
     /// waits: `/bin/sh` on Unix, an interactive `cmd.exe` under ConPTY on Windows.
     fn waiting_shell() -> Terminal {

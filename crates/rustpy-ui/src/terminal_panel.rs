@@ -2081,6 +2081,14 @@ mod profile_end_to_end {
         }
         eprintln!("terminal profiles exercised: {exercised:?}");
         assert!(!exercised.is_empty(), "no shell available");
+        if cfg!(windows) {
+            // Both ship with Windows; only pwsh is optional there.
+            assert!(exercised.iter().any(|name| name == "cmd"), "{exercised:?}");
+            assert!(
+                exercised.iter().any(|name| name == "powershell"),
+                "{exercised:?}"
+            );
+        }
     }
 }
 
