@@ -2061,6 +2061,13 @@ mod profile_end_to_end {
             assert_eq!(panel.tab_count(), 1);
             let tab = &mut panel.tabs[0];
             assert_eq!(tab.title, name);
+            // Type only once the shell shows its prompt, as a user would: the
+            // integration mark where the shell has one, else cmd's `>`.
+            if name == "cmd" {
+                wait_for(tab, shell, |tab| tab.terminal.contents().contains('>'));
+            } else {
+                wait_for(tab, shell, |tab| tab.terminal.metadata().prompt);
+            }
             // The typed command never contains the expanded marker; only its output does.
             let command = match name.as_str() {
                 "cmd" => "echo RUSTPY_PROFILE_%RUSTPY_PROFILE_MARK%",
@@ -2071,10 +2078,6 @@ mod profile_end_to_end {
             wait_for(tab, shell, |tab| {
                 tab.terminal.contents().contains("RUSTPY_PROFILE_42")
             });
-            if name != "cmd" {
-                // Shell integration reported the prompt after the command.
-                wait_for(tab, shell, |tab| tab.terminal.metadata().prompt);
-            }
             tab.terminal.write(b"exit\r");
             wait_for(tab, shell, |tab| !tab.terminal.is_alive());
             exercised.push(name);
