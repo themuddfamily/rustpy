@@ -2023,9 +2023,48 @@ mod profile_end_to_end {
         );
     }
 
+    /// Opens `profile` as the selected profile, waits for its prompt, runs a
+    /// command printing the marker the profile's environment carries and
+    /// exits. `environment` holds the terminal environment preferences.
+    fn run_profile(
+        root: &Path,
+        profile: rustpy_settings::terminal::Profile,
+        environment: &[(&str, &str)],
+        prompt: impl Fn(&mut TerminalTab) -> bool,
+        command: &str,
+    ) {
+        let name = profile.name.clone();
+        let mut panel = TerminalPanel::default();
+        panel.preferences.environment = environment
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect();
+        panel.preferences.profiles = vec![profile];
+        panel.preferences.selected_profile = name.clone();
+        panel.preferences.tab_name = String::new();
+        panel
+            .open_with_integration(
+                root,
+                &[("RUSTPY_PROFILE_MARK".into(), "42".into())],
+                &root.join("integration"),
+            )
+            .unwrap_or_else(|error| panic!("{name}: {error}"));
+        assert_eq!(panel.tab_count(), 1);
+        let tab = &mut panel.tabs[0];
+        assert_eq!(tab.title, name);
+        // Type only once the shell shows its prompt, as a user would.
+        wait_for(tab, &name, prompt);
+        // The typed command never contains the expanded marker; only its output does.
+        tab.terminal.write(format!("{command}\r").as_bytes());
+        wait_for(tab, &name, |tab| {
+            tab.terminal.contents().contains("RUSTPY_PROFILE_42")
+        });
+        tab.terminal.write(b"exit\r");
+        wait_for(tab, &name, |tab| !tab.terminal.is_alive());
+    }
+
     #[test]
     fn local_profiles_run_each_installed_shell() {
-        // WSL needs an installed distribution, which hosted runners lack.
         let shells: &[&str] = if cfg!(windows) {
             &["cmd.exe", "powershell.exe", "pwsh.exe"]
         } else {
@@ -2043,61 +2082,90 @@ mod profile_end_to_end {
                 .unwrap()
                 .to_string_lossy()
                 .into_owned();
-            let mut panel = TerminalPanel::default();
-            panel.preferences.profiles = vec![rustpy_settings::terminal::Profile {
+            let profile = rustpy_settings::terminal::Profile {
                 name: name.clone(),
                 shell: shell.into(),
                 ..Default::default()
-            }];
-            panel.preferences.selected_profile = name.clone();
-            panel.preferences.tab_name = String::new();
-            panel
-                .open_with_integration(
-                    root.path(),
-                    &[("RUSTPY_PROFILE_MARK".into(), "42".into())],
-                    &root.path().join("integration"),
-                )
-                .unwrap_or_else(|error| panic!("{shell}: {error}"));
-            assert_eq!(panel.tab_count(), 1);
-            let tab = &mut panel.tabs[0];
-            assert_eq!(tab.title, name);
-            // Type only once the shell shows its prompt, as a user would: the
-            // integration mark where the shell has one, else cmd's `>`.
-            if name == "cmd" {
-                wait_for(tab, shell, |tab| tab.terminal.contents().contains('>'));
-            } else {
-                wait_for(tab, shell, |tab| tab.terminal.metadata().prompt);
-            }
-            // The typed command never contains the expanded marker; only its output does.
+            };
             let command = match name.as_str() {
                 "cmd" => "echo RUSTPY_PROFILE_%RUSTPY_PROFILE_MARK%",
                 "pwsh" | "powershell" => "Write-Output \"RUSTPY_PROFILE_$env:RUSTPY_PROFILE_MARK\"",
                 _ => "echo \"RUSTPY_PROFILE_$RUSTPY_PROFILE_MARK\"",
             };
-            tab.terminal.write(format!("{command}\r").as_bytes());
-            wait_for(tab, shell, |tab| {
-                tab.terminal.contents().contains("RUSTPY_PROFILE_42")
-            });
-            tab.terminal.write(b"exit\r");
-            wait_for(tab, shell, |tab| !tab.terminal.is_alive());
+            // The integration mark where the shell has one, else cmd's `>`.
+            if name == "cmd" {
+                run_profile(
+                    root.path(),
+                    profile,
+                    &[],
+                    |tab| tab.terminal.contents().contains('>'),
+                    command,
+                );
+            } else {
+                run_profile(
+                    root.path(),
+                    profile,
+                    &[],
+                    |tab| tab.terminal.metadata().prompt,
+                    command,
+                );
+            }
             exercised.push(name);
+        }
+        // A WSL profile runs the distribution's shell through wsl.exe; the
+        // Windows environment does not cross into WSL, so the marker travels
+        // through the terminal environment preferences, as a user sets it.
+        #[cfg(windows)]
+        {
+            let distributions = rustpy_project::interpreter_remote::registered_wsl_distributions()
+                .unwrap_or_default();
+            if let Some(distribution) = distributions.first() {
+                run_profile(
+                    root.path(),
+                    rustpy_settings::terminal::Profile {
+                        name: "wsl".into(),
+                        target_kind: "wsl".into(),
+                        target: distribution.clone(),
+                        shell: "/bin/sh".into(),
+                        ..Default::default()
+                    },
+                    &[("RUSTPY_PROFILE_MARK", "42")],
+                    |tab| {
+                        let screen = tab.terminal.contents();
+                        screen.contains('$') || screen.contains('#')
+                    },
+                    "echo \"RUSTPY_PROFILE_$RUSTPY_PROFILE_MARK\"",
+                );
+                exercised.push("wsl".into());
+            } else {
+                eprintln!("no WSL distribution is registered; skipped");
+            }
         }
         eprintln!("terminal profiles exercised: {exercised:?}");
         assert!(!exercised.is_empty(), "no shell available");
         // Shells that ship with the system, plus pwsh, which every hosted
-        // GitHub Actions runner image provides.
-        let mut expected = if cfg!(windows) {
-            vec!["cmd", "powershell"]
+        // GitHub Actions runner image provides, plus those the CI job
+        // provisions (RUSTPY_TEST_REQUIRED_SHELLS, e.g. "fish" or "wsl").
+        let mut expected: Vec<String> = if cfg!(windows) {
+            vec!["cmd".into(), "powershell".into()]
         } else if cfg!(target_os = "macos") {
-            vec!["bash", "zsh"]
+            vec!["bash".into(), "zsh".into()]
         } else {
-            vec!["bash"]
+            vec!["bash".into()]
         };
         if std::env::var_os("GITHUB_ACTIONS").is_some() {
-            expected.push("pwsh");
+            expected.push("pwsh".into());
+        }
+        if let Ok(required) = std::env::var("RUSTPY_TEST_REQUIRED_SHELLS") {
+            expected.extend(
+                required
+                    .split([',', ' '])
+                    .filter(|s| !s.is_empty())
+                    .map(String::from),
+            );
         }
         for name in expected {
-            assert!(exercised.iter().any(|n| n == name), "{name}: {exercised:?}");
+            assert!(exercised.contains(&name), "{name}: {exercised:?}");
         }
     }
 }

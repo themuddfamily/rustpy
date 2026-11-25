@@ -80,6 +80,78 @@ jobs:
           echo "TMPDIR=${RUNNER_TEMP}" >> "$GITHUB_ENV"
           # The keyboard tests are written against the Windows/Linux keymap semantics.
           echo "RUSTPY_KEYMAP_PLATFORM=default" >> "$GITHUB_ENV"
+      # fish for the terminal-profile end-to-end test (terminal_panel.rs).
+      - name: Linux fish shell
+        if: runner.os == 'Linux' && matrix.shard == 'ui'
+        run: |
+          sudo apt-get install -y --no-install-recommends fish
+          echo "RUSTPY_TEST_REQUIRED_SHELLS=fish" >> "$GITHUB_ENV"
+      - name: macOS fish shell
+        if: runner.os == 'macOS' && matrix.shard == 'ui'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew install fish
+          echo "RUSTPY_TEST_REQUIRED_SHELLS=fish" >> "$GITHUB_ENV"
+      # A WSL distribution for the WSL terminal profile in the same test.
+      - name: Windows WSL distribution
+        if: runner.os == 'Windows' && matrix.shard == 'ui'
+        uses: Vampire/setup-wsl@4c48163d9f981914dd8caa0fc335fe19cca5bff4 # v7.2.0
+        with:
+          distribution: Alpine-3.22
+          use-cache: false
+      - name: Require the WSL profile
+        if: runner.os == 'Windows' && matrix.shard == 'ui'
+        shell: pwsh
+        run: |
+          wsl.exe --list --verbose
+          "RUSTPY_TEST_REQUIRED_SHELLS=wsl" >> $env:GITHUB_ENV
+      # Keychain trust settings for the macOS CA import check (system_store.rs):
+      # throwaway CAs trusted in the admin and user trust domains, one denied
+      # and one in the System keychain without trust settings.
+      - name: macOS keychain trust settings
+        if: runner.os == 'macOS' && matrix.shard == 'rest'
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/keychain-cas"
+          mkdir -p "$dir"
+          ca() {
+            openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj "/CN=RustPy CI $1" \
+              -addext basicConstraints=critical,CA:TRUE -addext keyUsage=critical,keyCertSign,cRLSign \
+              -keyout "$dir/$1.key" -out "$dir/$1.pem" 2>/dev/null
+            openssl x509 -noout -fingerprint -sha1 -in "$dir/$1.pem" | sed 's/.*=//; s/://g'
+          }
+          system=/Library/Keychains/System.keychain
+          # Non-interactive changes to trust settings need these rights opened.
+          sudo security authorizationdb write com.apple.trust-settings.admin allow
+          admin=$(ca admin-trusted)
+          sudo perl -e 'alarm 60; exec @ARGV' security add-trusted-cert -d -r trustRoot -k "$system" "$dir/admin-trusted.pem"
+          denied=$(ca admin-denied)
+          sudo perl -e 'alarm 60; exec @ARGV' security add-trusted-cert -d -r deny -k "$system" "$dir/admin-denied.pem"
+          plain=$(ca untrusted)
+          sudo security add-certificates -k "$system" "$dir/untrusted.pem"
+          trusted="$admin"
+          login="$HOME/Library/Keychains/login.keychain-db"
+          user=$(ca user-trusted)
+          # Trust settings may wait for an authorization dialog nobody answers.
+          limit() { perl -e 'alarm 60; exec @ARGV' "$@"; }
+          if limit security add-trusted-cert -r trustRoot -k "$login" "$dir/user-trusted.pem"; then
+            echo "user-domain trust set without changing authorization rights"
+            trusted="$trusted,$user"
+          else
+            sudo security authorizationdb write com.apple.trust-settings.user allow
+            if limit security add-trusted-cert -r trustRoot -k "$login" "$dir/user-trusted.pem"; then
+              echo "user-domain trust set after opening com.apple.trust-settings.user"
+              trusted="$trusted,$user"
+            else
+              echo "::warning::user-domain trust settings cannot be set non-interactively"
+            fi
+          fi
+          security trust-settings-export -d "$dir/admin.plist" && cat "$dir/admin.plist"
+          security trust-settings-export "$dir/user.plist" && cat "$dir/user.plist" || true
+          echo "RUSTPY_TEST_MACOS_TRUSTED_CAS=$trusted" >> "$GITHUB_ENV"
+          echo "RUSTPY_TEST_MACOS_UNTRUSTED_CAS=$denied,$plain" >> "$GITHUB_ENV"
       # The runner's TEMP uses an 8.3 short name (C:\Users\RUNNER~1\...), which never
       # compares equal to the long canonical path; RUNNER_TEMP is a plain long path.
       - name: Windows long-name temporary directory

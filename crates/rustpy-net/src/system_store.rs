@@ -724,6 +724,67 @@ mod live_store_tests {
         assert!(roots.iter().all(|der| !der.is_empty()));
     }
 
+    /// Certificates the CI job adds to this Mac's keychains with trust
+    /// settings (see the macOS keychain step in ci.yml), named by SHA-1
+    /// fingerprint in comma-separated environment variables:
+    /// `RUSTPY_TEST_MACOS_TRUSTED_CAS` (marked trusted roots in the admin or
+    /// user trust domain) must be imported; `RUSTPY_TEST_MACOS_UNTRUSTED_CAS`
+    /// (in a keychain but denied or without trust settings) must not be.
+    /// Skipped where the variables are absent (no such keychain entries).
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn macos_keychain_trust_settings_select_the_imported_cas() {
+        let list = |name: &str| -> Vec<String> {
+            std::env::var(name)
+                .unwrap_or_default()
+                .split(',')
+                .map(|f| f.trim().replace(':', "").to_ascii_uppercase())
+                .filter(|f| !f.is_empty())
+                .collect()
+        };
+        let trusted = list("RUSTPY_TEST_MACOS_TRUSTED_CAS");
+        let untrusted = list("RUSTPY_TEST_MACOS_UNTRUSTED_CAS");
+        if trusted.is_empty() && untrusted.is_empty() {
+            eprintln!("no keychain trust settings were provisioned; skipped");
+            return;
+        }
+        let imported: Vec<String> = super::platform_certificates()
+            .iter()
+            .map(|der| super::trust_settings::sha1_hex(der.as_slice()))
+            .collect();
+        eprintln!("keychain import: {imported:?}; trusted {trusted:?}; untrusted {untrusted:?}");
+        for fingerprint in &trusted {
+            assert_eq!(
+                imported.iter().filter(|f| *f == fingerprint).count(),
+                1,
+                "trusted CA {fingerprint} not imported exactly once: {imported:?}"
+            );
+        }
+        for fingerprint in &untrusted {
+            assert!(
+                !imported.contains(fingerprint),
+                "untrusted certificate {fingerprint} imported: {imported:?}"
+            );
+        }
+        // The import also reaches the certificates every HTTPS client uses.
+        let system: Vec<String> = crate::certs::system_certificates()
+            .iter()
+            .map(|der| super::trust_settings::sha1_hex(der.as_slice()))
+            .collect();
+        for fingerprint in &trusted {
+            assert!(
+                system.contains(fingerprint),
+                "{fingerprint} not in system certificates"
+            );
+        }
+        for fingerprint in &untrusted {
+            assert!(
+                !system.contains(fingerprint),
+                "{fingerprint} in system certificates"
+            );
+        }
+    }
+
     /// The parsing half of the keychain import against live `security` output:
     /// the system trust domain's export (whose entries carry no trust settings,
     /// since system roots are trusted by location) must parse into fingerprints
