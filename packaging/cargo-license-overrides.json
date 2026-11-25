@@ -920,6 +920,16 @@
    ],
    "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
   },
+  "rsqlite-vfs@0.2.0": {
+   "files": [
+    {
+     "path": "packaging/cargo-license-overrides/Spxg--sqlite-wasm-rs-3d8318430bac/LICENSE",
+     "url": "https://raw.githubusercontent.com/Spxg/sqlite-wasm-rs/3d8318430bacd7d6a1aafdf5b5e54fb0fee8d451/LICENSE",
+     "sha256": "e1c1975c3474cce31722836f101a40ffaf1cc784e4d2f38ce3e77b9712934e78"
+    }
+   ],
+   "reason": "upstream license and attribution files omitted from published crate; retrieved at packaged VCS revision"
+  },
   "selectors@0.38.0": {
    "files": [
     {

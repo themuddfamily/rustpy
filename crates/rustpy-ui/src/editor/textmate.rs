@@ -321,6 +321,7 @@ impl TextMateHighlight {
     pub fn spans(&self, doc: &Document, first: usize, last: usize) -> Vec<Span> {
         let mut out = Vec::new();
         let end = last.saturating_add(1).min(self.entries.len());
+        #[allow(clippy::needless_range_loop)] // `line` also addresses the document
         for line in first.min(end)..end {
             let Some(entry) = &self.entries[line] else {
                 continue;
@@ -370,6 +371,7 @@ impl TextMateHighlight {
             .flatten()
             .fold(0, |depth, entry| entry.brackets.apply(depth));
         let mut out = Vec::new();
+        #[allow(clippy::needless_range_loop)] // `line` also addresses the document
         for line in first..end {
             let text = doc.line_text(line);
             let spans = self.entries[line]
