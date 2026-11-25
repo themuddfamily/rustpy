@@ -27,6 +27,11 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
   IDE while it is shown.
 - **Git log:** keyboard focus in the log toolbar is no longer lost when a log search or
   indexing run finishes in the background.
+- **Directory comparison (macOS, Windows):** comparing two folders now works on macOS and
+  Windows instead of always reporting an incomplete result; links and junctions are listed
+  but never followed.
+- **rsync deployment (macOS):** works with the rsync 2.6.9 and openrsync that ship with macOS
+  (no Homebrew rsync needed), and remote listings work on servers with BSD `find`, such as macOS.
 
 ## [1.0.0] - 2026-10-25
 

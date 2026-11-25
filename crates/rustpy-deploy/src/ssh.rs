@@ -13,11 +13,17 @@
 //!   sources are glob patterns, so their `\*?[]` are backslash-escaped. With the legacy SCP
 //!   protocol (older clients, or `-O`) the remote shell parses the path: it is single-quoted.
 //!   When the server has no SFTP subsystem, [`SftpTransport`] switches to `-O` by itself.
-//! * `rsync -s` (protect-args): no remote shell is involved, but the remote rsync expands each
-//!   path segment containing `*`, `?` or `[` against the existing names (and uses the segment
-//!   as typed when nothing matches). Such segments are escaped ([`rsync_escape_path`]), and
-//!   uploads target the (existing) parent directory, so the file name comes from the local file
-//!   and is never expanded.
+//! * `rsync -s` (protect-args, rsync ≥ 3.0): no remote shell is involved, but the remote rsync
+//!   expands each path segment containing `*`, `?` or `[` against the existing names (and uses
+//!   the segment as typed when nothing matches). Such segments are escaped
+//!   ([`rsync_escape_path`]), and uploads target the (existing) parent directory, so the file
+//!   name comes from the local file and is never expanded.
+//! * Older clients (Apple's rsync 2.6.9, openrsync) have no `-s`: the remote shell parses each
+//!   remote path, so it is single-quoted with [`sh_quote`] and taken literally
+//!   ([`RsyncMode::Shell`]). The mode is detected once from `rsync --version`.
+//!
+//! Listings use GNU `find -printf` when the server has it, else BSD `find` with BSD `stat -f`
+//! (macOS, the BSDs), else `ls -la` one directory at a time.
 
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, PoisonError};
@@ -36,7 +42,7 @@ pub const DEFAULT_COMMAND_TIMEOUT: Duration = Duration::from_secs(60);
 /// Default timeout of one file transfer (stalls are detected earlier by keep-alives).
 pub const DEFAULT_TRANSFER_TIMEOUT: Duration = Duration::from_secs(3600);
 const TEST_TIMEOUT: Duration = Duration::from_secs(30);
-/// Exit code of the recursive listing script when GNU `find` is missing.
+/// Exit code of the recursive listing script when neither GNU `find` nor BSD `stat` is there.
 const NO_GNU_FIND_EXIT: i32 = 97;
 /// Exit code of the connection test script when the root path cannot be entered.
 const TEST_NO_ROOT_EXIT: i32 = 90;
@@ -248,17 +254,30 @@ pub fn remote_sh(script: &str) -> String {
     format!("sh -c {}", sh_quote(script))
 }
 
-/// Script listing one directory: GNU `find -printf` (NUL-separated records), falling back
-/// to `ls -la` on systems without GNU find (`TZ=UTC0`, so that its dates are UTC like ours).
-pub fn list_script(dir: &str) -> String {
+/// `elif` branch shared by the listing scripts for servers with BSD `find` and `stat` (macOS,
+/// the BSDs): from inside `$d`, `find -H . -mindepth 1 <selection>` hands batches of `./name`
+/// paths to a loop that prints the same NUL-separated `<d|f> <size> <mtime> <name>` records as
+/// GNU `-printf` (type and size of a link's target, like `%Y`). Detected with `stat -f %m`,
+/// which GNU and BusyBox `stat` reject (their `-f` reports the file system).
+fn bsd_listing(selection: &str) -> String {
     format!(
-        r#"d={}; if find "$d" -maxdepth 0 -printf '' >/dev/null 2>&1; then find -H "$d" -mindepth 1 -maxdepth 1 -printf '%Y %s %T@ %f\0'; else TZ=UTC0 LC_ALL=C QUOTING_STYLE=literal ls -la "$d/"; fi"#,
-        sh_quote(&shell_path(dir))
+        r#"elif stat -f %m "$d" >/dev/null 2>&1; then cd "$d" && find -H . -mindepth 1 {selection}-exec sh -c 'for f do t=f; [ -d "$f" ] && t=d; s=$(stat -L -f "%z %m" -- "$f" 2>/dev/null) && printf "%s %s %s\0" "$t" "$s" "${{f#./}}"; done; exit 0' sh {{}} +; "#
     )
 }
 
-/// Script listing a tree with GNU find (`%P` = path relative to `dir`), pruning the given
-/// name patterns; exits with 0 and no output when `dir` does not exist.
+/// Script listing one directory: GNU `find -printf` (NUL-separated records), BSD `find` with
+/// `stat` (see [`bsd_listing`]), falling back to `ls -la` on systems with neither (`TZ=UTC0`,
+/// so that its dates are UTC like ours).
+pub fn list_script(dir: &str) -> String {
+    format!(
+        r#"d={}; if find "$d" -maxdepth 0 -printf '' >/dev/null 2>&1; then find -H "$d" -mindepth 1 -maxdepth 1 -printf '%Y %s %T@ %f\0'; {}else TZ=UTC0 LC_ALL=C QUOTING_STYLE=literal ls -la "$d/"; fi"#,
+        sh_quote(&shell_path(dir)),
+        bsd_listing("-maxdepth 1 ")
+    )
+}
+
+/// Script listing a tree with GNU find (`%P` = path relative to `dir`) or BSD find and stat,
+/// pruning the given name patterns; exits with 0 and no output when `dir` does not exist.
 pub fn list_recursive_script(dir: &str, prune_names: &[String]) -> String {
     let prune = if prune_names.is_empty() {
         String::new()
@@ -270,8 +289,9 @@ pub fn list_recursive_script(dir: &str, prune_names: &[String]) -> String {
         format!(r"\( {} \) -prune -o ", names.join(" -o "))
     };
     format!(
-        r#"d={}; [ -e "$d" ] || exit 0; if find "$d" -maxdepth 0 -printf '' >/dev/null 2>&1; then find -H "$d" -mindepth 1 {prune}-printf '%Y %s %T@ %P\0'; else echo 'GNU find is not available on the server' >&2; exit {NO_GNU_FIND_EXIT}; fi"#,
-        sh_quote(&shell_path(dir))
+        r#"d={}; [ -e "$d" ] || exit 0; if find "$d" -maxdepth 0 -printf '' >/dev/null 2>&1; then find -H "$d" -mindepth 1 {prune}-printf '%Y %s %T@ %P\0'; {bsd}else echo 'Neither GNU find nor BSD stat is available on the server' >&2; exit {NO_GNU_FIND_EXIT}; fi"#,
+        sh_quote(&shell_path(dir)),
+        bsd = bsd_listing(&prune),
     )
 }
 
@@ -498,26 +518,67 @@ pub fn rsync_escape_path(path: &str) -> String {
         .join("/")
 }
 
-/// `rsync -az -L -s -e "<ssh>" --`: `-L` sends the content of a symlinked file (like the other
-/// transports) instead of recreating the link, `-s` see [`rsync_escape_path`].
-fn rsync_base(target: &SshTarget, ssh_program: &str) -> CommandSpec {
-    CommandSpec::new("rsync")
-        .args(["-az", "-L", "-s", "-e"])
+/// How the local rsync client passes remote paths to the server.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum RsyncMode {
+    /// rsync ≥ 3.0: `-s` (protect-args); remote paths bypass the remote shell and only their
+    /// wildcard segments are escaped (see [`rsync_escape_path`]).
+    ProtectArgs,
+    /// rsync < 3.0 (Apple's 2.6.9, openrsync): no `-s`; the remote shell parses each remote
+    /// path, so it is single-quoted and taken literally.
+    Shell,
+}
+
+/// Picks the mode from `rsync --version` output (`rsync  version 2.6.9  protocol version 29`,
+/// `rsync  version v3.2.7  protocol version 31`, openrsync's `rsync version 2.6.9 compatible`).
+/// Output without a recognisable version is taken for a current rsync, except openrsync.
+pub fn rsync_mode_from_version(version_output: &str) -> RsyncMode {
+    let words: Vec<&str> = version_output.split_whitespace().collect();
+    let major = words.windows(3).find_map(|w| {
+        (w[1] == "version" && w[0] != "protocol")
+            .then(|| w[2].trim_start_matches(['v', 'V']))
+            .and_then(|v| v.split('.').next()?.parse::<u32>().ok())
+    });
+    match major {
+        Some(major) if major < 3 => RsyncMode::Shell,
+        None if version_output.contains("openrsync") => RsyncMode::Shell,
+        _ => RsyncMode::ProtectArgs,
+    }
+}
+
+/// A remote path argument for the mode (`path` is already a [`shell_path`]).
+fn rsync_remote_path(path: &str, mode: RsyncMode) -> String {
+    match mode {
+        RsyncMode::ProtectArgs => rsync_escape_path(path),
+        RsyncMode::Shell => sh_quote(path),
+    }
+}
+
+/// `rsync -az -L [-s] -e "<ssh>" --`: `-L` sends the content of a symlinked file (like the
+/// other transports) instead of recreating the link, `-s` see [`RsyncMode`].
+fn rsync_base(target: &SshTarget, ssh_program: &str, mode: RsyncMode) -> CommandSpec {
+    let spec = CommandSpec::new("rsync").args(["-az", "-L"]);
+    let spec = match mode {
+        RsyncMode::ProtectArgs => spec.arg("-s"),
+        RsyncMode::Shell => spec,
+    };
+    spec.arg("-e")
         .arg(rsync_shell(target, ssh_program))
         .arg("--")
 }
 
-/// `rsync -az -L -s -e "<ssh>" -- <local> user@host:<remote dir>/`. `-s` (protect-args) passes
-/// remote paths without a remote shell, so they are not quoted. The file goes into the parent
-/// directory of `remote` (which must exist; see [`rsync_escape_path`]) and keeps the local
-/// file name, so the name is never expanded as a wildcard and an existing directory named
-/// like the file is an error instead of a target. When `remote` names the file differently,
-/// the full path is used, which is refused if the new name contains a wildcard character.
+/// `rsync -az -L [-s] -e "<ssh>" -- <local> user@host:<remote dir>/`. The file goes into the
+/// parent directory of `remote` (which must exist) and keeps the local file name, so the name
+/// is never expanded as a wildcard and an existing directory named like the file is an error
+/// instead of a target. When `remote` names the file differently, the full path is used; with
+/// `-s` that is refused if the new name contains a wildcard character (see
+/// [`rsync_escape_path`]), while a shell-quoted path is always literal.
 pub fn rsync_upload_command(
     target: &SshTarget,
     ssh_program: &str,
     local: &Path,
     remote: &str,
+    mode: RsyncMode,
 ) -> anyhow::Result<CommandSpec> {
     let remote = shell_path(remote);
     let Some(parent) = remote_parent(&remote) else {
@@ -526,7 +587,7 @@ pub fn rsync_upload_command(
     let dir = match parent.as_str() {
         "/" => "/".to_string(),
         "." => "./".to_string(),
-        p => format!("{}/", rsync_escape_path(&shell_path(p))),
+        p => format!("{}/", shell_path(p)),
     };
     let name = remote_file_name(&remote);
     let dest = if local
@@ -534,7 +595,7 @@ pub fn rsync_upload_command(
         .is_some_and(|n| n.to_string_lossy() == name.as_str())
     {
         dir
-    } else if has_wildcard(&name) {
+    } else if mode == RsyncMode::ProtectArgs && has_wildcard(&name) {
         bail!(
             "rsync cannot upload {} as {name:?}: a renamed target must not contain '*', '?' or '['",
             local.display()
@@ -542,24 +603,29 @@ pub fn rsync_upload_command(
     } else {
         format!("{dir}{name}")
     };
-    Ok(rsync_base(target, ssh_program)
+    Ok(rsync_base(target, ssh_program, mode)
         .arg(local_arg(local))
-        .arg(format!("{}:{dest}", target.remote_prefix())))
+        .arg(format!(
+            "{}:{}",
+            target.remote_prefix(),
+            rsync_remote_path(&dest, mode)
+        )))
 }
 
-/// `rsync -az -L -s -e "<ssh>" -- user@host:<remote> <local>` (wildcard segments of `remote`
-/// escaped, see [`rsync_escape_path`]).
+/// `rsync -az -L [-s] -e "<ssh>" -- user@host:<remote> <local>` (`remote` escaped or quoted
+/// for the mode, see [`RsyncMode`]).
 pub fn rsync_download_command(
     target: &SshTarget,
     ssh_program: &str,
     remote: &str,
     local: &Path,
+    mode: RsyncMode,
 ) -> CommandSpec {
-    rsync_base(target, ssh_program)
+    rsync_base(target, ssh_program, mode)
         .arg(format!(
             "{}:{}",
             target.remote_prefix(),
-            rsync_escape_path(&shell_path(remote))
+            rsync_remote_path(&shell_path(remote), mode)
         ))
         .arg(local_arg(local))
 }
@@ -925,6 +991,8 @@ impl Transport for SftpTransport {
 pub struct RsyncTransport {
     shell: SshShell,
     rsync_program: String,
+    /// Configured or detected from `rsync --version` on first use.
+    rsync_mode: std::sync::OnceLock<RsyncMode>,
     root_path: String,
     transfer_timeout: Duration,
 }
@@ -941,6 +1009,7 @@ impl RsyncTransport {
                 timeout: DEFAULT_COMMAND_TIMEOUT,
             },
             rsync_program: "rsync".into(),
+            rsync_mode: std::sync::OnceLock::new(),
             root_path,
             transfer_timeout: DEFAULT_TRANSFER_TIMEOUT,
         })
@@ -950,7 +1019,31 @@ impl RsyncTransport {
     pub fn with_programs(mut self, ssh: impl Into<String>, rsync: impl Into<String>) -> Self {
         self.shell.program = ssh.into();
         self.rsync_program = rsync.into();
+        self.rsync_mode = std::sync::OnceLock::new();
         self
+    }
+
+    /// Overrides the detected [`RsyncMode`]; it must match the installed rsync client.
+    pub fn with_rsync_mode(self, mode: RsyncMode) -> Self {
+        Self {
+            rsync_mode: std::sync::OnceLock::from(mode),
+            ..self
+        }
+    }
+
+    /// The rsync mode: as configured, else detected once from `rsync --version`.
+    pub fn rsync_mode(&self) -> RsyncMode {
+        *self.rsync_mode.get_or_init(|| {
+            match exec::run(
+                &CommandSpec::new(&self.rsync_program).arg("--version"),
+                Duration::from_secs(10),
+            ) {
+                Ok(out) => {
+                    rsync_mode_from_version(&format!("{} {}", out.stdout_text(), out.stderr))
+                }
+                Err(_) => RsyncMode::ProtectArgs,
+            }
+        })
     }
 
     pub fn with_timeouts(mut self, command: Duration, transfer: Duration) -> Self {
@@ -1004,6 +1097,7 @@ impl Transport for RsyncTransport {
             &self.shell.program,
             local,
             &remote,
+            self.rsync_mode(),
         )?)
     }
 
@@ -1015,6 +1109,7 @@ impl Transport for RsyncTransport {
                 &self.shell.program,
                 &remote,
                 tmp,
+                self.rsync_mode(),
             ))
         })
     }
@@ -1411,8 +1506,14 @@ mod tests {
     #[test]
     fn rsync_commands() {
         let t = target();
-        let up = rsync_upload_command(&t, "ssh", Path::new("/p/a b.py"), "/srv/it's here/a b.py")
-            .unwrap();
+        let up = rsync_upload_command(
+            &t,
+            "ssh",
+            Path::new("/p/a b.py"),
+            "/srv/it's here/a b.py",
+            RsyncMode::ProtectArgs,
+        )
+        .unwrap();
         assert_eq!(up.program, "rsync");
         assert_eq!(
             strs(&up.args),
@@ -1424,6 +1525,7 @@ mod tests {
             "/opt/my ssh",
             "rel/x.py",
             Path::new("/p/x.py"),
+            RsyncMode::ProtectArgs,
         );
         assert_eq!(strs(&down.args[3..]), ["-e", "'/opt/my ssh' -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=yes -p 2200 -i '/k/o''brien'", "--", "h:rel/x.py", "/p/x.py"]);
 
@@ -1443,6 +1545,7 @@ mod tests {
             "ssh",
             Path::new("/p/pages/[id].tsx"),
             "/srv/[app]/pages/[id].tsx",
+            RsyncMode::ProtectArgs,
         )
         .unwrap();
         assert_eq!(
@@ -1450,8 +1553,13 @@ mod tests {
             r"deploy@example.com:/srv/\[app\]/pages/",
             "the wildcard name itself is never sent"
         );
-        let down =
-            rsync_download_command(&t, "ssh", "/srv/[app]/pages/[id].tsx", Path::new("/p/x"));
+        let down = rsync_download_command(
+            &t,
+            "ssh",
+            "/srv/[app]/pages/[id].tsx",
+            Path::new("/p/x"),
+            RsyncMode::ProtectArgs,
+        );
         assert_eq!(
             down.args[down.args.len() - 2],
             r"deploy@example.com:/srv/\[app\]/pages/\[id\].tsx"
@@ -1459,7 +1567,7 @@ mod tests {
 
         // The root, the login directory, option-like names and renamed targets.
         let dest = |local: &str, remote: &str| {
-            rsync_upload_command(&t, "ssh", Path::new(local), remote)
+            rsync_upload_command(&t, "ssh", Path::new(local), remote, RsyncMode::ProtectArgs)
                 .map(|s| s.args.last().unwrap().clone())
         };
         assert_eq!(dest("/p/a.py", "/a.py").unwrap(), "deploy@example.com:/");
@@ -1478,6 +1586,157 @@ mod tests {
             "a renamed target containing a wildcard is refused"
         );
         assert!(dest("/p/a.py", "/").is_err());
+    }
+
+    #[test]
+    fn rsync_commands_without_protect_args() {
+        let t = target();
+        let mode = RsyncMode::Shell;
+        let up = rsync_upload_command(
+            &t,
+            "ssh",
+            Path::new("/p/a b.py"),
+            "/srv/it's here/a b.py",
+            mode,
+        )
+        .unwrap();
+        assert_eq!(
+            strs(&up.args[..3]),
+            ["-az", "-L", "-e"],
+            "no -s for rsync 2.x"
+        );
+        assert_eq!(
+            strs(&up.args[4..]),
+            [
+                "--",
+                "/p/a b.py",
+                r"deploy@example.com:'/srv/it'\''s here/'"
+            ],
+            "the remote shell gets one quoted word"
+        );
+        let remote = up.args.last().unwrap();
+        let (_, path) = remote.split_once(':').unwrap();
+        assert_eq!(shell_words(path), ["/srv/it's here/"]);
+
+        // Wildcards and shell syntax are quoted, never escaped or expanded.
+        let down = rsync_download_command(
+            &t,
+            "ssh",
+            "/srv/[app]/$HOME;x/*.py",
+            Path::new("/p/x"),
+            mode,
+        );
+        assert_eq!(
+            down.args[down.args.len() - 2],
+            "deploy@example.com:'/srv/[app]/$HOME;x/*.py'"
+        );
+        let dest = |local: &str, remote: &str| {
+            rsync_upload_command(&t, "ssh", Path::new(local), remote, mode)
+                .map(|s| s.args.last().unwrap().clone())
+        };
+        assert_eq!(dest("/p/a.py", "/a.py").unwrap(), "deploy@example.com:'/'");
+        assert_eq!(
+            dest("/p/a.py", "~/a.py").unwrap(),
+            "deploy@example.com:'./'"
+        );
+        assert_eq!(
+            dest("/p/x.py", "-d/x.py").unwrap(),
+            "deploy@example.com:'./-d/'"
+        );
+        assert_eq!(
+            dest("/p/a.py", "/srv/[a].py").unwrap(),
+            "deploy@example.com:'/srv/[a].py'",
+            "a quoted renamed target is literal"
+        );
+        assert!(dest("/p/a.py", "/").is_err());
+    }
+
+    #[test]
+    fn rsync_version_detection() {
+        for (output, mode) in [
+            (
+                "rsync  version 2.6.9  protocol version 29\nCopyright (C) 1996-2006 by Andrew Tridgell, Wayne Davison, and others.",
+                RsyncMode::Shell,
+            ),
+            (
+                "openrsync: protocol version 29\nrsync version 2.6.9 compatible",
+                RsyncMode::Shell,
+            ),
+            ("openrsync: protocol version 29", RsyncMode::Shell),
+            (
+                "rsync  version 3.1.3  protocol version 31",
+                RsyncMode::ProtectArgs,
+            ),
+            (
+                "rsync  version v3.2.7  protocol version 31\nCopyright (C) 1996-2022",
+                RsyncMode::ProtectArgs,
+            ),
+            ("rsync  version 3.4.1  protocol version 32", RsyncMode::ProtectArgs),
+            ("", RsyncMode::ProtectArgs),
+        ] {
+            assert_eq!(rsync_mode_from_version(output), mode, "{output}");
+        }
+        let transport = RsyncTransport::new(target(), "/srv")
+            .unwrap()
+            .with_programs("ssh", "/no/such/rsync");
+        assert_eq!(transport.rsync_mode(), RsyncMode::ProtectArgs);
+        let transport = transport.with_rsync_mode(RsyncMode::Shell);
+        assert_eq!(transport.rsync_mode(), RsyncMode::Shell);
+        assert_eq!(transport.clone().rsync_mode(), RsyncMode::Shell);
+    }
+
+    /// The installed rsync copies files with awkward names both ways, in the mode detected for
+    /// it, through an ssh stand-in that runs the remote command with the local `sh` as the
+    /// server's shell would.
+    #[cfg(unix)]
+    #[test]
+    fn installed_rsync_round_trips_awkward_names() {
+        use std::os::unix::fs::PermissionsExt;
+        let Ok(version) = std::process::Command::new("rsync")
+            .arg("--version")
+            .output()
+        else {
+            eprintln!("rsync not available; skipping");
+            return;
+        };
+        let version = String::from_utf8_lossy(&version.stdout).into_owned();
+        let tmp = crate::test_util::TempDir::new("rsync-round-trip");
+        let fake_ssh = tmp.path().join("fake ssh");
+        std::fs::write(
+            &fake_ssh,
+            "#!/bin/sh\nwhile [ $# -gt 0 ]; do case $1 in -o|-p|-i|-l) shift 2;; --) shift; break;; -*) shift;; *) break;; esac; done\nshift\nexec sh -c \"$*\"\n",
+        )
+        .unwrap();
+        std::fs::set_permissions(&fake_ssh, std::fs::Permissions::from_mode(0o755)).unwrap();
+        let remote = tmp.path().join("remote [x] it's $HOME");
+        let local = tmp.path().join("local");
+        std::fs::create_dir_all(&remote).unwrap();
+        std::fs::create_dir_all(&local).unwrap();
+        let transport = RsyncTransport::new(SshTarget::new("localhost", 22, "", None), "/")
+            .unwrap()
+            .with_programs(fake_ssh.to_string_lossy(), "rsync");
+        let mode = transport.rsync_mode();
+        assert_eq!(mode, rsync_mode_from_version(&version), "{version}");
+        eprintln!(
+            "rsync mode {mode:?} for {}",
+            version.lines().next().unwrap_or("")
+        );
+        let source = local.join("a b;[1].py");
+        std::fs::write(&source, "print('up')\n").unwrap();
+        let remote_dir = remote.to_string_lossy().into_owned();
+        transport
+            .upload(&source, &format!("{remote_dir}/a b;[1].py"))
+            .unwrap();
+        assert_eq!(
+            std::fs::read_to_string(remote.join("a b;[1].py")).unwrap(),
+            "print('up')\n"
+        );
+        std::fs::write(remote.join("it's *.txt"), "down\n").unwrap();
+        let target = local.join("copy.txt");
+        transport
+            .download(&format!("{remote_dir}/it's *.txt"), &target)
+            .unwrap();
+        assert_eq!(std::fs::read_to_string(&target).unwrap(), "down\n");
     }
 
     #[test]
@@ -1583,15 +1842,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn scripts_run_in_a_local_shell() {
-        // The listing script needs GNU find (`-printf`); BSD find skips the check.
-        if !std::process::Command::new("find")
-            .arg("--version")
-            .output()
-            .is_ok_and(|o| o.status.success())
-        {
-            eprintln!("GNU find not available; skipping");
-            return;
-        }
+        // GNU find takes the `-printf` branch, macOS and the BSDs the `stat -f` one.
         use crate::test_util::TempDir;
         let tmp = TempDir::new("ssh-scripts");
         let base = tmp.path().join("my dir 'q'");
@@ -1620,11 +1871,12 @@ mod tests {
         };
         let out = sh(ssh_list_command(&target(), &dir).args.last().unwrap());
         assert!(out.success, "{}", out.stderr);
-        let entries = if out.stdout.contains(&0) {
-            parse_find_output(&out.stdout)
-        } else {
-            parse_ls_output(&out.stdout_text(), unix_now())
-        };
+        assert!(
+            out.stdout.contains(&0),
+            "find records, not the ls fallback: {}",
+            out.stdout_text()
+        );
+        let entries = parse_find_output(&out.stdout);
         let mut names: Vec<(String, bool)> =
             entries.iter().map(|e| (e.name.clone(), e.is_dir)).collect();
         names.sort();

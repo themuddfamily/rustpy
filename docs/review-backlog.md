@@ -13,11 +13,7 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 | Frameworks (Pyramid, web2py) | For projects created by the New Project wizard, the framework run actions picked the conventional entry files (`development.ini`, `web2py.py`) instead of the generated `app.py` / `run_web2py.py`. | Fix in source; needs a check against real Pyramid and web2py installs. |
 | Terminal profiles | PowerShell, cmd and WSL profiles, and zsh, fish and pwsh as shells, have not been exercised end to end. | Untested. |
 | Certificates (Windows, macOS) | Importing trusted roots from the Windows certificate store and the macOS keychain is covered by tests but has not been checked against live system stores. | Untested. |
-| External formatters on macOS | Launching an external formatter (Black, Ruff, …) fails with "Operation not permitted" on the macOS CI runner at the process-group step; the process tests are Linux-only until this is reproduced on a Mac. | Formatting |
-| Directory diff on macOS and Windows | The symlink-safe directory inventory uses Linux descriptor-relative opens; on other systems directory comparisons report themselves incomplete. | Diff |
 | Closing a project with a corrupt workspace file on Windows | The test that closes a project whose `.rustpy/workspace.json` is corrupt hung for an hour in one Windows CI run and passed in others; no cause has been found on its path (workspace store waits are bounded). It now runs on Windows with a watchdog that reports the stuck stage and aborts after five minutes, so a recurrence identifies where it hangs. | Windows |
-| Stopping a Git job on macOS | A stopped Git job whose SSH helper ignores SIGTERM ends immediately on the macOS runner instead of waiting out the grace period; the process-group observation via proc_pidinfo needs checking on a Mac. | VCS |
-| rsync deployment on stock macOS | Apple's rsync 2.6.9 lacks `-s` (protect-args); install rsync 3 from Homebrew. Remote listing also needs GNU find on the server. | Deployment |
 
 ## Recently fixed
 

@@ -875,14 +875,16 @@ mod tests {
             .collect()
     }
 
-    /// An ssh stand-in that ignores SIGTERM and never answers.
+    /// An ssh stand-in that ignores SIGTERM and never answers. It ignores the
+    /// signal before it records its pid, so a test that stops the job as soon
+    /// as the pid appears never catches it before the trap is in place.
     #[cfg(unix)]
     fn stubborn_ssh(dir: &Path) -> String {
         let path = script(
             dir,
             "stubborn-ssh",
             &format!(
-                "#!/bin/sh\necho $$ >> '{}'\ntrap '' TERM\nexec sleep 30\n",
+                "#!/bin/sh\ntrap '' TERM\necho $$ >> '{}'\nexec sleep 30\n",
                 dir.join("pids").display()
             ),
         );
@@ -932,7 +934,7 @@ mod tests {
 
     /// A helper that ignores SIGTERM and keeps the job's output pipe open is
     /// killed after the grace period, and the job ends.
-    #[cfg(target_os = "linux")] // on macOS the job ends before the grace period; see known issues
+    #[cfg(unix)]
     #[test]
     fn helpers_holding_the_output_are_killed_after_the_grace_period() {
         if Command::new("git").arg("--version").output().is_err() {
@@ -957,13 +959,16 @@ mod tests {
         while pids(dir.path()).is_empty() && start.elapsed() < Duration::from_secs(10) {
             std::thread::sleep(Duration::from_millis(10));
         }
+        assert_eq!(pids(dir.path()).len(), 1, "git started the ssh stand-in");
         let start = Instant::now();
         job.stop();
         std::thread::sleep(Duration::from_millis(200));
         job.poll();
         assert!(
             job.is_running(),
-            "the helper still holds the pipe within the grace period"
+            "the helper still holds the pipe within the grace period; helper alive: {:?}; output: {}",
+            pids(dir.path()).into_iter().map(exists).collect::<Vec<_>>(),
+            job.output()
         );
         assert!(
             crate::RepositoryReservation::try_acquire(dir.path(), "Fetch").is_err(),
