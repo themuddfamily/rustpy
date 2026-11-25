@@ -96,6 +96,9 @@ pub struct RunSession {
 }
 
 struct PtySession {
+    /// Shared with the status worker, which alone polls it; holding it here
+    /// keeps the child owned for as long as the session exists.
+    #[allow(dead_code)]
     child: Arc<Mutex<Box<dyn portable_pty::Child + Send + Sync>>>,
     writer: Mutex<Box<dyn Write + Send>>,
     master: Box<dyn portable_pty::MasterPty + Send>,
@@ -624,30 +627,20 @@ impl RunSession {
                 .unwrap_or_default()
         )
     }
+    /// The owned leader's PID while it is still owned (not yet reaped).
+    ///
+    /// This never touches the child lock: the status worker holds it while it
+    /// polls, and a `try_lock` here made the PID of a live process briefly
+    /// unavailable whenever the UI asked during one of those polls.
     pub fn process_id(&self) -> Option<u32> {
         let tree = self.tree.as_ref()?;
-        self.pty
-            .as_ref()
-            .and_then(|pty| {
-                pty.child.try_lock().ok().and_then(|mut child| {
-                    if matches!(tree.poll_pty(child.as_mut()), Ok(None)) {
-                        Some(tree.pid())
-                    } else {
-                        None
-                    }
-                })
-            })
-            .or_else(|| {
-                self.child.as_ref().and_then(|child| {
-                    child.try_lock().ok().and_then(|mut child| {
-                        if matches!(tree.poll(&mut child), Ok(None)) {
-                            Some(tree.pid())
-                        } else {
-                            None
-                        }
-                    })
-                })
-            })
+        if self.pty.is_none() && self.child.is_none() {
+            return None;
+        }
+        // The status worker retires only after reaping or failing to observe
+        // the child; either way the PID is no longer a live owned process.
+        let owned = !tree.is_reaped() && !self.local_retired.load(Ordering::Acquire);
+        owned.then(|| tree.pid())
     }
     pub fn accepts_stdin(&self) -> bool {
         !self.redirected_input && (self.stdin.is_some() || self.pty.is_some())
@@ -876,6 +869,7 @@ impl RunSession {
             );
             let local_retired = session.local_retired.clone();
             let docker_local = session.docker_local.clone();
+            let signal_tx = tx.clone();
             std::thread::spawn(move || {
                 struct Retired(Arc<AtomicBool>);
                 impl Drop for Retired {
@@ -903,9 +897,20 @@ impl RunSession {
                         });
                     match result {
                         Ok(Some(status)) => {
-                            docker_local.finish(SessionStatus::Exited(status.exit_code() as i32));
-                            let _ =
-                                status_tx.send(SessionStatus::Exited(status.exit_code() as i32));
+                            // portable-pty reports a signal death as exit code 1;
+                            // name the signal instead of a code the child never chose.
+                            let status = match status.signal() {
+                                Some(signal) => {
+                                    let _ = signal_tx.send(OutputChunk {
+                                        kind: OutputKind::System,
+                                        text: format!("\nTerminated by signal: {signal}\n"),
+                                    });
+                                    SessionStatus::Killed
+                                }
+                                None => SessionStatus::Exited(status.exit_code() as i32),
+                            };
+                            docker_local.finish(status.clone());
+                            let _ = status_tx.send(status);
                             break;
                         }
                         Ok(None) => {}
@@ -1031,7 +1036,7 @@ impl RunSession {
                     SessionStatus::Exited(code) => {
                         format!("\nProcess finished with exit code {code}\n")
                     }
-                    SessionStatus::Killed => "\nProcess terminated (SIGKILL)\n".into(),
+                    SessionStatus::Killed => "\nProcess terminated\n".into(),
                     SessionStatus::Failed(error) => format!("\n{error}\n"),
                     SessionStatus::Running => String::new(),
                 };
@@ -1528,6 +1533,46 @@ mod tests {
             returned_without_lock,
             "Stop must not acquire the waiter's child mutex"
         );
+    }
+
+    /// The status worker holds the child lock while it polls; the PID of a
+    /// live owned process must stay available to the UI throughout.
+    #[cfg(unix)]
+    #[test]
+    fn process_id_does_not_depend_on_the_status_worker_child_lock() {
+        let args = ["-c".to_string(), "while :; do sleep 1; done".to_string()];
+        let mut pipe = RunSession::spawn_command(
+            93,
+            "pipe owner",
+            Path::new("/bin/sh"),
+            &args,
+            Path::new("/"),
+            &BTreeMap::new(),
+        );
+        let mut pty = RunSession::spawn_pty_command(
+            94,
+            "pty owner",
+            Path::new("/bin/sh"),
+            &args,
+            Path::new("/"),
+            &BTreeMap::new(),
+        );
+        for session in [&mut pipe, &mut pty] {
+            let pid = session.tree.as_ref().expect("owned tree").pid();
+            {
+                let _pipe_guard = session.child.as_ref().map(|child| child.lock().unwrap());
+                let _pty_guard = session.pty.as_ref().map(|pty| pty.child.lock().unwrap());
+                assert_eq!(session.process_id(), Some(pid), "{}", session.text());
+            }
+            session.stop();
+            let deadline = Instant::now() + std::time::Duration::from_secs(10);
+            while session.is_running() && Instant::now() < deadline {
+                session.poll();
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            }
+            assert!(!session.is_running(), "{}", session.text());
+            assert_eq!(session.process_id(), None, "retired leader has no PID");
+        }
     }
 
     #[test]

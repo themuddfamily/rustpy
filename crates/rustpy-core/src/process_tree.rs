@@ -138,6 +138,12 @@ impl ProcessTree {
     pub fn pid(&self) -> u32 {
         self.pid
     }
+    /// Whether the leader has been reaped. Until then its PID cannot be
+    /// recycled, so it still names this owned process (or its unreaped zombie).
+    /// Lock-free: callers need not contend with the thread that polls the child.
+    pub fn is_reaped(&self) -> bool {
+        self.reaped.load(Ordering::Acquire)
+    }
     /// The leader no longer pins the group: withdraw it from orphan cleanup.
     fn mark_reaped(&self) {
         if !self.reaped.swap(true, Ordering::AcqRel) {
