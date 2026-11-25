@@ -14,6 +14,9 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
+- **Windows:** closing a project, or opening and closing editors outside it, can no longer
+  freeze the IDE when a folder is created or deleted at the same moment; the file watcher
+  stopped by the change could take over that folder's handle and block it forever.
 - **Web preview (Windows):** the built-in preview server no longer resets connections, so
   pages and assets load reliably instead of failing with a connection reset.
 - **Windows:** project workspaces, window sessions and the window registry are saved even

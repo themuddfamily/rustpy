@@ -1,101 +1,131 @@
 name: CI
-# TEMPORARY stress workflow for the corrupt-workspace close hang; restored before merge.
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 env:
   CARGO_TERM_COLOR: always
+  CARGO_BUILD_JOBS: '2'
+  RAYON_NUM_THREADS: '2'
+  RUST_TEST_THREADS: '2'
+  # Typing-frame bounds are checked locally and in the performance stage, not on
+  # shared hosted runners. The strict cancellation bound runs separately below.
   CI: 'true'
 jobs:
-  stress:
+  fmt:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      # Formatting is platform-independent; on Windows `cargo fmt --all` exceeds the
+      # command-line length limit (os error 206) with this many crates.
+      - run: cargo fmt --all -- --check
+  clippy:
     strategy:
       fail-fast: false
       matrix:
-        mode: [regress, module, full4, full2]
-    runs-on: windows-2025
-    timeout-minutes: 340
+        os: [ubuntu-24.04, windows-2025, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     steps:
-      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: clippy
+          cache-on-failure: true
+      - name: Linux graphics dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgtk-3-dev unixodbc-dev
+      - run: cargo clippy --locked --workspace --all-targets -- -D warnings
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025, macos-15]
+        # The UI crate is the largest compile; the rest of the workspace runs beside it.
+        shard: [ui, rest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    steps:
+      # Git for Windows defaults to core.autocrlf=true; fixtures must check out byte for byte.
+      - if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          key: stress-ui
+          key: test-${{ matrix.shard }}
           cache-on-failure: true
+      - name: Linux graphics dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgtk-3-dev unixodbc-dev xvfb libgl1-mesa-dri libegl1 libxcursor1 libxrandr2 libxi6
+      - name: macOS unixODBC and a real temporary directory
+        if: runner.os == 'macOS'
+        # The default TMPDIR (/var/folders/...) is a symlink to /private/var; tests
+        # that compare canonical paths need a temporary directory that is not.
+        run: |
+          brew install unixodbc
+          echo "LIBRARY_PATH=$(brew --prefix)/lib" >> "$GITHUB_ENV"
+          echo "TMPDIR=${RUNNER_TEMP}" >> "$GITHUB_ENV"
+          # The keyboard tests are written against the Windows/Linux keymap semantics.
+          echo "RUSTPY_KEYMAP_PLATFORM=default" >> "$GITHUB_ENV"
+      # The runner's TEMP uses an 8.3 short name (C:\Users\RUNNER~1\...), which never
+      # compares equal to the long canonical path; RUNNER_TEMP is a plain long path.
       - name: Windows long-name temporary directory
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           "TMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
           "TEMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
-      - name: Debugger probe
-        shell: pwsh
+      # Interpreter/debugpy/pytest/coverage, fuzz/nightly and cargo-deny are
+      # provisioned separately; this recipe never installs Python packages.
+      - name: UI tests
+        if: matrix.shard == 'ui'
+        run: cargo test --locked -p rustpy-ui --no-fail-fast -- --test-threads=2 --skip app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly
+      - name: Cancellation latency (isolated)
+        if: matrix.shard == 'ui'
+        run: cargo test --locked -p rustpy-ui --lib app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly -- --exact --test-threads=1
+      - if: matrix.shard == 'rest'
+        run: cargo test --locked --workspace --exclude rustpy-ui --no-fail-fast
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: build
+          cache-on-failure: true
+      - name: Linux graphics dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgtk-3-dev unixodbc-dev
+      - name: macOS unixODBC
+        if: runner.os == 'macOS'
         run: |
-          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Debuggers" -Recurse -Filter cdb.exe -ErrorAction SilentlyContinue | ForEach-Object FullName
-          Get-Command procdump -ErrorAction SilentlyContinue
-          (Get-CimInstance Win32_Processor).NumberOfLogicalProcessors
-      - name: Build test binary
-        shell: pwsh
-        run: |
-          $exe = cargo test --locked -p rustpy-ui --lib --no-run --message-format=json | ForEach-Object { try { $_ | ConvertFrom-Json } catch { } } | Where-Object { $_.reason -eq 'compiler-artifact' -and $_.executable -and $_.target.name -eq 'rustpy_ui' } | Select-Object -Last 1 -ExpandProperty executable
-          if (-not $exe) { throw 'no test executable' }
-          Write-Host "test executable: $exe"
-          "TEST_EXE=$exe" >> $env:GITHUB_ENV
-      - name: Thread dump probe
-        if: matrix.mode == 'regress'
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          $p = Start-Process -FilePath $env:TEST_EXE -ArgumentList @('--test-threads=4') -WorkingDirectory crates\rustpy-ui -NoNewWindow -PassThru -RedirectStandardOutput "$env:RUNNER_TEMP\probe-out.txt" -RedirectStandardError "$env:RUNNER_TEMP\probe-err.txt"
-          Start-Sleep -Seconds 20
-          & "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe" -pv -p $p.Id -y (Split-Path $env:TEST_EXE) -logo "$env:RUNNER_TEMP\probe-stacks.txt" -c ".lines -e; ~*kn 80; qd" | Out-Null
-          Stop-Process -Id $p.Id -Force
-          Get-Content "$env:RUNNER_TEMP\probe-stacks.txt" | Select-Object -First 200
-      - name: Stress
-        shell: pwsh
-        env:
-          MODE: ${{ matrix.mode }}
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $exe = $env:TEST_EXE
-          $deps = Split-Path $exe
-          $cdb = "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe"
-          $env:CARGO_MANIFEST_DIR = (Resolve-Path crates\rustpy-ui).Path
-          $env:RUSTPY_TEST_WATCHDOG_SECS = '90'
-          $target = 'app::session_ui::workspace_persistence_tests::corrupt_workspace_is_reported_and_never_overwritten_by_actual_close'
-          $skip = 'app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly'
-          switch ($env:MODE) {
-            'regress' { $max = 400; $timeout = 200; $argv = @('app::session_ui::workspace_persistence_tests::closed_projects_can_be_deleted_while_other_projects_close', '--exact') }
-            'single' { $max = 8000; $timeout = 240; $argv = @($target, '--exact') }
-            'module' { $max = 300; $timeout = 400; $argv = @('app::session_ui', 'app::project_dialogs', 'app::workspace_ui', '--test-threads=4') }
-            'full4'  { $max = 40;  $timeout = 1800; $argv = @('--test-threads=4', '--skip', $skip) }
-            'full2'  { $max = 40;  $timeout = 1800; $argv = @('--test-threads=2', '--skip', $skip) }
-          }
-          $deadline = (Get-Date).AddMinutes(250)
-          $failures = 0; $passes = 0
-          for ($i = 1; $i -le $max -and (Get-Date) -lt $deadline; $i++) {
-            $out = Join-Path $env:RUNNER_TEMP "out-$i.txt"; $err = Join-Path $env:RUNNER_TEMP "err-$i.txt"
-            $started = Get-Date
-            $p = Start-Process -FilePath $exe -ArgumentList $argv -WorkingDirectory $env:CARGO_MANIFEST_DIR -NoNewWindow -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
-            $null = $p.Handle
-            if (-not $p.WaitForExit($timeout * 1000)) {
-              Write-Host "::error::HANG in iteration $i (mode $env:MODE) after $timeout s"
-              if (Test-Path $cdb) { & $cdb -pv -p $p.Id -y $deps -c ".lines -e; ~*kn 80; qd" }
-              Get-Content $out -Tail 60; Get-Content $err -Tail 200
-              Stop-Process -Id $p.Id -Force
-              exit 1
-            }
-            $p.WaitForExit()
-            $secs = [int]((Get-Date) - $started).TotalSeconds
-            $stderr = Get-Content $err -Raw
-            if ($p.ExitCode -ne 0) {
-              $failures++
-              Write-Host "::warning::iteration $i exited $($p.ExitCode) after $secs s"
-              Select-String -Path $out -Pattern 'FAILED|panicked|failures:|test result' | Select-Object -First 40 | ForEach-Object Line
-              if ($stderr -match 'exceeded') { Write-Host "::error::watchdog fired in iteration $i"; Get-Content $err -Tail 400; exit 1 }
-              Get-Content $err -Tail 40
-            } else { $passes++ }
-            if ($i % 10 -eq 0 -or $env:MODE -like 'full*') { Write-Host "iteration $i done in $secs s (passes $passes, failures $failures)" }
-            Remove-Item $out, $err -ErrorAction SilentlyContinue
-          }
-          Write-Host "mode ${env:MODE}: $passes passing iterations, $failures failing, no hang"
+          brew install unixodbc
+          echo "LIBRARY_PATH=$(brew --prefix)/lib" >> "$GITHUB_ENV"
+      - run: cargo build --locked -p rustpy --bin rustpy
+  dependencies:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check
+          arguments: --config qa/deny.toml
