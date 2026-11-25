@@ -386,7 +386,7 @@ impl Connection {
                 truncated: false,
             });
         }
-        let columns: Vec<String> = stmt.column_names().iter().map(|c| c.to_string()).collect();
+        let columns: Vec<String> = stmt.column_names().map(|c| c.to_string()).collect();
         let ncols = columns.len();
         let mut rows = Vec::new();
         let mut truncated = false;
