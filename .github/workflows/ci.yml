@@ -35,14 +35,28 @@ jobs:
           Get-Command procdump -ErrorAction SilentlyContinue
           (Get-CimInstance Win32_Processor).NumberOfLogicalProcessors
       - name: Build test binary
-        run: cargo test --locked -p rustpy-ui --lib --no-run
+        shell: pwsh
+        run: |
+          $exe = cargo test --locked -p rustpy-ui --lib --no-run --message-format=json | ForEach-Object { try { $_ | ConvertFrom-Json } catch { } } | Where-Object { $_.reason -eq 'compiler-artifact' -and $_.executable -and $_.target.name -eq 'rustpy_ui' } | Select-Object -Last 1 -ExpandProperty executable
+          if (-not $exe) { throw 'no test executable' }
+          Write-Host "test executable: $exe"
+          "TEST_EXE=$exe" >> $env:GITHUB_ENV
+      - name: Watchdog dump probe
+        if: matrix.mode == 'single'
+        shell: pwsh
+        continue-on-error: true
+        env:
+          RUSTPY_TEST_WATCHDOG_SECS: '0'
+        run: |
+          Set-Location crates\rustpy-ui
+          & $env:TEST_EXE app::session_ui::workspace_persistence_tests::corrupt_workspace_is_reported_and_never_overwritten_by_actual_close --exact --nocapture 2>&1 | Select-Object -Last 120
       - name: Stress
         shell: pwsh
         env:
           MODE: ${{ matrix.mode }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $exe = (Get-ChildItem target\debug\deps\rustpy_ui-*.exe | Sort-Object LastWriteTime -Descending | Select-Object -First 1).FullName
+          $exe = $env:TEST_EXE
           $deps = Split-Path $exe
           $cdb = "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe"
           $env:CARGO_MANIFEST_DIR = (Resolve-Path crates\rustpy-ui).Path
