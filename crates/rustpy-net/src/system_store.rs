@@ -729,6 +729,8 @@ mod live_store_tests {
     #[cfg(target_os = "macos")]
     #[test]
     fn macos_keychain_import_parses_the_live_system_trust_domain() {
+        let exported = std::cell::RefCell::new(String::new());
+        let keychain = std::cell::Cell::new(0);
         let security = |args: &[&str]| -> Option<Vec<u8>> {
             let mut args = args.to_vec();
             match args.as_slice() {
@@ -749,10 +751,26 @@ mod live_store_tests {
                 "security {args:?}: {}",
                 String::from_utf8_lossy(&output.stderr)
             );
+            if args[0] == "trust-settings-export" {
+                *exported.borrow_mut() = std::fs::read_to_string(args[2]).unwrap_or_default();
+            } else {
+                keychain.set(crate::certs::pem_certificates(&output.stdout).len());
+            }
             Some(output.stdout)
         };
         let roots = super::keychain_roots(&security);
-        assert!(roots.len() >= 5, "only {} system-domain roots", roots.len());
+        let exported = exported.borrow();
+        let decisions = super::trust_settings::root_decisions(&exported);
+        assert!(
+            roots.len() >= 5,
+            "only {} system-domain roots; {} keychain certificates; {} trust decisions ({} trusted); export of {} bytes begins:\n{}",
+            roots.len(),
+            keychain.get(),
+            decisions.len(),
+            decisions.iter().filter(|(_, trusted)| *trusted).count(),
+            exported.len(),
+            exported.chars().take(3000).collect::<String>()
+        );
         assert_well_known(&parsed_names(&roots), "macOS system trust domain");
     }
 }
