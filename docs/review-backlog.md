@@ -15,15 +15,9 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 | Certificates (Windows, macOS) | Importing trusted roots from the Windows certificate store and the macOS keychain is covered by tests but has not been checked against live system stores. | Untested. |
 | External formatters on macOS | Launching an external formatter (Black, Ruff, …) fails with "Operation not permitted" on the macOS CI runner at the process-group step; the process tests are Linux-only until this is reproduced on a Mac. | Formatting |
 | Directory diff on macOS and Windows | The symlink-safe directory inventory uses Linux descriptor-relative opens; on other systems directory comparisons report themselves incomplete. | Diff |
-| Window registry and session store on Windows | Concurrent registration stress and the atomic session-store claim hit sharing violations (ERROR_ACCESS_DENIED) when a lease or record is replaced while another process reads it; the multi-process tests are Unix-only until the Windows lease protocol is reworked. | Windows |
-| Idle repaint timing on Windows | The idle-frame test sees the caret blink scheduled a full period away instead of half on the Windows runner; ignored there pending a look at the Windows timer path. | Windows |
-| Git panel Tab order on Windows | The accessibility test that tabs to a retained Git revision row passes most runs and fails some on the Windows runner; ignored there until the focus timing is understood. | Windows |
-| Closing a project with a corrupt workspace file on Windows | The test that closes a project whose `.rustpy/workspace.json` is corrupt hung for an hour in one Windows CI run and passed in others; ignored there until the hang is reproduced with a debugger. | Windows |
-| Backup-save retry on Windows | The regression test for retrying a save after a blocked backup directory does not write the edited file on Windows. | Ignored on Windows pending investigation. |
-| Project-tree keyboard traversal on Windows | Alt+1 project activation and traversal tests fail to activate the tree on the Windows runner. | Ignored on Windows pending investigation. |
+| Closing a project with a corrupt workspace file on Windows | The test that closes a project whose `.rustpy/workspace.json` is corrupt hung for an hour in one Windows CI run and passed in others; no cause has been found on its path (workspace store waits are bounded). It now runs on Windows with a watchdog that reports the stuck stage and aborts after five minutes, so a recurrence identifies where it hangs. | Windows |
 | Stopping a Git job on macOS | A stopped Git job whose SSH helper ignores SIGTERM ends immediately on the macOS runner instead of waiting out the grace period; the process-group observation via proc_pidinfo needs checking on a Mac. | VCS |
 | rsync deployment on stock macOS | Apple's rsync 2.6.9 lacks `-s` (protect-args); install rsync 3 from Homebrew. Remote listing also needs GNU find on the server. | Deployment |
-| Local typing performance | An unoptimized code/completion frame check on the shared Linux host measured 83.5 ms p95 against a 60 ms budget. | Local performance gate not met; release GUI latency remains unverified. |
 
 ## Recently fixed
 

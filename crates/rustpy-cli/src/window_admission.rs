@@ -525,7 +525,6 @@ mod tests {
         }
     }
     #[test]
-    #[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
     fn certified_unknown_registry_lease_blocks_admission() {
         let config = tempfile::tempdir().unwrap();
         certify(config.path(), "old-endpoint");
@@ -542,6 +541,9 @@ mod tests {
             gate.acquire_shared(deadline()),
             Err(AdmissionError::PreviousQuitPending)
         ));
+        // A Unix lease is a flock that is released explicitly; a Windows lease
+        // is an unshared handle that only closing releases.
+        #[cfg(unix)]
         os::unlock(lease.borrowed_file_for_test()).unwrap();
         drop(lease);
         gate.acquire_shared(deadline()).unwrap();
