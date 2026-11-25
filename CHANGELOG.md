@@ -16,6 +16,12 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 - **Web preview (Windows):** the built-in preview server no longer resets connections, so
   pages and assets load reliably instead of failing with a connection reset.
+- **Windows:** project workspaces, window sessions and the window registry are saved even
+  while another RustPy window is reading them, instead of failing with "access denied".
+- **Windows:** `rustpy --wait` returns normally when the window it waits for is closed by
+  ending its process, instead of reporting a connection error.
+- **Backups before save:** a backup folder that cannot be created is reported as a backup
+  failure; on Windows it was mistaken for an external change and blocked later saves.
 
 ## [1.0.0] - 2026-10-25
 
