@@ -97,6 +97,9 @@ fn idle_app_waits_for_the_caret_blink() {
     // What asked for each frame (file:line of the repaint request), so a
     // failure names the component that keeps the app awake.
     let mut causes = Vec::new();
+    // File-system events the app saw (a watched project that keeps changing
+    // keeps the app polling); the latest few are reported on failure.
+    let mut watcher_events = std::collections::VecDeque::new();
     while started.elapsed() < Duration::from_secs(60) && idle_run < 8 {
         let delay = frame(&mut app, &ctx, now(), vec![]);
         delays.push(delay);
@@ -107,6 +110,14 @@ fn idle_app_waits_for_the_caret_blink() {
                 .collect::<Vec<_>>()
                 .join(", "),
         );
+        for (kind, data) in crate::performance_trace::take_recorded() {
+            if kind == "watcher_event" {
+                watcher_events.push_back(format!("{:.2}s {data}", now()));
+                if watcher_events.len() > 12 {
+                    watcher_events.pop_front();
+                }
+            }
+        }
         if delay >= Duration::from_millis(100) {
             idle_run += 1;
         } else {
@@ -119,7 +130,10 @@ fn idle_app_waits_for_the_caret_blink() {
     assert!(
         idle_run >= 8,
         "an idle app kept asking for frames sooner than 100 ms: {recent:?}\n\
-         requested by (latest first): {recent_causes:#?}"
+         requested by (latest first): {recent_causes:#?}\n\
+         latest watcher events: {watcher_events:#?}\n\
+         pending deployment work: {:?}",
+        app.deploy.pending_transfers()
     );
     // Idle frames wait for the blink: about half a period, never immediate,
     // and the blink itself is still scheduled (not stalled).
