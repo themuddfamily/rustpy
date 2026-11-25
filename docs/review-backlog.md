@@ -1,7 +1,7 @@
 # Known issues
 
 Open issues found in review and testing, with the area they affect. Platform coverage gaps
-(macOS, Windows on Arm, Snap, screen readers other than Orca) are listed in
+(interactive macOS and Windows on Arm, Snap, screen readers other than Orca) are listed in
 [HANDOFF.md](../HANDOFF.md#known-open-issues-and-limitations). Please report new problems on
 the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 
@@ -19,10 +19,13 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 | Idle repaint timing on Windows | The idle-frame test sees the caret blink scheduled a full period away instead of half on the Windows runner; ignored there pending a look at the Windows timer path. | Windows |
 | Git panel Tab order on Windows | The accessibility test that tabs to a retained Git revision row passes most runs and fails some on the Windows runner; ignored there until the focus timing is understood. | Windows |
 | Closing a project with a corrupt workspace file on Windows | The test that closes a project whose `.rustpy/workspace.json` is corrupt hung for an hour in one Windows CI run and passed in others; ignored there until the hang is reproduced with a debugger. | Windows |
+| Backup-save retry on Windows | The regression test for retrying a save after a blocked backup directory does not write the edited file on Windows. | Ignored on Windows pending investigation. |
+| Project-tree keyboard traversal on Windows | Alt+1 project activation and traversal tests fail to activate the tree on the Windows runner. | Ignored on Windows pending investigation. |
 | Web preview loopback on Windows | The in-process preview server test's client gets a connection reset on the Windows runner; the server path needs checking against Windows socket close semantics. | Windows |
 | AI streaming on Windows | A server that closes the connection right after the stop reason is reported as "connection interrupted" (WSAECONNRESET) rather than a clean end of stream. | AI Assistant |
 | Stopping a Git job on macOS | A stopped Git job whose SSH helper ignores SIGTERM ends immediately on the macOS runner instead of waiting out the grace period; the process-group observation via proc_pidinfo needs checking on a Mac. | VCS |
 | rsync deployment on stock macOS | Apple's rsync 2.6.9 lacks `-s` (protect-args); install rsync 3 from Homebrew. Remote listing also needs GNU find on the server. | Deployment |
+| Local typing performance | An unoptimized code/completion frame check on the shared Linux host measured 83.5 ms p95 against a 60 ms budget. | Local performance gate not met; release GUI latency remains unverified. |
 
 ## Recently fixed
 
