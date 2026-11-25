@@ -96,6 +96,9 @@ pub struct RunSession {
 }
 
 struct PtySession {
+    /// Shared with the status worker, which alone polls it; holding it here
+    /// keeps the child owned for as long as the session exists.
+    #[allow(dead_code)]
     child: Arc<Mutex<Box<dyn portable_pty::Child + Send + Sync>>>,
     writer: Mutex<Box<dyn Write + Send>>,
     master: Box<dyn portable_pty::MasterPty + Send>,
@@ -624,30 +627,20 @@ impl RunSession {
                 .unwrap_or_default()
         )
     }
+    /// The owned leader's PID while it is still owned (not yet reaped).
+    ///
+    /// This never touches the child lock: the status worker holds it while it
+    /// polls, and a `try_lock` here made the PID of a live process briefly
+    /// unavailable whenever the UI asked during one of those polls.
     pub fn process_id(&self) -> Option<u32> {
         let tree = self.tree.as_ref()?;
-        self.pty
-            .as_ref()
-            .and_then(|pty| {
-                pty.child.try_lock().ok().and_then(|mut child| {
-                    if matches!(tree.poll_pty(child.as_mut()), Ok(None)) {
-                        Some(tree.pid())
-                    } else {
-                        None
-                    }
-                })
-            })
-            .or_else(|| {
-                self.child.as_ref().and_then(|child| {
-                    child.try_lock().ok().and_then(|mut child| {
-                        if matches!(tree.poll(&mut child), Ok(None)) {
-                            Some(tree.pid())
-                        } else {
-                            None
-                        }
-                    })
-                })
-            })
+        if self.pty.is_none() && self.child.is_none() {
+            return None;
+        }
+        // The status worker retires only after reaping or failing to observe
+        // the child; either way the PID is no longer a live owned process.
+        let owned = !tree.is_reaped() && !self.local_retired.load(Ordering::Acquire);
+        owned.then(|| tree.pid())
     }
     pub fn accepts_stdin(&self) -> bool {
         !self.redirected_input && (self.stdin.is_some() || self.pty.is_some())
@@ -818,18 +811,17 @@ impl RunSession {
                     pixel_width: 0,
                     pixel_height: 0,
                 })?;
-                let mut command = portable_pty::CommandBuilder::new(program);
+                let mut command = std::process::Command::new(program);
                 if !inherit_environment {
                     command.env_clear();
                 }
                 command.args(args);
-                command.cwd(cwd);
+                command.current_dir(cwd);
                 command.env("TERM", "xterm-256color");
                 command.env("COLORTERM", "truecolor");
-                for (key, value) in env {
-                    command.env(key, value);
-                }
-                let mut child = pair.slave.spawn_command(command)?;
+                command.envs(env);
+                let mut child: Box<dyn portable_pty::Child + Send + Sync> =
+                    Box::new(spawn_on_pty(command, pair.master.as_ref())?);
                 session.launched = true;
                 drop(pair.slave);
                 let endpoints = (|| -> anyhow::Result<_> {
@@ -876,6 +868,7 @@ impl RunSession {
             );
             let local_retired = session.local_retired.clone();
             let docker_local = session.docker_local.clone();
+            let signal_tx = tx.clone();
             std::thread::spawn(move || {
                 struct Retired(Arc<AtomicBool>);
                 impl Drop for Retired {
@@ -903,9 +896,20 @@ impl RunSession {
                         });
                     match result {
                         Ok(Some(status)) => {
-                            docker_local.finish(SessionStatus::Exited(status.exit_code() as i32));
-                            let _ =
-                                status_tx.send(SessionStatus::Exited(status.exit_code() as i32));
+                            // portable-pty reports a signal death as exit code 1;
+                            // name the signal instead of a code the child never chose.
+                            let status = match status.signal() {
+                                Some(signal) => {
+                                    let _ = signal_tx.send(OutputChunk {
+                                        kind: OutputKind::System,
+                                        text: format!("\nTerminated by signal: {signal}\n"),
+                                    });
+                                    SessionStatus::Killed
+                                }
+                                None => SessionStatus::Exited(status.exit_code() as i32),
+                            };
+                            docker_local.finish(status.clone());
+                            let _ = status_tx.send(status);
                             break;
                         }
                         Ok(None) => {}
@@ -1031,7 +1035,7 @@ impl RunSession {
                     SessionStatus::Exited(code) => {
                         format!("\nProcess finished with exit code {code}\n")
                     }
-                    SessionStatus::Killed => "\nProcess terminated (SIGKILL)\n".into(),
+                    SessionStatus::Killed => "\nProcess terminated\n".into(),
                     SessionStatus::Failed(error) => format!("\n{error}\n"),
                     SessionStatus::Running => String::new(),
                 };
@@ -1153,6 +1157,91 @@ pub fn config_stdin(cfg: &RunConfig, project_root: &Path) -> Option<Stdio> {
 /// A bare program name (`black`) looked up on `PATH` the way the shell would,
 /// including `PATHEXT` on Windows (`black.cmd`); paths and unknown names are
 /// returned as they are, so the spawn error names what the user typed.
+/// Starts `command` as a new session leader whose controlling terminal and
+/// standard streams are the PTY behind `master`.
+///
+/// portable-pty's own spawn closes every inherited descriptor in the forked
+/// child before exec. That also closes the pipe through which std reports a
+/// failed exec (so a failure surfaced as a bare "exit code 1"), allocates in
+/// a forked multi-threaded process, and on macOS can close a guarded
+/// descriptor, which the kernel punishes with SIGKILL. Here the child only
+/// marks inherited descriptors close-on-exec, which is always permitted.
+#[cfg(not(windows))]
+pub(crate) fn spawn_on_pty(
+    mut command: std::process::Command,
+    master: &dyn portable_pty::MasterPty,
+) -> anyhow::Result<std::process::Child> {
+    use std::os::unix::fs::OpenOptionsExt;
+    use std::os::unix::process::CommandExt;
+    let name = master
+        .tty_name()
+        .ok_or_else(|| anyhow::anyhow!("The PTY has no terminal device name"))?;
+    // std opens close-on-exec; the child gets the terminal only as stdio.
+    let slave = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .custom_flags(libc::O_NOCTTY)
+        .open(&name)?;
+    let max_fd = {
+        let mut limit = libc::rlimit {
+            rlim_cur: 0,
+            rlim_max: 0,
+        };
+        if unsafe { libc::getrlimit(libc::RLIMIT_NOFILE, &mut limit) } == 0 {
+            limit.rlim_cur.clamp(256, 65536) as i32
+        } else {
+            4096
+        }
+    };
+    command
+        .stdin(slave.try_clone()?)
+        .stdout(slave.try_clone()?)
+        .stderr(slave.try_clone()?);
+    unsafe {
+        command.pre_exec(move || {
+            for signal in [
+                libc::SIGCHLD,
+                libc::SIGHUP,
+                libc::SIGINT,
+                libc::SIGQUIT,
+                libc::SIGTERM,
+                libc::SIGALRM,
+            ] {
+                libc::signal(signal, libc::SIG_DFL);
+            }
+            let mut empty: libc::sigset_t = std::mem::zeroed();
+            libc::sigemptyset(&mut empty);
+            libc::sigprocmask(libc::SIG_SETMASK, &empty, std::ptr::null_mut());
+            if libc::setsid() == -1 {
+                return Err(std::io::Error::last_os_error());
+            }
+            if libc::ioctl(0, libc::TIOCSCTTY as _, 0) == -1 {
+                return Err(std::io::Error::last_os_error());
+            }
+            // Linux 5.11+ marks the whole range in one call.
+            #[cfg(target_os = "linux")]
+            const CLOSE_RANGE_CLOEXEC: libc::c_uint = 1 << 2;
+            #[cfg(target_os = "linux")]
+            let marked = libc::syscall(
+                libc::SYS_close_range,
+                3 as libc::c_uint,
+                libc::c_uint::MAX,
+                CLOSE_RANGE_CLOEXEC,
+            ) == 0;
+            #[cfg(not(target_os = "linux"))]
+            let marked = false;
+            for fd in (3..max_fd).take_while(|_| !marked) {
+                let flags = libc::fcntl(fd, libc::F_GETFD);
+                if flags >= 0 && flags & libc::FD_CLOEXEC == 0 {
+                    libc::fcntl(fd, libc::F_SETFD, flags | libc::FD_CLOEXEC);
+                }
+            }
+            Ok(())
+        });
+    }
+    Ok(command.spawn()?)
+}
+
 /// Program and arguments that start `program` with `args`. On Windows a
 /// RustPy remote-interpreter wrapper (`remote-<key>.cmd`) becomes its adapter
 /// Python plus `-I <adapter.py>`, so no argument is re-parsed by cmd.
@@ -1527,6 +1616,78 @@ mod tests {
         assert!(
             returned_without_lock,
             "Stop must not acquire the waiter's child mutex"
+        );
+    }
+
+    /// The status worker holds the child lock while it polls; the PID of a
+    /// live owned process must stay available to the UI throughout.
+    #[cfg(unix)]
+    #[test]
+    fn process_id_does_not_depend_on_the_status_worker_child_lock() {
+        let args = ["-c".to_string(), "while :; do sleep 1; done".to_string()];
+        let mut pipe = RunSession::spawn_command(
+            93,
+            "pipe owner",
+            Path::new("/bin/sh"),
+            &args,
+            Path::new("/"),
+            &BTreeMap::new(),
+        );
+        let mut pty = RunSession::spawn_pty_command(
+            94,
+            "pty owner",
+            Path::new("/bin/sh"),
+            &args,
+            Path::new("/"),
+            &BTreeMap::new(),
+        );
+        for session in [&mut pipe, &mut pty] {
+            let pid = session.tree.as_ref().expect("owned tree").pid();
+            {
+                let _pipe_guard = session.child.as_ref().map(|child| child.lock().unwrap());
+                let _pty_guard = session.pty.as_ref().map(|pty| pty.child.lock().unwrap());
+                assert_eq!(session.process_id(), Some(pid), "{}", session.text());
+            }
+            session.stop();
+            let deadline = Instant::now() + std::time::Duration::from_secs(10);
+            while session.is_running() && Instant::now() < deadline {
+                session.poll();
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            }
+            assert!(!session.is_running(), "{}", session.text());
+            assert_eq!(session.process_id(), None, "retired leader has no PID");
+        }
+    }
+
+    /// An exec failure after the child has forked is reported as a start
+    /// failure. portable-pty's spawn closed std's exec-error pipe in the child,
+    /// so the failure surfaced as the child's own abort ("exit code 1").
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn pty_exec_failure_is_reported_as_a_start_failure() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let program = dir.path().join("busy-true");
+        std::fs::copy("/bin/true", &program).unwrap();
+        std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o755)).unwrap();
+        // An executable open for writing cannot be executed (ETXTBSY).
+        let _writer = std::fs::OpenOptions::new()
+            .write(true)
+            .open(&program)
+            .unwrap();
+        let mut session =
+            RunSession::spawn_pty_command(95, "busy", &program, &[], dir.path(), &BTreeMap::new());
+        session.poll();
+        assert!(
+            matches!(&session.status, SessionStatus::Failed(error) if error.contains("busy")),
+            "{:?}: {}",
+            session.status,
+            session.text()
+        );
+        assert!(
+            session.text().contains("Cannot start PTY"),
+            "{}",
+            session.text()
         );
     }
 

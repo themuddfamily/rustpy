@@ -25,8 +25,38 @@ fn frame(app: &mut IdeApp, ctx: &egui::Context, time: f64, events: Vec<egui::Eve
     delay
 }
 
+const IDLE_CHILD: &str = "RUSTPY_IDLE_REPAINT_CHILD";
+
+/// Background tasks are process-wide (`TaskManager::global`), and the status
+/// bar keeps polling while any of them runs, so a task of a test running
+/// concurrently kept this app awake for as long as that test ran. The check
+/// therefore runs alone in a child process of this test binary.
 #[test]
 fn an_idle_app_with_no_pending_work_waits_for_the_caret_blink() {
+    if std::env::var_os(IDLE_CHILD).is_some() {
+        return idle_app_waits_for_the_caret_blink();
+    }
+    let output = std::process::Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "app::idle_repaint_tests::an_idle_app_with_no_pending_work_waits_for_the_caret_blink",
+            "--nocapture",
+            "--test-threads=1",
+        ])
+        .env(IDLE_CHILD, "1")
+        .stdin(std::process::Stdio::null())
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        output.status.success() && stdout.contains("1 passed"),
+        "isolated idle check failed ({}):\n{stdout}\n{}",
+        output.status,
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+fn idle_app_waits_for_the_caret_blink() {
     let root = tempfile::tempdir().unwrap();
     let path = root.path().join("main.py");
     std::fs::write(
@@ -64,9 +94,30 @@ fn an_idle_app_with_no_pending_work_waits_for_the_caret_blink() {
     // startup work (analysis, indexes, tool windows) has settled.
     let mut idle_run = 0;
     let mut delays = Vec::new();
+    // What asked for each frame (file:line of the repaint request), so a
+    // failure names the component that keeps the app awake.
+    let mut causes = Vec::new();
+    // File-system events the app saw (a watched project that keeps changing
+    // keeps the app polling); the latest few are reported on failure.
+    let mut watcher_events = std::collections::VecDeque::new();
     while started.elapsed() < Duration::from_secs(60) && idle_run < 8 {
         let delay = frame(&mut app, &ctx, now(), vec![]);
         delays.push(delay);
+        causes.push(
+            ctx.repaint_causes()
+                .iter()
+                .map(|cause| format!("{}:{}", cause.file, cause.line))
+                .collect::<Vec<_>>()
+                .join(", "),
+        );
+        for (kind, data) in crate::performance_trace::take_recorded() {
+            if kind == "watcher_event" {
+                watcher_events.push_back(format!("{:.2}s {data}", now()));
+                if watcher_events.len() > 12 {
+                    watcher_events.pop_front();
+                }
+            }
+        }
         if delay >= Duration::from_millis(100) {
             idle_run += 1;
         } else {
@@ -75,9 +126,14 @@ fn an_idle_app_with_no_pending_work_waits_for_the_caret_blink() {
         std::thread::sleep(delay.min(Duration::from_millis(600)));
     }
     let recent: Vec<_> = delays.iter().rev().take(12).collect();
+    let recent_causes: Vec<_> = causes.iter().rev().take(12).collect();
     assert!(
         idle_run >= 8,
-        "an idle app kept asking for frames sooner than 100 ms: {recent:?}"
+        "an idle app kept asking for frames sooner than 100 ms: {recent:?}\n\
+         requested by (latest first): {recent_causes:#?}\n\
+         latest watcher events: {watcher_events:#?}\n\
+         pending deployment work: {:?}",
+        app.deploy.pending_transfers()
     );
     // Idle frames wait for the blink: about half a period, never immediate,
     // and the blink itself is still scheduled (not stalled).

@@ -702,6 +702,28 @@ impl Terminal {
         self.parser.lock().screen_mut().set_scrollback(0);
     }
 
+    /// Whether the program on the PTY reads its input raw (non-canonical), as
+    /// line editors (readline, zle, fish, PSReadLine) do while they wait for a
+    /// command. Input typed before that is handled by the kernel's cooked mode
+    /// instead: echoed, and with Enter turned into a line feed. `None` where
+    /// the PTY has no terminal attributes (Windows ConPTY).
+    pub fn reads_raw_input(&self) -> Option<bool> {
+        #[cfg(unix)]
+        {
+            let fd = self.master.lock().as_raw_fd()?;
+            // SAFETY: tcgetattr only writes the termios it is given.
+            let mut attributes: libc::termios = unsafe { std::mem::zeroed() };
+            if unsafe { libc::tcgetattr(fd, &mut attributes) } != 0 {
+                return None;
+            }
+            Some(attributes.c_lflag & libc::ICANON == 0)
+        }
+        #[cfg(not(unix))]
+        {
+            None
+        }
+    }
+
     pub fn is_alive(&mut self) -> bool {
         !self.retirement.complete.load(Ordering::Acquire)
     }

@@ -68,13 +68,10 @@ impl OwnedPty {
             let pair = portable_pty::native_pty_system().openpty(size)?;
             let reader = pair.master.try_clone_reader()?;
             let writer = pair.master.take_writer()?;
-            let mut command = portable_pty::CommandBuilder::new(program);
-            command.args(args);
-            command.cwd(cwd);
-            for (key, value) in &variables {
-                command.env(key, value);
-            }
-            let child = pair.slave.spawn_command(command)?;
+            let mut command = std::process::Command::new(program);
+            command.args(args).current_dir(cwd).envs(&variables);
+            let child: Box<dyn Child + Send + Sync> =
+                Box::new(crate::process::spawn_on_pty(command, pair.master.as_ref())?);
             drop(pair.slave);
             RawParts {
                 child,

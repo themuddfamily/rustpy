@@ -2017,7 +2017,9 @@ mod profile_end_to_end {
         }
         assert!(
             done(tab),
-            "{shell}: timed out; {}; screen:\n{}",
+            "{shell}: timed out; prompt mark {}, raw input {:?}; {}; screen:\n{}",
+            tab.terminal.metadata().prompt,
+            tab.terminal.reads_raw_input(),
             tab.terminal.lifecycle_stamp(),
             tab.terminal.contents()
         );
@@ -2054,6 +2056,26 @@ mod profile_end_to_end {
         assert_eq!(tab.title, name);
         // Type only once the shell shows its prompt, as a user would.
         wait_for(tab, &name, prompt);
+        // The prompt mark comes from the prompt function, before the line
+        // editor switches the PTY to raw input. PSReadLine on macOS lost
+        // typed-ahead commands that the kernel had already taken in cooked
+        // mode, so type once the editor is reading.
+        wait_for(tab, &name, |tab| {
+            tab.terminal.reads_raw_input() != Some(false)
+        });
+        // fish 4 on macOS also lost a command typed while it was still
+        // drawing its prompt; a user types once the screen has settled.
+        let mut screen = tab.terminal.contents();
+        let mut settled = Instant::now();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while settled.elapsed() < Duration::from_millis(300) && Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(20));
+            let now = tab.terminal.contents();
+            if now != screen {
+                screen = now;
+                settled = Instant::now();
+            }
+        }
         // The typed command never contains the expanded marker; only its output does.
         tab.terminal.write(format!("{command}\r").as_bytes());
         wait_for(tab, &name, |tab| {
