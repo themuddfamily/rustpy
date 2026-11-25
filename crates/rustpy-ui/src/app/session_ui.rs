@@ -441,6 +441,40 @@ mod workspace_persistence_tests {
     }
     #[cfg(not(windows))]
     fn dump_thread_stacks() {}
+    /// Closing and dropping a project, then deleting its directory, while other
+    /// projects do the same on other threads. notify 8 closed the directory handle
+    /// of a stopped watch before a queued read completion ran; that completion
+    /// re-armed ReadDirectoryChangesW on the closed handle value, which Windows had
+    /// reused for a directory being deleted, and the deletion blocked forever.
+    #[test]
+    fn closed_projects_can_be_deleted_while_other_projects_close() {
+        let (done, finished) = std::sync::mpsc::channel();
+        for _ in 0..4 {
+            let done = done.clone();
+            std::thread::spawn(move || {
+                for _ in 0..100 {
+                    let dir = tempfile::tempdir().unwrap();
+                    let path = Workspace::path_for(dir.path());
+                    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+                    std::fs::write(&path, b"{}").unwrap();
+                    let mut app = app(dir.path());
+                    app.close_project();
+                    drop(app);
+                    drop(dir);
+                }
+                let _ = done.send(());
+            });
+        }
+        drop(done);
+        for _ in 0..4 {
+            assert!(
+                finished
+                    .recv_timeout(std::time::Duration::from_secs(240))
+                    .is_ok(),
+                "deleting a closed project directory hung"
+            );
+        }
+    }
     #[test]
     fn corrupt_workspace_is_reported_and_never_overwritten_by_actual_close() {
         let watchdog = StageWatchdog::start(

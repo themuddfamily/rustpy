@@ -446,53 +446,6 @@ fn forwards_watcher_event(event: &notify::Result<notify::Event>) -> bool {
 mod tests {
     use super::*;
 
-    /// Closing a project drops its recursive watcher while the tree may still be
-    /// changing, and the directory can be deleted right after. notify 8 closed a
-    /// stopped watch's directory handle before a queued read completion ran; the
-    /// completion re-armed ReadDirectoryChangesW on the closed handle value, which
-    /// Windows had often reused for the directory being deleted, so the deletion
-    /// and the watcher thread blocked each other forever.
-    #[test]
-    fn dropping_a_busy_project_watcher_before_deleting_the_tree_never_hangs() {
-        use notify::Watcher;
-        let (done, finished) = std::sync::mpsc::channel();
-        std::thread::spawn(move || {
-            for round in 0..150 {
-                let dir = tempfile::tempdir().unwrap();
-                for d in 0..4 {
-                    let sub = dir.path().join(format!("pkg{d}/inner"));
-                    std::fs::create_dir_all(&sub).unwrap();
-                    for f in 0..4 {
-                        std::fs::write(sub.join(format!("m{f}.py")), b"x = 1\n").unwrap();
-                    }
-                }
-                let (tx, rx) = crossbeam_channel::bounded(1024);
-                let mut watcher =
-                    notify::recommended_watcher(move |event: notify::Result<notify::Event>| {
-                        let _ = tx.try_send(event);
-                    })
-                    .unwrap();
-                watcher
-                    .watch(dir.path(), notify::RecursiveMode::Recursive)
-                    .unwrap();
-                for d in 0..4 {
-                    std::fs::write(dir.path().join(format!("pkg{d}/touch{round}.py")), b"y\n")
-                        .unwrap();
-                }
-                drop(watcher);
-                drop(dir);
-                drop(rx);
-            }
-            let _ = done.send(());
-        });
-        assert!(
-            finished
-                .recv_timeout(std::time::Duration::from_secs(120))
-                .is_ok(),
-            "deleting a just-unwatched project tree hung"
-        );
-    }
-
     #[test]
     fn watcher_drops_access_events_before_queueing() {
         use notify::event::{AccessKind, AccessMode, CreateKind, DataChange, ModifyKind};

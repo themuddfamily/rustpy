@@ -65,7 +65,7 @@ jobs:
           $target = 'app::session_ui::workspace_persistence_tests::corrupt_workspace_is_reported_and_never_overwritten_by_actual_close'
           $skip = 'app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly'
           switch ($env:MODE) {
-            'regress' { $max = 400; $timeout = 100; $argv = @('app::file_sync::tests::dropping_a_busy_project_watcher_before_deleting_the_tree_never_hangs', '--exact') }
+            'regress' { $max = 400; $timeout = 200; $argv = @('app::session_ui::workspace_persistence_tests::closed_projects_can_be_deleted_while_other_projects_close', '--exact') }
             'single' { $max = 8000; $timeout = 240; $argv = @($target, '--exact') }
             'module' { $max = 300; $timeout = 400; $argv = @('app::session_ui', 'app::project_dialogs', 'app::workspace_ui', '--test-threads=4') }
             'full4'  { $max = 40;  $timeout = 1800; $argv = @('--test-threads=4', '--skip', $skip) }
