@@ -731,63 +731,137 @@ mod workspace_regressions {
         assert!(parser.screen().bracketed_paste());
         assert!(parser.screen().contents().is_empty());
     }
-    #[cfg(unix)]
+    /// A shell that starts a background descendant, prints `CHILD:` and then
+    /// waits: `/bin/sh` on Unix, an interactive `cmd.exe` under ConPTY on Windows.
+    fn waiting_shell() -> Terminal {
+        #[cfg(unix)]
+        {
+            Terminal::spawn_command(
+                "/bin/sh",
+                &[
+                    "-c".into(),
+                    "sleep 30 & printf 'CHILD:%s\\n' \"$!\"; wait".into(),
+                ],
+                Path::new("/"),
+                &[],
+                40,
+                5,
+            )
+            .unwrap()
+        }
+        #[cfg(windows)]
+        {
+            let mut terminal = Terminal::spawn_command(
+                "cmd.exe",
+                &[],
+                &std::env::temp_dir(),
+                &[("RUSTPY_TERMINAL_MARK".into(), "ready".into())],
+                80,
+                5,
+            )
+            .unwrap();
+            terminal.write(b"start /B ping -n 30 127.0.0.1 >NUL\r");
+            terminal.write(b"echo CHILD:%RUSTPY_TERMINAL_MARK%\r");
+            terminal
+        }
+    }
+
     #[test]
     fn stopping_owned_terminal_reaps_leader_and_drains_reader() {
-        let mut terminal = Terminal::spawn_command(
-            "/bin/sh",
-            &[
-                "-c".into(),
-                "sleep 30 & printf 'CHILD:%s\\n' \"$!\"; wait".into(),
-            ],
-            Path::new("/"),
-            &[],
-            40,
-            5,
-        )
-        .unwrap();
-        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(3);
-        while !terminal.contents().contains("CHILD:") && std::time::Instant::now() < deadline {
+        let mut terminal = waiting_shell();
+        // The Windows shell echoes its typed command; only the output expands the mark.
+        let needle = if cfg!(windows) {
+            "CHILD:ready"
+        } else {
+            "CHILD:"
+        };
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+        while !terminal.contents().contains(needle) && std::time::Instant::now() < deadline {
             std::thread::sleep(std::time::Duration::from_millis(10));
         }
-        assert!(terminal.contents().contains("CHILD:"));
+        assert!(
+            terminal.contents().contains(needle),
+            "screen: {}",
+            terminal.contents()
+        );
         let before = std::time::Instant::now();
         terminal.kill();
         assert!(before.elapsed() < std::time::Duration::from_secs(1));
         while terminal.is_alive() && std::time::Instant::now() < deadline {
             std::thread::sleep(std::time::Duration::from_millis(10));
         }
-        assert!(!terminal.is_alive());
         let stamp = terminal.lifecycle_stamp();
-        assert!(stamp.contains("reaped=true"));
-        assert!(stamp.contains("reader-drained=true"));
+        assert!(
+            !terminal.is_alive(),
+            "stopped terminal did not finish: {stamp}"
+        );
+        assert!(stamp.contains("reaped=true"), "{stamp}");
+        assert!(stamp.contains("reader-drained=true"), "{stamp}");
     }
 
-    #[cfg(unix)]
     #[test]
     fn dropping_terminal_retains_waiter_until_pty_retirement() {
-        let terminal = Terminal::spawn_command(
+        let terminal = waiting_shell();
+        let state = terminal.retirement.clone();
+        let before = std::time::Instant::now();
+        drop(terminal);
+        assert!(before.elapsed() < std::time::Duration::from_secs(1));
+        assert!(state.stop.load(Ordering::Acquire));
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+        while !state.complete.load(Ordering::Acquire) && std::time::Instant::now() < deadline {
+            poll_retiring_terminals();
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+        assert!(
+            state.complete.load(Ordering::Acquire),
+            "dropped terminal did not retire: {}",
+            state.stamp.lock()
+        );
+        assert!(state.stamp.lock().contains("reaped=true"));
+        poll_retiring_terminals();
+    }
+
+    /// A shell that exits by itself must also finish: on Windows the reader
+    /// only reaches EOF once the pseudoconsole is closed after the exit.
+    #[test]
+    fn exited_shell_finishes_with_its_reader_drained() {
+        #[cfg(unix)]
+        let mut terminal = Terminal::spawn_command(
             "/bin/sh",
-            &["-c".into(), "sleep 30 & wait".into()],
+            &["-c".into(), "echo DONE:ready".into()],
             Path::new("/"),
             &[],
             40,
             5,
         )
         .unwrap();
-        let state = terminal.retirement.clone();
-        let before = std::time::Instant::now();
-        drop(terminal);
-        assert!(before.elapsed() < std::time::Duration::from_secs(1));
-        assert!(state.stop.load(Ordering::Acquire));
-        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(3);
-        while !state.complete.load(Ordering::Acquire) && std::time::Instant::now() < deadline {
-            poll_retiring_terminals();
+        #[cfg(windows)]
+        let mut terminal = Terminal::spawn_command(
+            "cmd.exe",
+            &[],
+            &std::env::temp_dir(),
+            &[("RUSTPY_TERMINAL_MARK".into(), "ready".into())],
+            80,
+            5,
+        )
+        .unwrap();
+        #[cfg(windows)]
+        terminal.write(b"echo DONE:%RUSTPY_TERMINAL_MARK%& exit\r");
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+        while terminal.is_alive() && std::time::Instant::now() < deadline {
             std::thread::sleep(std::time::Duration::from_millis(10));
         }
-        assert!(state.complete.load(Ordering::Acquire));
-        assert!(state.stamp.lock().contains("reaped=true"));
-        poll_retiring_terminals();
+        let stamp = terminal.lifecycle_stamp();
+        assert!(
+            !terminal.is_alive(),
+            "exited terminal did not finish: {stamp}"
+        );
+        assert!(stamp.contains("reader-drained=true"), "{stamp}");
+        assert!(
+            terminal.contents().contains("DONE:ready"),
+            "screen: {}",
+            terminal.contents()
+        );
     }
 }
 
