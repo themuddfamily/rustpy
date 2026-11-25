@@ -186,10 +186,6 @@ fn pending_notebook_model_is_saved_and_active_transactions_defer_publication() {
     assert_eq!(std::fs::read(&plain.path).unwrap(), b"pending scope");
 }
 #[test]
-#[cfg_attr(
-    windows,
-    ignore = "the retried save after a blocked backup root does not write on Windows; see known issues"
-)]
 fn backup_failure_preserves_editor_and_retries_only_after_real_activity() {
     let mut fixture = Fixture::new("backup.txt", b"original\r\n");
     struct Reset;
@@ -212,6 +208,10 @@ fn backup_failure_preserves_editor_and_retries_only_after_real_activity() {
     assert_eq!(std::fs::read(&fixture.path).unwrap(), b"original\r\n");
     assert!(fixture.app.tabs[0].state.doc.is_modified());
     assert_eq!(fixture.app.tabs[0].state.doc.undo_history(), history);
+    assert!(
+        matches!(fixture.app.dialog, Dialog::None),
+        "a backup failure is not an external change"
+    );
     let status = fixture.app.status.clone();
     std::fs::remove_file(&root).unwrap();
     fixture.frame(5., true, vec![]);

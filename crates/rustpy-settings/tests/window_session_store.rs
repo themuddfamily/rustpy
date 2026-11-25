@@ -347,7 +347,6 @@ fn actual_processes_preserve_disjoint_owners_and_tombstones() {
     assert_eq!(bytes(&store), closed);
 }
 #[test]
-#[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
 fn actual_process_claim_isolation_and_atomic_readers() {
     let (dir, store) = store();
     let saved = checkpoint(&store);

@@ -1374,14 +1374,26 @@ pub struct Forwarded {
 
 impl Forwarded {
     /// Blocks until the IDE reports the files closed, or the connection ends
-    /// (the IDE exited).
+    /// (the IDE exited). An IDE that was killed or crashed ends the
+    /// connection with a reset on Windows rather than an orderly close; that
+    /// is the same outcome for the waiting caller.
     pub fn wait_closed(mut self) -> io::Result<()> {
         self.reader.get_ref().set_read_timeout(None)?;
         let mut line = String::new();
         loop {
             line.clear();
-            if self.reader.read_line(&mut line)? == 0 {
-                return Ok(());
+            match self.reader.read_line(&mut line) {
+                Ok(0) => return Ok(()),
+                Ok(_) => {}
+                Err(error)
+                    if matches!(
+                        error.kind(),
+                        io::ErrorKind::ConnectionReset | io::ErrorKind::ConnectionAborted
+                    ) =>
+                {
+                    return Ok(())
+                }
+                Err(error) => return Err(error),
             }
             match serde_json::from_str::<Response>(line.trim_end()) {
                 Ok(Response::Closed) => return Ok(()),

@@ -357,19 +357,58 @@ mod workspace_persistence_tests {
         assert_eq!(app.project.as_ref().unwrap().root, root);
         app
     }
+    /// Names the step a stuck test is in and ends the test process, so a hang
+    /// fails within minutes and says where instead of exhausting the CI job.
+    struct StageWatchdog {
+        stage: std::sync::Arc<std::sync::Mutex<&'static str>>,
+        done: Option<std::sync::mpsc::Sender<()>>,
+    }
+    impl StageWatchdog {
+        fn start(test: &'static str, limit: std::time::Duration) -> Self {
+            let stage = std::sync::Arc::new(std::sync::Mutex::new("start"));
+            let (done, finished) = std::sync::mpsc::channel::<()>();
+            let observed = stage.clone();
+            std::thread::spawn(move || {
+                if let Err(std::sync::mpsc::RecvTimeoutError::Timeout) =
+                    finished.recv_timeout(limit)
+                {
+                    let stage = *observed.lock().unwrap_or_else(|e| e.into_inner());
+                    eprintln!("{test} exceeded {limit:?} in stage `{stage}`; aborting");
+                    std::process::abort();
+                }
+            });
+            Self {
+                stage,
+                done: Some(done),
+            }
+        }
+        fn enter(&self, stage: &'static str) {
+            *self.stage.lock().unwrap_or_else(|e| e.into_inner()) = stage;
+        }
+    }
+    impl Drop for StageWatchdog {
+        fn drop(&mut self) {
+            if let Some(done) = self.done.take() {
+                let _ = done.send(());
+            }
+        }
+    }
     #[test]
-    #[cfg_attr(
-        windows,
-        ignore = "hung once for an hour on the Windows runner (passes other runs); see known issues"
-    )]
     fn corrupt_workspace_is_reported_and_never_overwritten_by_actual_close() {
+        let watchdog = StageWatchdog::start(
+            "corrupt_workspace_is_reported_and_never_overwritten_by_actual_close",
+            std::time::Duration::from_secs(300),
+        );
         let dir = tempfile::tempdir().unwrap();
         let path = Workspace::path_for(dir.path());
         std::fs::create_dir_all(path.parent().unwrap()).unwrap();
         let corrupt = b"{\"open_files\": [ broken owned fixture";
         std::fs::write(&path, corrupt).unwrap();
+        watchdog.enter("IdeApp::new");
         let mut app = app(dir.path());
+        watchdog.enter("save_workspace");
         app.save_workspace();
+        watchdog.enter("close_project");
         app.close_project();
         assert_eq!(std::fs::read(&path).unwrap(), corrupt);
         assert!(
@@ -378,6 +417,10 @@ mod workspace_persistence_tests {
                 .is_some_and(|(message, _)| message.contains("Workspace persistence failed")),
             "workspace error must remain visible"
         );
+        watchdog.enter("drop IdeApp");
+        drop(app);
+        watchdog.enter("drop project directory");
+        drop(dir);
     }
     #[test]
     fn stale_window_close_preserves_another_windows_codec_choice() {

@@ -179,40 +179,18 @@ fn read_record(path: &Path) -> io::Result<WindowInfo> {
     }
     serde_json::from_slice(&bytes).map_err(io::Error::other)
 }
-#[cfg(not(windows))]
-pub(crate) fn replace_file(source: &Path, destination: &Path) -> io::Result<()> {
-    std::fs::rename(source, destination)
-}
-#[cfg(windows)]
-pub(crate) fn replace_file(source: &Path, destination: &Path) -> io::Result<()> {
-    use std::os::windows::ffi::OsStrExt;
-    #[link(name = "kernel32")]
-    extern "system" {
-        fn MoveFileExW(source: *const u16, destination: *const u16, flags: u32) -> i32;
-    }
-    let source: Vec<u16> = source.as_os_str().encode_wide().chain(Some(0)).collect();
-    let destination: Vec<u16> = destination
-        .as_os_str()
-        .encode_wide()
-        .chain(Some(0))
-        .collect();
-    // SAFETY: both paths are nul-terminated and remain alive for the call.
-    if unsafe { MoveFileExW(source.as_ptr(), destination.as_ptr(), 1 | 8) } == 0 {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok(())
-    }
-}
+pub(crate) use rustpy_settings::replace::replace_file;
 
 /// Returns only OS-live windows whose endpoint proves its identity and current
 /// project. PID and on-disk project values never establish liveness or routing.
 /// A registration removed concurrently vanishes between listing and reading;
-/// on Windows it is briefly inaccessible instead.
+/// on Windows a file whose deletion is pending, or one another handle opened
+/// without sharing, is briefly inaccessible instead.
 fn transient(error: &io::Error) -> bool {
     matches!(
         error.kind(),
         io::ErrorKind::NotFound | io::ErrorKind::PermissionDenied
-    )
+    ) || rustpy_settings::replace::is_sharing_conflict(error)
 }
 pub fn live_windows(config: &Path) -> io::Result<Vec<WindowInfo>> {
     let entries = match std::fs::read_dir(config.join(DIRECTORY)) {
@@ -256,7 +234,7 @@ pub fn live_windows(config: &Path) -> io::Result<Vec<WindowInfo>> {
         let lease = match ipc::try_existing_lock_file(&directory.join("lease")) {
             Ok(lease) => lease,
             Err(error) if error.kind() == io::ErrorKind::NotFound => {
-                if directory.join(RECORD).try_exists()? {
+                if directory.join(RECORD).try_exists().unwrap_or(false) {
                     return Err(io::Error::new(
                         io::ErrorKind::InvalidData,
                         "published window has no lease",
@@ -275,9 +253,11 @@ pub fn live_windows(config: &Path) -> io::Result<Vec<WindowInfo>> {
                 let _ = std::fs::remove_dir(&directory);
             }
             None => {
+                // Publication replaces the record atomically, so a record that
+                // cannot be opened belongs to a window that is closing.
                 let info = match read_record(&directory.join(RECORD)) {
                     Ok(info) => info,
-                    Err(error) if error.kind() == io::ErrorKind::NotFound => continue,
+                    Err(error) if transient(&error) => continue,
                     Err(error) => return Err(error),
                 };
                 if info.id != id {
@@ -295,7 +275,7 @@ pub fn live_windows(config: &Path) -> io::Result<Vec<WindowInfo>> {
                         }
                         match ipc::try_existing_lock_file(&directory.join("lease")) {
                             Ok(Some(_)) => continue,
-                            Err(missing) if missing.kind() == io::ErrorKind::NotFound => continue,
+                            Err(gone) if transient(&gone) => continue,
                             _ => return Err(error),
                         }
                     }
@@ -740,7 +720,6 @@ mod tests {
         )
     }
     #[test]
-    #[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
     fn actual_two_process_routing_wait_disconnect_rejection_and_crash_pruning() {
         let directory = tempfile::tempdir().unwrap();
         let a = directory.path().join("a");
@@ -1026,7 +1005,6 @@ mod tests {
         drop(lease);
     }
     #[test]
-    #[cfg(unix)] // Windows file-sharing and socket semantics differ; see known issues
     fn registration_and_discovery_concurrent_stress() {
         let directory = tempfile::tempdir().unwrap();
         let root = directory.path().to_path_buf();
