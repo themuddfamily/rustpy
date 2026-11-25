@@ -23,6 +23,9 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 - **Run and Terminal (Linux, macOS):** a program that cannot be started in the terminal
   emulator is now reported with the reason it could not start, instead of finishing with
   "exit code 1" and no explanation.
+- **Windows:** closing a project, or opening and closing editors outside it, can no longer
+  freeze the IDE when a folder is created or deleted at the same moment; the file watcher
+  stopped by the change could take over that folder's handle and block it forever.
 - **Terminal (Windows):** a terminal tab whose shell exits or is stopped now finishes instead
   of staying open with its output reader still waiting.
 - **Terminal:** PowerShell (pwsh) on Linux and macOS no longer garbles the first command;
