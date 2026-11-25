@@ -258,7 +258,8 @@ fn hooks(name: &str, prefix: &str) -> Option<String> {
         "bash"=>format!("__rustpy_prompt() {{ local s=$?; printf '\\033]133;D;%s\\007\\033]7;file://localhost%s\\007\\033]133;A\\007' \"$s\" \"$PWD\"; }}; PROMPT_COMMAND=\"__rustpy_prompt${{PROMPT_COMMAND:+; $PROMPT_COMMAND}}\"; PS1={prefix}\"$PS1\"; trap 'printf \"\\033]133;C;\\007\"' DEBUG"),
         "zsh"=>format!("autoload -Uz add-zsh-hook; __rustpy_precmd() {{ printf '\\033]133;D;%s\\007\\033]7;file://localhost%s\\007\\033]133;A\\007' \"$?\" \"$PWD\"; }}; __rustpy_preexec() {{ printf '\\033]133;C;\\007'; }}; add-zsh-hook precmd __rustpy_precmd; add-zsh-hook preexec __rustpy_preexec; PS1={prefix}\"$PS1\""),
         "fish"=>"function __rustpy_prompt --on-event fish_prompt; printf '\\033]133;D;%s\\007\\033]7;file://localhost%s\\007\\033]133;A\\007' $status $PWD; end; function __rustpy_preexec --on-event fish_preexec; printf '\\033]133;C;\\007'; end".into(),
-        "pwsh"|"powershell"=>"$global:__rustpy_old_prompt = $function:prompt; function global:prompt { [Console]::Write(\"`e]133;D;$LASTEXITCODE`a`e]7;file://localhost$($pwd.Path.Replace('\\','/'))`a`e]133;A`a\"); & $global:__rustpy_old_prompt }".into(),
+        // Windows PowerShell 5.1 has no `e escape; [char] works in every version.
+        "pwsh"|"powershell"=>"$global:__rustpy_old_prompt = $function:prompt; function global:prompt { $e = [char]27; $b = [char]7; [Console]::Write(\"$e]133;D;$LASTEXITCODE$b$e]7;file://localhost$($pwd.Path.Replace('\\','/'))$b$e]133;A$b\"); & $global:__rustpy_old_prompt }".into(),
         _=>return None,
     })
 }

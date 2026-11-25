@@ -17,6 +17,14 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 - **Windows:** closing a project, or opening and closing editors outside it, can no longer
   freeze the IDE when a folder is created or deleted at the same moment; the file watcher
   stopped by the change could take over that folder's handle and block it forever.
+- **Terminal (Windows):** a terminal tab whose shell exits or is stopped now finishes instead
+  of staying open with its output reader still waiting.
+- **Terminal:** PowerShell (pwsh) on Linux and macOS no longer garbles the first command;
+  the terminal now answers cursor-position and status queries.
+- **Terminal (Windows):** shell integration (prompt marks, working directory) now works in
+  Windows PowerShell 5.1 profiles.
+- **web2py:** projects created by the New Project wizard now serve their own application
+  instead of redirecting to web2py's welcome application.
 - **Web preview (Windows):** the built-in preview server no longer resets connections, so
   pages and assets load reliably instead of failing with a connection reset.
 - **Windows:** project workspaces, window sessions and the window registry are saved even

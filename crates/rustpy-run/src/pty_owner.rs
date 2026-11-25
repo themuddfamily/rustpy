@@ -14,7 +14,16 @@ impl PtyOwner {
         &self,
         child: &mut (dyn Child + Send + Sync),
     ) -> std::io::Result<Option<portable_pty::ExitStatus>> {
-        self.0.poll_pty(child)
+        let status = self.0.poll_pty(child)?;
+        // On Windows the pseudoconsole host keeps the output pipe's writer open
+        // until HPCON is closed, which the owned child does in `wait`. Once the
+        // process-tree barrier has retired every member, finalize it here so a
+        // concurrently draining reader reaches EOF and the session can finish.
+        #[cfg(windows)]
+        if status.is_some() {
+            child.wait()?;
+        }
+        Ok(status)
     }
     pub fn stop(&self, child: &mut (dyn Child + Send + Sync)) {
         self.0.force_pty(child);

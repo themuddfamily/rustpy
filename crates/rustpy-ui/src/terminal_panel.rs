@@ -304,6 +304,17 @@ impl TerminalPanel {
 
     /// Opens a new shell tab in `cwd` with extra environment variables.
     pub fn open(&mut self, cwd: &Path, env: &[(String, String)]) -> anyhow::Result<()> {
+        let integration = rustpy_settings::Settings::system_dir().join("terminal");
+        self.open_with_integration(cwd, env, &integration)
+    }
+
+    /// [`Self::open`] with the shell-integration startup files under `integration`.
+    fn open_with_integration(
+        &mut self,
+        cwd: &Path,
+        env: &[(String, String)],
+        integration: &Path,
+    ) -> anyhow::Result<()> {
         let profile = self
             .preferences
             .profiles
@@ -358,13 +369,12 @@ impl TerminalPanel {
         // Integration is injected through generated startup files where the shell
         // supports it, so nothing is echoed; typed input is the fallback only.
         let injected = if integrate {
-            let dir = rustpy_settings::Settings::system_dir().join("terminal");
             match rustpy_terminal::integration::launch(
                 &plan.program,
                 &plan.args,
                 &self.preferences.prompt_prefix,
                 startup.as_deref(),
-                &dir,
+                integration,
             ) {
                 Ok(launch) => launch,
                 Err(err) => {
@@ -1992,6 +2002,106 @@ fn file_link(value: &str) -> (&str, usize) {
         (value, 1)
     }
 }
+/// The configured local profiles launched for real: each shell installed on
+/// this machine starts through the profile and integration pipeline, receives
+/// a command, shows its output and finishes after `exit`.
+#[cfg(test)]
+mod profile_end_to_end {
+    use super::*;
+    use std::time::{Duration, Instant};
+
+    fn wait_for(tab: &mut TerminalTab, shell: &str, done: impl Fn(&mut TerminalTab) -> bool) {
+        let deadline = Instant::now() + Duration::from_secs(60);
+        while !done(tab) && Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(20));
+        }
+        assert!(
+            done(tab),
+            "{shell}: timed out; {}; screen:\n{}",
+            tab.terminal.lifecycle_stamp(),
+            tab.terminal.contents()
+        );
+    }
+
+    #[test]
+    fn local_profiles_run_each_installed_shell() {
+        // WSL needs an installed distribution, which hosted runners lack.
+        let shells: &[&str] = if cfg!(windows) {
+            &["cmd.exe", "powershell.exe", "pwsh.exe"]
+        } else {
+            &["bash", "zsh", "fish", "pwsh"]
+        };
+        let root = tempfile::tempdir().unwrap();
+        let mut exercised = Vec::new();
+        for &shell in shells {
+            if which::which(shell).is_err() {
+                eprintln!("{shell} is not installed; skipped");
+                continue;
+            }
+            let name = Path::new(shell)
+                .file_stem()
+                .unwrap()
+                .to_string_lossy()
+                .into_owned();
+            let mut panel = TerminalPanel::default();
+            panel.preferences.profiles = vec![rustpy_settings::terminal::Profile {
+                name: name.clone(),
+                shell: shell.into(),
+                ..Default::default()
+            }];
+            panel.preferences.selected_profile = name.clone();
+            panel.preferences.tab_name = String::new();
+            panel
+                .open_with_integration(
+                    root.path(),
+                    &[("RUSTPY_PROFILE_MARK".into(), "42".into())],
+                    &root.path().join("integration"),
+                )
+                .unwrap_or_else(|error| panic!("{shell}: {error}"));
+            assert_eq!(panel.tab_count(), 1);
+            let tab = &mut panel.tabs[0];
+            assert_eq!(tab.title, name);
+            // Type only once the shell shows its prompt, as a user would: the
+            // integration mark where the shell has one, else cmd's `>`.
+            if name == "cmd" {
+                wait_for(tab, shell, |tab| tab.terminal.contents().contains('>'));
+            } else {
+                wait_for(tab, shell, |tab| tab.terminal.metadata().prompt);
+            }
+            // The typed command never contains the expanded marker; only its output does.
+            let command = match name.as_str() {
+                "cmd" => "echo RUSTPY_PROFILE_%RUSTPY_PROFILE_MARK%",
+                "pwsh" | "powershell" => "Write-Output \"RUSTPY_PROFILE_$env:RUSTPY_PROFILE_MARK\"",
+                _ => "echo \"RUSTPY_PROFILE_$RUSTPY_PROFILE_MARK\"",
+            };
+            tab.terminal.write(format!("{command}\r").as_bytes());
+            wait_for(tab, shell, |tab| {
+                tab.terminal.contents().contains("RUSTPY_PROFILE_42")
+            });
+            tab.terminal.write(b"exit\r");
+            wait_for(tab, shell, |tab| !tab.terminal.is_alive());
+            exercised.push(name);
+        }
+        eprintln!("terminal profiles exercised: {exercised:?}");
+        assert!(!exercised.is_empty(), "no shell available");
+        // Shells that ship with the system, plus pwsh, which every hosted
+        // GitHub Actions runner image provides.
+        let mut expected = if cfg!(windows) {
+            vec!["cmd", "powershell"]
+        } else if cfg!(target_os = "macos") {
+            vec!["bash", "zsh"]
+        } else {
+            vec!["bash"]
+        };
+        if std::env::var_os("GITHUB_ACTIONS").is_some() {
+            expected.push("pwsh");
+        }
+        for name in expected {
+            assert!(exercised.iter().any(|n| n == name), "{name}: {exercised:?}");
+        }
+    }
+}
+
 #[cfg(test)]
 mod workspace_fixtures {
     use super::*;
