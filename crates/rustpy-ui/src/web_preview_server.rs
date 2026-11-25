@@ -416,7 +416,46 @@ fn response(
     }
     Ok(())
 }
+/// Serves one connection and closes it gracefully.
+///
+/// Accepted sockets inherit the listener's non-blocking mode on Windows (not on Unix), so the
+/// stream is switched back to blocking reads with a short timeout before the request is read.
+/// After the response the write side is shut down and any bytes the client still sends are
+/// drained until its end of stream (bounded by a short deadline): closing a socket with unread
+/// received data makes Windows reset the connection, which can discard a response the client
+/// has not read yet.
 fn serve(
+    stream: &mut TcpStream,
+    root: &Path,
+    address: SocketAddr,
+    token: &str,
+    state: &Shared,
+) -> std::io::Result<()> {
+    stream.set_nonblocking(false)?;
+    let result = serve_request(stream, root, address, token, state);
+    close_gracefully(stream, &state.cancel);
+    result
+}
+fn close_gracefully(stream: &mut TcpStream, cancel: &AtomicBool) {
+    if stream.shutdown(std::net::Shutdown::Write).is_err() || stream.set_nonblocking(true).is_err()
+    {
+        return;
+    }
+    let deadline = Instant::now() + Duration::from_millis(250);
+    let mut buffer = [0; 1024];
+    while Instant::now() < deadline && !cancel.load(Ordering::Acquire) {
+        match stream.read(&mut buffer) {
+            Ok(0) => return,
+            Ok(_) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                std::thread::park_timeout(Duration::from_millis(2))
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => {}
+            Err(_) => return,
+        }
+    }
+}
+fn serve_request(
     stream: &mut TcpStream,
     root: &Path,
     address: SocketAddr,
@@ -748,10 +787,6 @@ mod tests {
         assert!(exchange(root.path(), &state, "/cap/%2e%2e/secret", "").starts_with("HTTP/1.1 404"));
     }
     #[test]
-    #[cfg_attr(
-        windows,
-        ignore = "the loopback client sees WSAECONNRESET on the Windows runner; see known issues"
-    )]
     fn generated_unicode_url_serves_nested_html_and_relative_asset_on_owned_host() {
         let root = tempfile::tempdir().unwrap();
         let nested = root.path().join("folder λ");
@@ -816,6 +851,33 @@ mod tests {
         }
         server.reap();
         assert!(TcpStream::connect_timeout(&server.address, Duration::from_millis(100)).is_err());
+    }
+    #[test]
+    fn client_with_unread_trailing_bytes_still_receives_the_whole_response() {
+        let root = tempfile::tempdir().unwrap();
+        std::fs::write(root.path().join("index.html"), "<body>complete</body>").unwrap();
+        let server = Server::start(root.path(), false, Default::default()).unwrap();
+        let mut stream =
+            TcpStream::connect_timeout(&server.address, Duration::from_secs(2)).unwrap();
+        stream
+            .set_read_timeout(Some(Duration::from_secs(2)))
+            .unwrap();
+        let mut request = format!(
+            "GET /{}/index.html HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n",
+            server.token, server.address
+        )
+        .into_bytes();
+        // Bytes after the header block are never read by the request parser; closing the
+        // socket with them unread would reset the connection and lose the response.
+        request.extend(std::iter::repeat_n(b'x', 32 * 1024));
+        stream.write_all(&request).unwrap();
+        stream.shutdown(std::net::Shutdown::Write).unwrap();
+        let mut response = String::new();
+        stream.read_to_string(&mut response).unwrap();
+        assert!(response.starts_with("HTTP/1.1 200 OK"), "{response}");
+        assert!(response.contains("<body>complete"), "{response}");
+        assert!(response.ends_with("</body>"), "{response}");
+        server.cancel();
     }
     #[test]
     fn font_assets_keep_correct_types_and_root_traversal_and_size_guards() {
