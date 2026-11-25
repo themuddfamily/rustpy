@@ -16,6 +16,9 @@ pub struct Metadata {
     pub hyperlinks: BTreeMap<String, String>,
     pub clipboard: Option<String>,
     pub blocks: Vec<CommandBlock>,
+    /// The shell shows its prompt and waits for a command: from the prompt
+    /// start (OSC 133;A) until a command starts (133;C). The end-of-prompt
+    /// mark (133;B), which fish 4 emits itself, does not end the wait.
     pub prompt: bool,
     pub command_running: bool,
 }
@@ -198,8 +201,8 @@ impl Tracker {
                         self.metadata.prompt = true;
                         self.metadata.command_running = false;
                     }
-                    "B" => self.metadata.prompt = false,
                     "C" => {
+                        self.metadata.prompt = false;
                         self.command(&percent_decode(extra));
                     }
                     "D" => {
@@ -455,6 +458,17 @@ mod tests {
         assert_eq!(t.metadata.cwd, Some("/a b".into()));
         assert_eq!(t.metadata.hyperlinks["label"], "https://example.org");
         assert_eq!(t.metadata.clipboard.as_deref(), Some("hello"));
+    }
+    #[test]
+    fn prompt_lasts_until_the_command_starts() {
+        let mut t = Tracker::default();
+        // fish 4 marks the prompt itself, around the integration's own mark.
+        t.process(b"\x1b]133;A\x07\x1b]133;A;click_events=1\x07> \x1b]133;B\x07");
+        assert!(t.metadata.prompt, "still waiting for a command after 133;B");
+        t.process(b"\x1b]133;C;\x07");
+        assert!(!t.metadata.prompt && t.metadata.command_running);
+        t.process(b"\x1b]133;D;0\x07\x1b]133;A\x07");
+        assert!(t.metadata.prompt && !t.metadata.command_running);
     }
     #[test]
     fn actual_command_phases_bound_output() {

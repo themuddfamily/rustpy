@@ -2063,8 +2063,7 @@ mod profile_end_to_end {
         wait_for(tab, &name, |tab| {
             tab.terminal.reads_raw_input() != Some(false)
         });
-        // fish 4 on macOS also lost a command typed while it was still
-        // drawing its prompt; a user types once the screen has settled.
+        // And, as a user would, once the prompt has finished drawing.
         let mut screen = tab.terminal.contents();
         let mut settled = Instant::now();
         let deadline = Instant::now() + Duration::from_secs(10);
