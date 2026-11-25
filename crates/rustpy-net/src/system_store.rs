@@ -353,15 +353,18 @@ mod trust_settings {
         dict.iter().find(|(k, _)| k == key).map(|(_, v)| v)
     }
 
-    /// Whether a certificate's trust settings make it a trusted root: an empty
-    /// list means "always trust"; otherwise some entry must say "trust root" or
-    /// "trust as root" (the default result) and none "deny".
+    /// Whether a certificate's trust settings make it a trusted root: no list
+    /// or an empty one means "always trust" (`security add-trusted-cert -r
+    /// trustRoot` without a policy records no list); otherwise some entry must
+    /// say "trust root" or "trust as root" (the default result) and none "deny".
     fn trusts_as_root(entry: &Plist) -> bool {
         let Plist::Dict(fields) = entry else {
             return false;
         };
-        let Some(Plist::Array(settings)) = get(fields, "trustSettings") else {
-            return false;
+        let settings = match get(fields, "trustSettings") {
+            None => return true,
+            Some(Plist::Array(settings)) => settings,
+            Some(_) => return false,
         };
         if settings.is_empty() {
             return true;
@@ -443,6 +446,15 @@ mod tests {
 			<key>trustSettings</key>
 			<array/>
 		</dict>
+		<key>4444444444444444444444444444444444444444</key>
+		<dict>
+			<key>issuerName</key>
+			<data>MDsxCzAJBgNVBAYTAlVT</data>
+			<key>modDate</key>
+			<date>2026-11-25T21:00:00Z</date>
+			<key>serialNumber</key>
+			<data>AQ==</data>
+		</dict>
 		<key>1111111111111111111111111111111111111111</key>
 		<dict>
 			<key>trustSettings</key>
@@ -516,13 +528,21 @@ mod tests {
 
     #[test]
     fn trust_settings_select_trusted_roots() {
-        // Always trusted (empty list) and trusted root; not denied or unspecified ones.
+        // Always trusted (empty or no list) and trusted root; not denied or
+        // unspecified ones.
         assert_eq!(
             trusted_roots(EXPORT),
             vec![
                 "0A1B2C3D4E5F60718293A4B5C6D7E8F901234567".to_string(),
+                "4444444444444444444444444444444444444444".to_string(),
                 "2222222222222222222222222222222222222222".to_string()
             ]
+        );
+        // A trust list that is not an array is not trust.
+        assert!(
+            trusted_roots(&EXPORT.replace("<array/>", "<string>x</string>"))
+                .iter()
+                .all(|f| f != "0A1B2C3D4E5F60718293A4B5C6D7E8F901234567")
         );
         assert!(trusted_roots("not a plist").is_empty());
         assert!(trusted_roots(
@@ -543,7 +563,10 @@ mod tests {
             );
             assert_eq!(
                 trusted_roots(&scoped),
-                vec!["0A1B2C3D4E5F60718293A4B5C6D7E8F901234567".to_string()],
+                vec![
+                    "0A1B2C3D4E5F60718293A4B5C6D7E8F901234567".to_string(),
+                    "4444444444444444444444444444444444444444".to_string()
+                ],
                 "{key}"
             );
         }
@@ -762,14 +785,12 @@ mod live_store_tests {
                     record += &format!("{} {} bytes", o.status, o.stdout.len());
                     if let Some(path) = args.last().filter(|_| args[0] == "trust-settings-export") {
                         let xml = std::fs::read_to_string(path).unwrap_or_default();
-                        record += &format!(
-                            "; decisions {:?}",
-                            super::trust_settings::root_decisions(&xml)
-                                .into_iter()
-                                .filter(|(f, _)| trusted.contains(f) || untrusted.contains(f))
-                                .collect::<Vec<_>>()
-                        );
-                        if !trusted.iter().all(|f| xml.contains(f.as_str())) {
+                        let decisions: Vec<_> = super::trust_settings::root_decisions(&xml)
+                            .into_iter()
+                            .filter(|(f, _)| trusted.contains(f) || untrusted.contains(f))
+                            .collect();
+                        record += &format!("; decisions {decisions:?}");
+                        if decisions.iter().any(|(f, t)| !t && trusted.contains(f)) {
                             record += &format!("; export:\n{xml}");
                         }
                     }
