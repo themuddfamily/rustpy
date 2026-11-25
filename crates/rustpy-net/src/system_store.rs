@@ -724,53 +724,53 @@ mod live_store_tests {
         assert!(roots.iter().all(|der| !der.is_empty()));
     }
 
-    /// The same keychain import against the live system trust domain, which
-    /// every Mac has: the real `security` output must parse into its roots.
+    /// The parsing half of the keychain import against live `security` output:
+    /// the system trust domain's export (whose entries carry no trust settings,
+    /// since system roots are trusted by location) must parse into fingerprints
+    /// that match the certificates of the live system root keychain. The roots
+    /// themselves come from the CA bundle, checked above.
     #[cfg(target_os = "macos")]
     #[test]
-    fn macos_keychain_import_parses_the_live_system_trust_domain() {
-        let exported = std::cell::RefCell::new(String::new());
-        let keychain = std::cell::Cell::new(0);
-        let security = |args: &[&str]| -> Option<Vec<u8>> {
-            let mut args = args.to_vec();
-            match args.as_slice() {
-                ["trust-settings-export", "-d", _] => args[1] = "-s",
-                // The user domain is covered by the test above.
-                ["trust-settings-export", _] => return None,
-                ["find-certificate", "-a", "-p"] => {
-                    args.push("/System/Library/Keychains/SystemRootCertificates.keychain")
-                }
-                _ => {}
-            }
+    fn macos_trust_export_fingerprints_match_the_live_system_roots() {
+        let security = |args: &[&str]| {
             let output = std::process::Command::new("/usr/bin/security")
-                .args(&args)
+                .args(args)
                 .output()
-                .ok()?;
+                .unwrap();
             assert!(
                 output.status.success(),
                 "security {args:?}: {}",
                 String::from_utf8_lossy(&output.stderr)
             );
-            if args[0] == "trust-settings-export" {
-                *exported.borrow_mut() = std::fs::read_to_string(args[2]).unwrap_or_default();
-            } else {
-                keychain.set(crate::certs::pem_certificates(&output.stdout).len());
-            }
-            Some(output.stdout)
+            output.stdout
         };
-        let roots = super::keychain_roots(&security);
-        let exported = exported.borrow();
-        let decisions = super::trust_settings::root_decisions(&exported);
+        let directory = tempfile::tempdir().unwrap();
+        let file = directory.path().join("system.plist");
+        security(&["trust-settings-export", "-s", file.to_str().unwrap()]);
+        let decisions =
+            super::trust_settings::root_decisions(&std::fs::read_to_string(&file).unwrap());
+        assert!(decisions.len() >= 50, "{} decisions", decisions.len());
+        let pem = security(&[
+            "find-certificate",
+            "-a",
+            "-p",
+            "/System/Library/Keychains/SystemRootCertificates.keychain",
+        ]);
+        let roots = crate::certs::pem_certificates(&pem);
+        let names = parsed_names(&roots);
+        assert_well_known(&names, "macOS system root keychain");
+        let fingerprints: std::collections::HashSet<String> = roots
+            .iter()
+            .map(|der| super::trust_settings::sha1_hex(der.as_slice()))
+            .collect();
+        let matched = decisions
+            .iter()
+            .filter(|(fingerprint, _)| fingerprints.contains(fingerprint))
+            .count();
         assert!(
-            roots.len() >= 5,
-            "only {} system-domain roots; {} keychain certificates; {} trust decisions ({} trusted); export of {} bytes begins:\n{}",
-            roots.len(),
-            keychain.get(),
-            decisions.len(),
-            decisions.iter().filter(|(_, trusted)| *trusted).count(),
-            exported.len(),
-            exported.chars().take(3000).collect::<String>()
+            matched * 2 >= decisions.len(),
+            "only {matched} of {} exported fingerprints are system roots",
+            decisions.len()
         );
-        assert_well_known(&parsed_names(&roots), "macOS system trust domain");
     }
 }
