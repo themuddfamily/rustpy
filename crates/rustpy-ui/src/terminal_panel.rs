@@ -2067,6 +2067,13 @@ mod profile_end_to_end {
                 wait_for(tab, shell, |tab| tab.terminal.contents().contains('>'));
             } else {
                 wait_for(tab, shell, |tab| tab.terminal.metadata().prompt);
+                // The prompt mark comes from the prompt function, before the
+                // line editor switches the PTY to raw input. PSReadLine on
+                // macOS lost typed-ahead commands that the kernel had already
+                // taken in cooked mode, so type once the editor is reading.
+                wait_for(tab, shell, |tab| {
+                    tab.terminal.reads_raw_input() != Some(false)
+                });
             }
             // The typed command never contains the expanded marker; only its output does.
             let command = match name.as_str() {

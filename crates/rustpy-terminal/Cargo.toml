@@ -13,3 +13,6 @@ vt100.workspace = true
 anyhow.workspace = true
 log.workspace = true
 parking_lot.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+libc.workspace = true

@@ -6246,6 +6246,7 @@ name = "rustpy-terminal"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "libc",
  "log",
  "parking_lot",
  "portable-pty",
