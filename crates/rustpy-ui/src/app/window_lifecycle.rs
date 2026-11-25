@@ -1889,10 +1889,9 @@ mod tests {
     fn prepare_existing(app: &mut IdeApp, transaction: &str) -> QuitGuard {
         app.prepare_coordinated_quit(transaction);
         app.answer_coordinated_quit(transaction, QuitAnswer::Discard);
-        let QuitProgress::Prepared { guard } =
-            app.answer_coordinated_quit(transaction, QuitAnswer::Discard)
-        else {
-            panic!("not prepared")
+        let progress = app.answer_coordinated_quit(transaction, QuitAnswer::Discard);
+        let QuitProgress::Prepared { guard } = progress.clone() else {
+            panic!("not prepared: {progress:?}; status: {:?}", app.status)
         };
         guard
     }
