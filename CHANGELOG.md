@@ -16,6 +16,11 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 - **Web preview (Windows):** the built-in preview server no longer resets connections, so
   pages and assets load reliably instead of failing with a connection reset.
+- **Freeze notice:** the "UI Freeze" notice no longer takes the keyboard from the editor or
+  tool window you are working in: the caret keeps blinking and Tab keeps moving through the
+  IDE while it is shown.
+- **Git log:** keyboard focus in the log toolbar is no longer lost when a log search or
+  indexing run finishes in the background.
 
 ## [1.0.0] - 2026-10-25
 

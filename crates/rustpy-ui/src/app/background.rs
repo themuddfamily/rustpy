@@ -402,7 +402,9 @@ impl IdeApp {
             .resizable(false)
             .default_width(360.0)
             .anchor(Align2::RIGHT_BOTTOM, Vec2::new(-12.0, -36.0))
-            .show_modal(ctx, |ui| {
+            // A notice, not a dialog: a stall seen by the watchdog must not take
+            // the keyboard from the editor or tool window the user is typing in.
+            .show_modeless(ctx, |ui| {
                 ui.label(
                     egui::RichText::new(crate::freeze::notice_text(&freeze)).color(theme.text),
                 );
