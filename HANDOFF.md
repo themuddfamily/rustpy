@@ -38,7 +38,7 @@ The published-release verification below records the current evidence and remain
 | §6 Add Interpreter dialog | macOS flows not verified |
 | §6 Web browsers and preview | Safari and the WKWebView built-in preview not verified |
 | §8 Cross-platform builds | Snap package, macOS bundle (universal build, signing, notarisation) and interactive Windows GUI acceptance |
-| §8 Performance targets | Release GUI latency is unverified; the local unoptimized typing/completion frame gate exceeded its budget |
+| §8 Performance targets | Interactive GUI latency is unmeasured; the headless typing-frame gate passes locally (see below) |
 | §8 Accessibility | NVDA (Windows) and VoiceOver (macOS); Linux was checked with Orca |
 | §8 Quality | Recorded corpus, CPython oracle and fuzz runs with provisioned inputs remain outstanding |
 
@@ -62,9 +62,11 @@ Cancellation now stops both type-check syntax walks. The regression fails withou
 checkpoints and passes with them; the unchanged local cancellation test measured 19.1 ms
 p95 against 250 ms, and all three platform UI CI shards passed.
 
-The full local quality gate is **not green**: the unoptimized code/completion typing-frame
-check on the shared Linux host measured 83.5 ms p95 against 60 ms at `53680fc`, whose typing
-implementation is unchanged in the release revision. The release notes disclose this result.
+The local typing-frame gate passes on an otherwise idle host (2026-11-25, two cores):
+the code/completion frame measured 34-41 ms p95 against the 60 ms bound in the test
+profile, and 22-28 ms in a release build, where plain typing measured 10-12 ms p95.
+The 83.5 ms figure recorded for 1.0.0 was taken while the shared host was under load.
+These are headless frame timings; latency in the interactive GUI has not been measured.
 Packages are unsigned. Interactive Windows GUI, accessibility, embedded-browser
 acceptance and older-version upgrades remain unverified. Linux, macOS and Store installers
 are not published. Corpus, CPython oracle and fuzz gates still need recorded runs with their

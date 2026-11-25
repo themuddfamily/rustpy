@@ -41,9 +41,7 @@ fn builtin_failure_or_precancel_produces_no_candidate() {
     ));
 }
 
-// macOS runners fail these with EPERM at process-group operations; see the
-// known-issues list until that is understood on a Mac.
-#[cfg(target_os = "linux")]
+#[cfg(unix)]
 mod process {
     use super::*;
     use rustpy_format::candidate::{CandidateError, ExternalFormatter, FormatterLimits};

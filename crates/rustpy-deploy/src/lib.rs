@@ -61,7 +61,7 @@ pub use paths::{
     join_remote, local_path, mapping_local_root, mapping_remote_root, normalize_remote,
     remote_file_name, remote_parent, remote_path, web_url,
 };
-pub use ssh::{RsyncTransport, ScpMode, SftpTransport, SshTarget};
+pub use ssh::{RsyncMode, RsyncTransport, ScpMode, SftpTransport, SshTarget};
 pub use sync::{
     collect_files, download_paths, execute_sync, plan_server_sync, plan_sync, plan_sync_with,
     upload_paths, SyncAction, SyncDirection, SyncItem, SyncOptions,
