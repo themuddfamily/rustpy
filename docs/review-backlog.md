@@ -9,10 +9,8 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 
 | Area | Symptom | State |
 |---|---|---|
-| Terminal (Windows) | Stopping a terminal session backed by ConPTY can leave its output reader running after the process has exited, so the session does not finish cleanly. | Fix in source; needs a re-run on Windows. |
-| Frameworks (Pyramid, web2py) | For projects created by the New Project wizard, the framework run actions picked the conventional entry files (`development.ini`, `web2py.py`) instead of the generated `app.py` / `run_web2py.py`. | Fix in source; needs a check against real Pyramid and web2py installs. |
-| Terminal profiles | PowerShell, cmd and WSL profiles, and zsh, fish and pwsh as shells, have not been exercised end to end. | Untested. |
-| Certificates (Windows, macOS) | Importing trusted roots from the Windows certificate store and the macOS keychain is covered by tests but has not been checked against live system stores. | Untested. |
+| Terminal profiles | WSL profiles and fish as a shell have not been exercised end to end: the hosted CI runners have no WSL distribution and no fish. (cmd, Windows PowerShell, pwsh, bash and zsh profiles are tested end to end on CI.) | Untested. |
+| Certificates (macOS) | Importing CAs that an administrator or user marked as trusted in the macOS keychain trust settings has not been checked against a Mac that has such settings; the CI runner has none. (The Windows store, the macOS system roots and the trust-export parser are tested against live stores.) | Untested. |
 | External formatters on macOS | Launching an external formatter (Black, Ruff, …) fails with "Operation not permitted" on the macOS CI runner at the process-group step; the process tests are Linux-only until this is reproduced on a Mac. | Formatting |
 | Directory diff on macOS and Windows | The symlink-safe directory inventory uses Linux descriptor-relative opens; on other systems directory comparisons report themselves incomplete. | Diff |
 | Window registry and session store on Windows | Concurrent registration stress and the atomic session-store claim hit sharing violations (ERROR_ACCESS_DENIED) when a lease or record is replaced while another process reads it; the multi-process tests are Unix-only until the Windows lease protocol is reworked. | Windows |
