@@ -1105,7 +1105,7 @@ fn sync_published(path: &Path) -> Result<(), WindowSessionError> {
             .share_mode(FILE_SHARE_READ)
             .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT); // FlushFileBuffers needs GENERIC_WRITE.
     }
-    let file = options.open(path).map_err(uncertain)?;
+    let file = crate::replace::retry_sharing(|| options.open(path)).map_err(uncertain)?;
     if !file.metadata().map_err(uncertain)?.is_file() {
         return Err(uncertain(std::io::Error::other(
             "published checkpoint changed to a nonregular file",
@@ -1132,8 +1132,8 @@ fn sync_published(path: &Path) -> Result<(), WindowSessionError> {
             .map_err(uncertain)?;
         directory.sync_all().map_err(uncertain)?;
     }
-    // Windows atomic replacement uses MOVEFILE_WRITE_THROUGH; file sync above
-    // additionally checks completion. There is no portable directory fsync.
+    // On Windows the file sync above flushes the replaced file; NTFS journals
+    // the rename itself. There is no portable directory fsync.
     Ok(())
 }
 
@@ -1328,7 +1328,7 @@ fn read_checked(path: &Path) -> Result<Option<Vec<u8>>, WindowSessionError> {
         use std::os::unix::fs::OpenOptionsExt;
         options.custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK);
     }
-    let file = options.open(path).map_err(|e| io(path, e))?;
+    let file = crate::replace::retry_sharing(|| options.open(path)).map_err(|e| io(path, e))?;
     if !file.metadata().map_err(|e| io(path, e))?.is_file() {
         return Err(WindowSessionError::Invalid {
             path: path.into(),
@@ -1483,32 +1483,7 @@ fn atomic_write(
     }
     result
 }
-#[cfg(not(windows))]
-fn replace_file(from: &Path, to: &Path) -> std::io::Result<()> {
-    std::fs::rename(from, to)
-}
-#[cfg(windows)]
-fn replace_file(from: &Path, to: &Path) -> std::io::Result<()> {
-    use std::os::windows::ffi::OsStrExt;
-    use windows_sys::Win32::Storage::FileSystem::{
-        MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
-    };
-    let from: Vec<u16> = from.as_os_str().encode_wide().chain([0]).collect();
-    let to: Vec<u16> = to.as_os_str().encode_wide().chain([0]).collect();
-    // SAFETY: both pointers are valid null-terminated strings for the call.
-    if unsafe {
-        MoveFileExW(
-            from.as_ptr(),
-            to.as_ptr(),
-            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
-        )
-    } != 0
-    {
-        Ok(())
-    } else {
-        Err(std::io::Error::last_os_error())
-    }
-}
+use crate::replace::replace_file;
 
 #[cfg(unix)]
 mod os_lock {

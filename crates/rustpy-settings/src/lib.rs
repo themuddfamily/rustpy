@@ -44,6 +44,7 @@ pub mod project_directory;
 pub mod python_console;
 pub mod python_style;
 pub mod python_testing;
+pub mod replace;
 pub mod run_console;
 pub mod save_actions;
 pub mod save_synchronization;

@@ -61,6 +61,18 @@ fn preserve(
     Ok(destination)
 }
 
+/// Callers read `AlreadyExists` from a checked write as "the file changed on
+/// disk". A backup directory that cannot be created reports that kind too on
+/// Windows (a regular file where the directory belongs), so backup failures
+/// never carry it.
+fn backup_failed(error: io::Error) -> io::Error {
+    let kind = match error.kind() {
+        io::ErrorKind::AlreadyExists => io::ErrorKind::Other,
+        kind => kind,
+    };
+    io::Error::new(kind, format!("backup before saving failed: {error}"))
+}
+
 /// Back up only the acknowledged baseline, then recheck it through the original
 /// writer. A changed disk file is neither overwritten nor admitted as a backup
 /// of the caller's baseline. A race after the final check has the same portable
@@ -86,7 +98,7 @@ pub fn checked_write(
             ));
         }
         if let Some(snapshot) = baseline.filter(|snapshot| snapshot.bytes.as_ref() != bytes) {
-            preserve(root, path, &snapshot.bytes, vfs, limits)?;
+            preserve(root, path, &snapshot.bytes, vfs, limits).map_err(backup_failed)?;
         }
     }
     super::save_actions::checked_write(vfs, path, bytes, expected, limits)
@@ -191,5 +203,24 @@ mod tests {
         assert!(backup.file_name().unwrap().as_encoded_bytes().len() <= 189);
         assert_eq!(std::fs::read(backup).unwrap(), b"original");
         assert_eq!(std::fs::read(path).unwrap(), b"new");
+    }
+    #[test]
+    fn blocked_backup_directory_is_not_reported_as_an_external_change() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("source.txt");
+        let root = dir.path().join("backups");
+        std::fs::write(&path, b"original").unwrap();
+        // A regular file where the per-source directory belongs makes directory
+        // creation fail with `AlreadyExists`, as a blocked root does on Windows.
+        std::fs::create_dir(&root).unwrap();
+        std::fs::write(source_directory(&root, &path), b"blocking").unwrap();
+        let vfs = Vfs::new();
+        let limits = ReadLimits::default();
+        let expected = vfs.read(&path, limits).unwrap().revision;
+        let error =
+            checked_write(&vfs, &path, b"new", Some(expected), limits, Some(&root)).unwrap_err();
+        assert_ne!(error.kind(), io::ErrorKind::AlreadyExists);
+        assert!(error.to_string().contains("backup"), "{error}");
+        assert_eq!(std::fs::read(&path).unwrap(), b"original");
     }
 }
