@@ -656,3 +656,103 @@ mod tests {
         assert!(!DESCRIPTION.is_empty());
     }
 }
+
+/// The live operating-system stores of the machine running the tests (on CI,
+/// the hosted Windows, macOS and Linux runners).
+#[cfg(test)]
+mod live_store_tests {
+    use crate::x509::CertificateInfo;
+
+    /// Roots that every current trust store ships; a store missing all of
+    /// them is not being read correctly.
+    const WELL_KNOWN: &[&str] = &[
+        "ISRG Root X1",
+        "DigiCert Global Root G2",
+        "DigiCert Global Root CA",
+        "USERTrust RSA Certification Authority",
+    ];
+
+    /// Every certificate parses as DER; returns their subject common names.
+    fn parsed_names(certificates: &[Vec<u8>]) -> Vec<String> {
+        certificates
+            .iter()
+            .map(|der| {
+                let info = CertificateInfo::from_der(der);
+                assert_eq!(
+                    info.parse_error,
+                    None,
+                    "unparsable certificate {}",
+                    info.sha256_hex()
+                );
+                info.subject.common_name().unwrap_or_default().to_string()
+            })
+            .collect()
+    }
+
+    fn assert_well_known(names: &[String], source: &str) {
+        assert!(
+            WELL_KNOWN
+                .iter()
+                .any(|known| names.iter().any(|n| n == known)),
+            "{source}: none of {WELL_KNOWN:?} among {} roots: {names:?}",
+            names.len()
+        );
+    }
+
+    #[test]
+    fn system_certificates_include_a_well_known_root() {
+        let certificates = crate::certs::system_certificates();
+        assert!(!certificates.is_empty(), "no system certificates");
+        assert_well_known(&parsed_names(certificates), "system certificates");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_certificate_store_roots_are_imported() {
+        let roots = super::platform_certificates();
+        assert!(roots.len() >= 5, "only {} Windows roots", roots.len());
+        assert_well_known(&parsed_names(&roots), "Windows ROOT store");
+    }
+
+    /// The import as it runs on a Mac: whatever the admin and user trust
+    /// settings of this machine select must be well-formed certificates.
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn macos_keychain_import_reads_the_live_keychains() {
+        let roots = super::platform_certificates();
+        parsed_names(&roots);
+        assert!(roots.iter().all(|der| !der.is_empty()));
+    }
+
+    /// The same keychain import against the live system trust domain, which
+    /// every Mac has: the real `security` output must parse into its roots.
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn macos_keychain_import_parses_the_live_system_trust_domain() {
+        let security = |args: &[&str]| -> Option<Vec<u8>> {
+            let mut args = args.to_vec();
+            match args.as_slice() {
+                ["trust-settings-export", "-d", _] => args[1] = "-s",
+                // The user domain is covered by the test above.
+                ["trust-settings-export", _] => return None,
+                ["find-certificate", "-a", "-p"] => {
+                    args.push("/System/Library/Keychains/SystemRootCertificates.keychain")
+                }
+                _ => {}
+            }
+            let output = std::process::Command::new("/usr/bin/security")
+                .args(&args)
+                .output()
+                .ok()?;
+            assert!(
+                output.status.success(),
+                "security {args:?}: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+            Some(output.stdout)
+        };
+        let roots = super::keychain_roots(&security);
+        assert!(roots.len() >= 5, "only {} system-domain roots", roots.len());
+        assert_well_known(&parsed_names(&roots), "macOS system trust domain");
+    }
+}
