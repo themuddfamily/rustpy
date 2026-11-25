@@ -14,6 +14,12 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
+- **Terminal (Windows):** WSL profiles now start the configured distribution and shell;
+  before, `wsl.exe` did not recognise its options and ran the whole command line in the
+  default distribution's shell.
+- **Certificates (macOS):** CAs trusted as roots in the keychain trust settings without a
+  policy restriction (as `security add-trusted-cert -r trustRoot` records them) are now used
+  for HTTPS connections.
 - **Debugger (Windows):** stopping a debug session whose adapter is idle now closes the
   adapter connection at once instead of waiting until the adapter disconnects.
 - **Run:** a running process's PID (used by attach actions and the Run console) no longer

@@ -9,8 +9,7 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 
 | Area | Symptom | State |
 |---|---|---|
-| Terminal profiles | WSL profiles and fish as a shell have not been exercised end to end: the hosted CI runners have no WSL distribution and no fish. (cmd, Windows PowerShell, pwsh, bash and zsh profiles are tested end to end on CI.) | Untested. |
-| Certificates (macOS) | Importing CAs that an administrator or user marked as trusted in the macOS keychain trust settings has not been checked against a Mac that has such settings; the CI runner has none. (The Windows store, the macOS system roots and the trust-export parser are tested against live stores.) | Untested. |
+| Certificates (macOS) | Importing CAs that a user marked as trusted in their own (user-domain) keychain trust settings has not been checked on a live Mac: on the hosted runner `security add-trusted-cert` without `-d` waits for an authorization dialog that nobody can answer, and `security authorizationdb write` is refused. (Admin-domain trust, deny and certificates without trust settings are checked on CI against the live keychains; the user domain uses the same parser, and its precedence over the admin domain is unit-tested.) | Untested. |
 
 ## Recently fixed
 

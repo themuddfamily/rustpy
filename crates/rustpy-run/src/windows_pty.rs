@@ -209,9 +209,19 @@ impl Drop for Attributes {
 fn wide(value: &OsStr) -> Vec<u16> {
     value.encode_wide().chain(Some(0)).collect()
 }
-/// Quote each argument using the same backslash/quote rules as Command on Windows.
+/// Quote an argument using the same backslash/quote rules as Command on Windows.
+/// Arguments are quoted only where needed (whitespace, quotes, and cmd.exe's
+/// command separators, which quoting keeps literal): programs that parse their
+/// raw command line, such as wsl.exe, do not recognise a quoted option.
 fn quote(value: &OsStr) -> Vec<u16> {
     let source = value.encode_wide().collect::<Vec<_>>();
+    let plain = !source.is_empty()
+        && !source
+            .iter()
+            .any(|&unit| b" \t\n\x0b\"&|<>^()".iter().any(|&c| u16::from(c) == unit));
+    if plain {
+        return source;
+    }
     let mut out = vec![b'"' as u16];
     let mut slashes = 0;
     for value in source {
@@ -406,7 +416,23 @@ mod tests {
     #[test]
     fn windows_argument_quoting_retains_spaces_quotes_and_trailing_slashes() {
         assert_eq!(quote(OsStr::new("a\"b")), vec![34, 97, 92, 34, 98, 34]);
-        assert_eq!(quote(OsStr::new("a\\")), vec![34, 97, 92, 92, 34]);
+        assert_eq!(quote(OsStr::new("a\\ ")), vec![34, 97, 92, 32, 34]);
+        assert_eq!(quote(OsStr::new("a \\")), vec![34, 97, 32, 92, 92, 34]);
+        // Arguments without spaces or quotes stay bare, so options parsed
+        // from the raw command line (wsl.exe --distribution) are recognised.
+        assert_eq!(
+            String::from_utf16(&quote(OsStr::new("--distribution"))).unwrap(),
+            "--distribution"
+        );
+        assert_eq!(
+            String::from_utf16(&quote(OsStr::new("C:\\a\\"))).unwrap(),
+            "C:\\a\\"
+        );
+        assert_eq!(String::from_utf16(&quote(OsStr::new(""))).unwrap(), "\"\"");
+        assert_eq!(
+            String::from_utf16(&quote(OsStr::new("a&b"))).unwrap(),
+            "\"a&b\""
+        );
         assert_eq!(
             String::from_utf16(&quote(OsStr::new("a b"))).unwrap(),
             "\"a b\""

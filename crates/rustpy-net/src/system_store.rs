@@ -353,15 +353,18 @@ mod trust_settings {
         dict.iter().find(|(k, _)| k == key).map(|(_, v)| v)
     }
 
-    /// Whether a certificate's trust settings make it a trusted root: an empty
-    /// list means "always trust"; otherwise some entry must say "trust root" or
-    /// "trust as root" (the default result) and none "deny".
+    /// Whether a certificate's trust settings make it a trusted root: no list
+    /// or an empty one means "always trust" (`security add-trusted-cert -r
+    /// trustRoot` without a policy records no list); otherwise some entry must
+    /// say "trust root" or "trust as root" (the default result) and none "deny".
     fn trusts_as_root(entry: &Plist) -> bool {
         let Plist::Dict(fields) = entry else {
             return false;
         };
-        let Some(Plist::Array(settings)) = get(fields, "trustSettings") else {
-            return false;
+        let settings = match get(fields, "trustSettings") {
+            None => return true,
+            Some(Plist::Array(settings)) => settings,
+            Some(_) => return false,
         };
         if settings.is_empty() {
             return true;
@@ -443,6 +446,15 @@ mod tests {
 			<key>trustSettings</key>
 			<array/>
 		</dict>
+		<key>4444444444444444444444444444444444444444</key>
+		<dict>
+			<key>issuerName</key>
+			<data>MDsxCzAJBgNVBAYTAlVT</data>
+			<key>modDate</key>
+			<date>2026-11-25T21:00:00Z</date>
+			<key>serialNumber</key>
+			<data>AQ==</data>
+		</dict>
 		<key>1111111111111111111111111111111111111111</key>
 		<dict>
 			<key>trustSettings</key>
@@ -516,13 +528,21 @@ mod tests {
 
     #[test]
     fn trust_settings_select_trusted_roots() {
-        // Always trusted (empty list) and trusted root; not denied or unspecified ones.
+        // Always trusted (empty or no list) and trusted root; not denied or
+        // unspecified ones.
         assert_eq!(
             trusted_roots(EXPORT),
             vec![
                 "0A1B2C3D4E5F60718293A4B5C6D7E8F901234567".to_string(),
+                "4444444444444444444444444444444444444444".to_string(),
                 "2222222222222222222222222222222222222222".to_string()
             ]
+        );
+        // A trust list that is not an array is not trust.
+        assert!(
+            trusted_roots(&EXPORT.replace("<array/>", "<string>x</string>"))
+                .iter()
+                .all(|f| f != "0A1B2C3D4E5F60718293A4B5C6D7E8F901234567")
         );
         assert!(trusted_roots("not a plist").is_empty());
         assert!(trusted_roots(
@@ -543,7 +563,10 @@ mod tests {
             );
             assert_eq!(
                 trusted_roots(&scoped),
-                vec!["0A1B2C3D4E5F60718293A4B5C6D7E8F901234567".to_string()],
+                vec![
+                    "0A1B2C3D4E5F60718293A4B5C6D7E8F901234567".to_string(),
+                    "4444444444444444444444444444444444444444".to_string()
+                ],
                 "{key}"
             );
         }
@@ -722,6 +745,106 @@ mod live_store_tests {
         let roots = super::platform_certificates();
         parsed_names(&roots);
         assert!(roots.iter().all(|der| !der.is_empty()));
+    }
+
+    /// Certificates the CI job adds to this Mac's keychains with trust
+    /// settings (see the macOS keychain step in ci.yml), named by SHA-1
+    /// fingerprint in comma-separated environment variables:
+    /// `RUSTPY_TEST_MACOS_TRUSTED_CAS` (marked trusted roots in the admin or
+    /// user trust domain) must be imported; `RUSTPY_TEST_MACOS_UNTRUSTED_CAS`
+    /// (in a keychain but denied or without trust settings) must not be.
+    /// Skipped where the variables are absent (no such keychain entries).
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn macos_keychain_trust_settings_select_the_imported_cas() {
+        let list = |name: &str| -> Vec<String> {
+            std::env::var(name)
+                .unwrap_or_default()
+                .split(',')
+                .map(|f| f.trim().replace(':', "").to_ascii_uppercase())
+                .filter(|f| !f.is_empty())
+                .collect()
+        };
+        let trusted = list("RUSTPY_TEST_MACOS_TRUSTED_CAS");
+        let untrusted = list("RUSTPY_TEST_MACOS_UNTRUSTED_CAS");
+        if trusted.is_empty() && untrusted.is_empty() {
+            eprintln!("no keychain trust settings were provisioned; skipped");
+            return;
+        }
+        // The import as platform_certificates runs it, recording each
+        // `security` call so a failure shows which step lost the CAs.
+        let calls = std::cell::RefCell::new(Vec::new());
+        let roots = super::keychain_roots(&|args| {
+            let output = std::process::Command::new("/usr/bin/security")
+                .args(args)
+                .output()
+                .ok();
+            let mut record = format!("{args:?}: ");
+            match &output {
+                Some(o) => {
+                    record += &format!("{} {} bytes", o.status, o.stdout.len());
+                    if let Some(path) = args.last().filter(|_| args[0] == "trust-settings-export") {
+                        let xml = std::fs::read_to_string(path).unwrap_or_default();
+                        let decisions: Vec<_> = super::trust_settings::root_decisions(&xml)
+                            .into_iter()
+                            .filter(|(f, _)| trusted.contains(f) || untrusted.contains(f))
+                            .collect();
+                        record += &format!("; decisions {decisions:?}");
+                        if decisions.iter().any(|(f, t)| !t && trusted.contains(f)) {
+                            record += &format!("; export:\n{xml}");
+                        }
+                    }
+                }
+                None => record += "not run",
+            }
+            calls.borrow_mut().push(record);
+            output.filter(|o| o.status.success()).map(|o| o.stdout)
+        });
+        let imported: Vec<String> = roots
+            .iter()
+            .map(|der| super::trust_settings::sha1_hex(der.as_slice()))
+            .collect();
+        eprintln!(
+            "keychain import: {imported:?}; trusted {trusted:?}; untrusted {untrusted:?}; calls:\n{}",
+            calls.borrow().join("\n")
+        );
+        assert_eq!(
+            imported,
+            super::platform_certificates()
+                .iter()
+                .map(|der| super::trust_settings::sha1_hex(der.as_slice()))
+                .collect::<Vec<_>>()
+        );
+        for fingerprint in &trusted {
+            assert_eq!(
+                imported.iter().filter(|f| *f == fingerprint).count(),
+                1,
+                "trusted CA {fingerprint} not imported exactly once: {imported:?}"
+            );
+        }
+        for fingerprint in &untrusted {
+            assert!(
+                !imported.contains(fingerprint),
+                "untrusted certificate {fingerprint} imported: {imported:?}"
+            );
+        }
+        // The import also reaches the certificates every HTTPS client uses.
+        let system: Vec<String> = crate::certs::system_certificates()
+            .iter()
+            .map(|der| super::trust_settings::sha1_hex(der.as_slice()))
+            .collect();
+        for fingerprint in &trusted {
+            assert!(
+                system.contains(fingerprint),
+                "{fingerprint} not in system certificates"
+            );
+        }
+        for fingerprint in &untrusted {
+            assert!(
+                !system.contains(fingerprint),
+                "{fingerprint} in system certificates"
+            );
+        }
     }
 
     /// The parsing half of the keychain import against live `security` output:
