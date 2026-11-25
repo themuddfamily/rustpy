@@ -18,7 +18,6 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 | Closing a project with a corrupt workspace file on Windows | The test that closes a project whose `.rustpy/workspace.json` is corrupt hung for an hour in one Windows CI run and passed in others; no cause has been found on its path (workspace store waits are bounded). It now runs on Windows with a watchdog that reports the stuck stage and aborts after five minutes, so a recurrence identifies where it hangs. | Windows |
 | Stopping a Git job on macOS | A stopped Git job whose SSH helper ignores SIGTERM ends immediately on the macOS runner instead of waiting out the grace period; the process-group observation via proc_pidinfo needs checking on a Mac. | VCS |
 | rsync deployment on stock macOS | Apple's rsync 2.6.9 lacks `-s` (protect-args); install rsync 3 from Homebrew. Remote listing also needs GNU find on the server. | Deployment |
-| Local typing performance | An unoptimized code/completion frame check on the shared Linux host measured 83.5 ms p95 against a 60 ms budget. | Local performance gate not met; release GUI latency remains unverified. |
 
 ## Recently fixed
 
