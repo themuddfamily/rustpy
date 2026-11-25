@@ -12,8 +12,11 @@ crates/rustpy-net/src/system_store.rs (`RUSTPY_TEST_MACOS_TRUSTED_CAS` and
   allows setting user trust without an authorization dialog.
 
 `security add-trusted-cert` asks for authorization, which a headless runner
-cannot give. Where it is refused for the admin domain, the admin trust
-settings file is written as root instead, in the format the tool writes.
+cannot give. Under sudo it succeeds for the admin domain on the hosted macOS
+runners; where it is refused, the admin trust settings file is written as
+root instead, in the format the tool writes. For the user domain it waits
+for a dialog (and `security authorizationdb write` is refused), so the user
+CA is then left in the login keychain without trust settings.
 
 Run only on a disposable machine: it changes the system's trust settings.
 """
@@ -151,7 +154,7 @@ def main():
 
     trusted, untrusted = [admin[2]], [denied[2], plain[2]]
     print("== user domain through security add-trusted-cert", flush=True)
-    if run("security", "add-trusted-cert", "-r", "trustRoot", "-k", LOGIN, user[0]) \
+    if run("security", "add-trusted-cert", "-r", "trustRoot", "-k", LOGIN, user[0], timeout=15) \
             and user[2] in exported(False):
         trusted.append(user[2])
         print("user trust settings set")
