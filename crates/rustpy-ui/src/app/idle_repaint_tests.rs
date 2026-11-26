@@ -161,15 +161,19 @@ fn idle_app_waits_for_the_caret_blink() {
         let delay = frame(&mut app, &ctx, now(), vec![]);
         std::thread::sleep(delay.min(Duration::from_millis(600)));
     }
-    let config = Settings::config_dir();
-    let config_events: Vec<_> = crate::performance_trace::take_recorded()
+    // Settings are saved through a temporary file and a rename: neither may
+    // change. (Caches elsewhere in the directory may still be written by
+    // background work that finishes late.)
+    let temporary = settings.with_extension("json.tmp");
+    let settings_events: Vec<_> = crate::performance_trace::take_recorded()
         .into_iter()
         .filter(|(kind, data)| {
             kind == "watcher_event"
                 && data["paths"].as_array().is_some_and(|paths| {
                     paths.iter().any(|path| {
-                        path.as_str()
-                            .is_some_and(|path| Path::new(path).starts_with(&config))
+                        path.as_str().is_some_and(|path| {
+                            Path::new(path) == settings || Path::new(path) == temporary
+                        })
                     })
                 })
         })
@@ -181,8 +185,8 @@ fn idle_app_waits_for_the_caret_blink() {
         settings.display()
     );
     assert!(
-        config_events.is_empty(),
-        "an idle app changed its configuration directory: {config_events:?}"
+        settings_events.is_empty(),
+        "an idle app wrote its settings: {settings_events:?}"
     );
 }
 
