@@ -132,7 +132,8 @@ jobs:
           base="$RUNNER_TEMP/legacy-frameworks"
           python3 -m venv "$base/venv"
           "$base/venv/bin/pip" install --quiet --require-hashes --only-binary=:all: -r qa/legacy-frameworks-requirements.txt
-          git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$WEB2PY_TAG" \
+          # The repository's Git LFS binaries are not needed and their download quota runs out.
+          GIT_LFS_SKIP_SMUDGE=1 git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$WEB2PY_TAG" \
             --recurse-submodules --shallow-submodules https://github.com/web2py/web2py "$base/web2py"
           test "$(git -C "$base/web2py" rev-parse HEAD)" = "$WEB2PY_COMMIT"
           git -C "$base/web2py" submodule status
