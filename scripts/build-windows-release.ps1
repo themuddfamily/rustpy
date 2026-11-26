@@ -1,9 +1,10 @@
 <# Build native Windows release artifacts with retained linker and licence evidence.
 
-   Default: build rustpy.exe, record and verify its link-time licence evidence, stage
-   Native-Licenses.zip once and create the portable zip, Inno Setup installer and MSI.
-   -BuildOnly stops after staging. It leaves target\<target>\release\rustpy.exe and
-   target\windows\Native-Licenses.zip, the evidence bundle bound to that exact executable.
+   Default: build rustpy.exe, record and verify its link-time licence evidence, stage the
+   licence evidence bundle once (target\windows\rustpy-<version>-windows-<arch>-native-licenses.zip,
+   the corresponding source and evidence bound to that exact executable, published beside the
+   packages rather than inside them) and create the portable zip, Inno Setup installer and MSI.
+   -BuildOnly stops after staging. It leaves target\<target>\release\rustpy.exe and the bundle.
    -PackageOnly packages those two files (for example restored from an earlier build of the
    same commit) after checking that the bundle describes this executable, this checkout's
    source revision and this target. #>
@@ -55,7 +56,10 @@ $Python = (Get-Command python -CommandType Application | Select-Object -First 1)
 $TargetDir = if ($env:CARGO_TARGET_DIR) { [IO.Path]::GetFullPath($env:CARGO_TARGET_DIR) } else { Join-Path $Root 'target' }
 $Binary = Join-Path $TargetDir "$Target\release\rustpy.exe"
 $OutDir = Join-Path $TargetDir 'windows'
-$NativeLicenses = Join-Path $OutDir 'Native-Licenses.zip'
+$Version = (Select-String -LiteralPath (Join-Path $Root 'Cargo.toml') -Pattern '^version = "([^"]+)"' | Select-Object -First 1).Matches.Groups[1].Value
+if (-not $Version) { throw 'Cannot read the workspace version' }
+$EvidenceArch = if ($Arch -eq 'x64') { 'x86_64' } else { 'arm64' }
+$NativeLicenses = Join-Path $OutDir "rustpy-$Version-windows-$EvidenceArch-native-licenses.zip"
 
 function Invoke-Packaging {
     # The two-processor cap protects shared build machines. A GitHub-hosted runner is a
@@ -64,7 +68,7 @@ function Invoke-Packaging {
         $Process.ProcessorAffinity = [IntPtr]$Allowed
     }
     # The packagers only read the binary and the staged bundle, so they run side by side.
-    # Each one confirms that the bundle describes this exact executable before using it.
+    # Each one confirms that the bundle describes this exact executable.
     $Shell = (Get-Process -Id $PID).Path
     $Packagers = foreach ($Package in @(
             @('Portable zip', 'packaging\windows\build.ps1', '-SkipInstaller'),
@@ -154,7 +158,7 @@ if (-not (Wait-Logged $Preflight)) { throw 'Native licence input preflight faile
 if ($LASTEXITCODE) { throw 'Windows native licence evidence preparation failed' }
 $env:RUSTPY_NATIVE_RUNTIME_MANIFEST = Join-Path $Evidence 'runtime-manifest.json'
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
-# Collect and verify the licence and source bundle once: all three packages ship this same file.
+# Collect and verify the licence and source bundle once; it is published beside all three packages.
 & $Python (Join-Path $Root 'packaging\stage-native-licenses.py') --runtime-file $Binary --output $NativeLicenses
 if ($LASTEXITCODE) { throw 'Native license/source collection failed' }
 if ($BuildOnly) { return }

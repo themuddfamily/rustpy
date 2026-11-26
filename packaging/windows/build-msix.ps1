@@ -104,7 +104,9 @@ try {
         Copy-Item $Exe (Join-Path $Stage "rustpy.exe")
         Copy-Item (Join-Path $Root "THIRD-PARTY-NOTICES.txt") $Stage
         Copy-Item (Join-Path $Root "LICENSE") $Stage
-        & python (Join-Path $Root "packaging/stage-native-licenses.py") --binary (Join-Path $Stage "rustpy.exe") --runtime-root $Stage --output (Join-Path $Stage "Native-Licenses.zip")
+        # Corresponding source and licence evidence for this exact executable: published beside
+        # the package (THIRD-PARTY-NOTICES.txt names it), not inside it.
+        & python (Join-Path $Root "packaging/stage-native-licenses.py") --binary (Join-Path $Stage "rustpy.exe") --runtime-root $Stage --output (Join-Path $OutDir "rustpy-$Version-windows-$Arch-msix-native-licenses.zip")
         if ($LASTEXITCODE) { throw "Native license/source collection failed" }
         # Fallback install-kind marker; package identity (GetCurrentPackageFullName) wins.
         Set-Content -LiteralPath (Join-Path $Stage "rustpy-install.kind") -Value 'msix' -Encoding Ascii

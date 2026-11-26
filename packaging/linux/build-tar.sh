@@ -32,5 +32,7 @@ fi
 install -m644 THIRD-PARTY-NOTICES.txt "$stage/THIRD-PARTY-NOTICES.txt"
 install -m644 LICENSE "$stage/LICENSE"
 install -m644 packaging/linux/rustpy.desktop packaging/linux/rustpy.svg packaging/linux/rustpy-mime.xml "$stage/"
-python3 packaging/stage-native-licenses.py --binary "$stage/rustpy" --runtime-root "$stage" --output "$stage/Native-Licenses.zip"
-tar -C "$stage" -czf "$out/rustpy-$version-linux-$arch.tar.gz" rustpy rustpy.desktop rustpy.svg rustpy-mime.xml LICENSE THIRD-PARTY-NOTICES.txt Native-Licenses.zip
+# Corresponding source and licence evidence for this exact binary: published beside the
+# archive (THIRD-PARTY-NOTICES.txt names it), not inside it.
+python3 packaging/stage-native-licenses.py --binary "$stage/rustpy" --runtime-root "$stage" --output "$out/rustpy-$version-linux-$arch-native-licenses.zip"
+tar -C "$stage" -czf "$out/rustpy-$version-linux-$arch.tar.gz" rustpy rustpy.desktop rustpy.svg rustpy-mime.xml LICENSE THIRD-PARTY-NOTICES.txt

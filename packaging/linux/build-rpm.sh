@@ -104,9 +104,6 @@ if ((STRIP)); then
   fi
 fi
 
-mkdir -p packaging/generated/runtime-empty
-python3 packaging/stage-native-licenses.py --binary "$STAGE_BIN_DIR/rustpy" --runtime-root packaging/generated/runtime-empty --output packaging/generated/Native-Licenses.zip
-
 ARGS=(-p crates/rustpy --target-dir "$STAGE" -o "$OUT")
 if [[ -n $TARGET ]]; then
   ARGS+=(--target "$TARGET")
@@ -123,6 +120,10 @@ fi
 mkdir -p -- "$OUT"
 RPM="$OUT/rustpy-$RPM_VERSION-1.$ARCH.rpm"
 rm -f -- "$RPM"
+mkdir -p packaging/generated/runtime-empty
+# Corresponding source and licence evidence for this exact binary, published beside the
+# package (THIRD-PARTY-NOTICES.txt names it) rather than installed with it.
+python3 packaging/stage-native-licenses.py --binary "$STAGE_BIN_DIR/rustpy" --runtime-root packaging/generated/runtime-empty --output "${RPM%.rpm}-native-licenses.zip"
 cargo generate-rpm "${ARGS[@]}"
 [[ -f $RPM ]] || die "cargo generate-rpm did not write $RPM"
 echo "RPM package: $RPM"

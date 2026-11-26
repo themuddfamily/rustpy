@@ -97,7 +97,10 @@ install -Dm644 LICENSE "$PREFIX/share/doc/rustpy/LICENSE"
 if ((STRIP)) && command -v strip >/dev/null 2>&1; then
   strip --strip-debug "$BIN_DIR/rustpy"
 fi
-python3 packaging/stage-native-licenses.py --runtime-file "$BIN_DIR/rustpy" --output "$PREFIX/share/doc/rustpy/Native-Licenses.zip"
+# A build installed for its own user is not redistributed, so the corresponding-source bundle
+# is not needed here; releases publish it beside their packages. Remove one left by an older
+# version of this script.
+rm -f -- "$PREFIX/share/doc/rustpy/Native-Licenses.zip"
 install -m 644 packaging/linux/rustpy.svg "$ICON_DIR/rustpy.svg"
 
 # The desktop entry points at the installed binary, so launchers work even when

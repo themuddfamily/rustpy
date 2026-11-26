@@ -12,6 +12,15 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ## [Unreleased]
 
+### Changed
+
+- **Downloads:** the Windows portable ZIP, setup program and MSI are about 90% smaller
+  (about 35–55 MB each instead of about 420 MB). They no longer contain `Native-Licenses.zip`;
+  they keep `LICENSE` and `THIRD-PARTY-NOTICES.txt`, which now also include the Rust
+  standard library, compiler-rt and WebView2 SDK licences. The corresponding source and
+  licence evidence for each build is published once per architecture beside the packages, as
+  the release asset `rustpy-<version>-windows-<arch>-native-licenses.zip`.
+
 ### Fixed
 
 - **Build:** removed unused workspace dependencies and inherited the repository URL in

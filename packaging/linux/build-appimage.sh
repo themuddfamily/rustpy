@@ -146,7 +146,8 @@ fi
 [[ -n ${APPIMAGETOOL_RUNTIME_FILE:-} && -f $APPIMAGETOOL_RUNTIME_FILE ]] || die "set APPIMAGETOOL_RUNTIME_FILE to the reviewed AppImage runtime for $ARCH"
 RUNTIME_REL="usr/lib/rustpy/appimage-runtime"
 install -Dm755 "$APPIMAGETOOL_RUNTIME_FILE" "$APPDIR/$RUNTIME_REL"
-python3 packaging/stage-native-licenses.py --binary "$APPDIR/usr/bin/rustpy" --runtime-root "$APPDIR" --required-native-file "$RUNTIME_REL" --output "$APPDIR/usr/share/doc/rustpy/Native-Licenses.zip"
+# Corresponding source and licence evidence: published beside the AppImage, not inside it.
+python3 packaging/stage-native-licenses.py --binary "$APPDIR/usr/bin/rustpy" --runtime-root "$APPDIR" --required-native-file "$RUNTIME_REL" --output "$OUT/RustPy-$VERSION-$ARCH-AppImage-native-licenses.zip"
 
 # APPIMAGE_EXTRACT_AND_RUN lets an AppImage-packaged appimagetool run without FUSE
 # (containers, CI). --runtime-file forbids implicit runtime selection/download.

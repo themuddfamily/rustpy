@@ -67,6 +67,14 @@ SOURCES = [
      'packaging/NOTICE-embedded-resource-supplement.txt'),
     ('Native library licenses and exceptions',
      'packaging/NOTICE-native-runtime-dependencies.txt'),
+    ('Rust standard library and compiler runtime (statically linked)',
+     'packaging/NOTICE-rust-runtime.txt'),
+    ('Microsoft Visual C++ CRT and Windows SDK (Windows builds)',
+     'packaging/NOTICE-microsoft-runtime.txt'),
+    ('Microsoft WebView2 SDK 1.0.3800.47 license (WebView2 Loader, Windows builds)',
+     'packaging/LICENSE-webview2-sdk.txt'),
+    ('Microsoft WebView2 SDK 1.0.3800.47 notices',
+     'packaging/NOTICE-webview2-sdk.txt'),
 ]
 HEADER = """RustPy — third-party licenses, attribution and source locations
 ============================================
@@ -77,8 +85,13 @@ It covers every registry package in the application, QA and fuzz lockfiles,
 the retained embedded resources, locally vendored GUI sources, and native
 library notices. Inclusion is conservative: optional, build, development and
 other-target dependencies are not necessarily present in every executable.
-Artifact-specific runtime evidence and covered source accompany binaries in
-Native-Licenses.zip. Read the retained build and replacement instructions there.
+Corresponding source and license evidence for each release build: the source
+of the covered components (including the MPL-2.0 packages), the native source
+archives and the artifact-specific runtime and linker evidence are published
+once per build, next to its packages, as the release asset whose name ends in
+-native-licenses.zip (for Windows: rustpy-<version>-windows-<arch>-native-licenses.zip)
+on https://github.com/themuddfamily/rustpy/releases. Read its build and
+replacement instructions.
 The Black test corpus and other source-only fixtures retain their own notices
 and provenance beside their source. RustPy's separate code uses the project
 LICENSE; third-party components retain their respective terms.

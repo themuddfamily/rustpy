@@ -244,7 +244,10 @@ def official_rust_source(version, output, include_compiler_rt):
                     compiler_rt_found = True
                 basename = Path(member.name).name.lower()
                 if member.isfile() and basename.startswith(('license', 'copying', 'copyright', 'notice')):
-                    path = output / f'rust-terms-{len(terms)}-{Path(member.name).name}'
+                    # The compiler-rt licence is named so that packaging can check that the
+                    # shipped notices carry it (compiler_builtins links compiler-rt objects).
+                    origin = 'compiler-rt-' if member.name.endswith('/src/llvm-project/compiler-rt/LICENSE.TXT') else ''
+                    path = output / f'rust-terms-{len(terms)}-{origin}{Path(member.name).name}'
                     path.write_bytes(source.extractfile(member).read())
                     terms.append(path.name)
     if not terms:
@@ -582,12 +585,12 @@ def main():
     if not groups['msvc-crt']:
         raise ValueError('The linker evidence does not identify the Microsoft CRT startup inputs')
     for name, source in (('link-map.txt', args.link_map), ('link-trace.txt', args.link_trace)):
-        (output / name).write_text(sanitise(source.read_text(errors='replace'), roots))
+        (output / name).write_text(sanitise(source.read_text(errors='replace'), roots), encoding='utf-8')
     (output / 'build-record.json').write_text(json.dumps(sanitise_record({'link': record, 'toolchain': toolchain}, roots), indent=2) + '\n')
     imports = subprocess.check_output(['dumpbin', '/dependents', str(args.binary)], text=True, errors='replace')
     if re.search(r'\b(?:VCRUNTIME\d+[^\s.]*|MSVCP\d+[^\s.]*|CONCRT\d+[^\s.]*|ucrtbased)\.dll\b', imports, re.I):
         raise ValueError('Windows release depends on an unbundled VC/debug runtime; build the target with +crt-static')
-    (output / 'pe-imports.txt').write_text(sanitise(imports, roots))
+    (output / 'pe-imports.txt').write_text(sanitise(imports, roots), encoding='utf-8')
     build = output / 'build.txt'
     build.write_text(f'Compiler: Rust {release_match[1]} ({commit_match[1]}).\nTarget: {args.target}.\n'
                      'Use the exact release revision and Cargo.lock with Visual Studio ' + profile['year'] + ' and the retained toolchain versions.\n'
@@ -680,7 +683,7 @@ def main():
         retained = output / archive.name
         shutil.copyfile(archive, retained)
         notice = output / (package['name'] + '-' + package['version'] + '-native-notices.txt')
-        notice.write_text(native_package_notice(package, archive, notice_manifest, notice_overrides))
+        notice.write_text(native_package_notice(package, archive, notice_manifest, notice_overrides), encoding='utf-8')
         components.append({'name': package['name'], 'version': package['version'], 'license_files': [notice.name],
                            'source_archives': {retained.name: digest(retained)},
                            'build_instructions': build.name, 'replacement_instructions': replace.name})

@@ -43,12 +43,14 @@ the separate `sandbox_packages` input; Microsoft Store jobs remain disabled.
 5. **Build the artifacts** with the [packaging recipes](../packaging/README.md): Linux packages,
    Windows Inno Setup and WiX 5.0.2 (with `WixToolset.UI.wixext/5.0.2`), the macOS bundle and
    DMG. `native-web-preview` needs each platform's browser SDK. A cross-build does not replace
-   a native test. Check that every artifact contains `LICENSE`, `THIRD-PARTY-NOTICES.txt` and
-   `Native-Licenses.zip`, and that the archive holds the covered sources and build
-   instructions. On macOS the linkage manifest describes the executable before signing
-   (`binary_stage: pre-sign`); verify the signed artifact with the release checksums.
-   The Windows build script supplies the generated manifest to the portable ZIP, Inno
-   Setup EXE and MSI packagers. Publication requires all three packages for each architecture.
+   a native test. Check that every artifact contains `LICENSE` and `THIRD-PARTY-NOTICES.txt`,
+   and that each build's licence evidence bundle (`*-native-licenses.zip`, published beside
+   its packages, not inside them) holds the covered sources and build instructions. Staging
+   fails when the bundle retains a licence text that the notices lack. On macOS the linkage
+   manifest describes the executable before signing (`binary_stage: pre-sign`); verify the
+   signed artifact with the release checksums. The Windows build stages the bundle once and
+   checks it against the executable before packaging. Publication requires all three packages
+   and the `rustpy-<version>-windows-<arch>-native-licenses.zip` asset for each architecture.
 6. **Test installation** on each supported OS and architecture: fresh install, upgrade,
    launcher and file associations, uninstall (settings are kept), and a portable
    configuration directory. Test the update check: manifest, hash and signature verification,

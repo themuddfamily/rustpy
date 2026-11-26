@@ -29,6 +29,7 @@ class LicensePackagingTests(unittest.TestCase):
                     destination = Path(command[command.index('--output') + 1])
                     destination.mkdir()
                     (destination / 'native-license.txt').write_text('retained terms')
+                    (destination / 'runtime-manifest.json').write_text('{"components": []}')
                     runtime = Path(command[command.index('--runtime-root') + 1])
                     self.assertEqual((runtime / 'rustpy.exe').read_bytes(), b'fixture')
                     binary = Path(command[command.index('--binary') + 1])
@@ -36,7 +37,9 @@ class LicensePackagingTests(unittest.TestCase):
                 else:
                     Path(command[command.index('--source-bundle') + 1]).write_bytes(b'exact sources')
 
-            with patch.object(sys, 'argv', ['stage', '--runtime-file', str(executable), '--output', str(output)]), patch.object(STAGE.subprocess, 'run', side_effect=collect), patch.dict(STAGE.os.environ, {'TMPDIR': str(root)}, clear=True):
+            notices = root / 'THIRD-PARTY-NOTICES.txt'
+            notices.write_text('shipped notices')
+            with patch.object(sys, 'argv', ['stage', '--runtime-file', str(executable), '--output', str(output)]), patch.object(STAGE.subprocess, 'run', side_effect=collect), patch.object(STAGE, 'NOTICES', notices), patch.dict(STAGE.os.environ, {'TMPDIR': str(root)}, clear=True):
                 STAGE.main()
             self.assertEqual(len(calls), 2)
             with zipfile.ZipFile(output) as archive:
@@ -126,13 +129,80 @@ class LicensePackagingTests(unittest.TestCase):
         self.assertIn('--locked --no-build --no-strip', deb)
         self.assertIn('CARGO_TARGET_DIR="$STAGE" cargo deb', deb)
 
-    def test_installers_require_license_and_source_archive(self):
-        for recipe in ['packaging/windows/rustpy.iss', 'packaging/windows/rustpy.wxs', 'crates/rustpy/Cargo.toml']:
+    def test_installers_carry_notices_but_not_the_evidence_bundle(self):
+        for recipe in ['packaging/windows/rustpy.iss', 'packaging/windows/rustpy.wxs', 'crates/rustpy/Cargo.toml',
+                       'packaging/windows/build.ps1', 'packaging/linux/build-tar.sh']:
             source = (ROOT / recipe).read_text()
             with self.subTest(recipe=recipe):
                 self.assertIn('THIRD-PARTY-NOTICES.txt', source)
                 self.assertIn('LICENSE', source)
-                self.assertIn('Native-Licenses', source)
+                self.assertNotIn('Native-Licenses.zip', source)
+        # The notices tell every recipient where the corresponding source of a build is published.
+        notices = (ROOT / 'THIRD-PARTY-NOTICES.txt').read_text(encoding='utf-8')
+        self.assertIn('-native-licenses.zip', notices)
+        self.assertIn('https://github.com/themuddfamily/rustpy/releases', notices)
+        self.assertIn('rustpy-$Version-windows-$Arch-native-licenses.zip', (ROOT / 'packaging/windows/build.ps1').read_text())
+
+    def test_staging_fails_when_the_notices_lack_a_retained_text(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / 'Native-Licenses'
+            component = bundle / 'static' / '0'
+            component.mkdir(parents=True)
+            (component / '0-zlib-native-notices.txt').write_text(
+                'Locked Cargo package: libz-sys@1.0\r\nThese package texts do not replace separately retained vendor/native SDK terms.\r\n'
+                '\r\nSource: libz-sys-1.0/LICENSE\r\nSHA256: ' + 'a' * 64 + '\r\n\r\nzlib terms  text\r\n'
+                '\r\nSource: libz-sys-1.0/src/zlib/LICENSE\r\nSHA256: ' + 'b' * 64 + '\r\n\r\nnested zlib terms\r\n')
+            (component / '1-vendor-terms.docx').write_bytes(b'PK')
+            (bundle / 'NOTICE-native-runtime-dependencies.txt').write_text('native crate notice')
+            records = [{'name': 'libz-sys', 'version': '1.0', 'license_files': ['zlib-native-notices.txt'],
+                        'retained_evidence': [{'path': 'static\\0\\0-zlib-native-notices.txt'}]},
+                       {'name': 'Microsoft Visual C++ CRT', 'version': '14', 'license_files': ['vendor-terms.docx'],
+                        'evidence_kind': 'microsoft-redistributable',
+                        'retained_evidence': [{'path': 'static/0/1-vendor-terms.docx'}]}]
+            (bundle / 'runtime-manifest.json').write_text(STAGE.json.dumps({'components': records}))
+            complete = 'native crate notice\nzlib terms text\nnested   zlib terms\nMicrosoft Visual C++ CRT'
+            self.assertEqual(STAGE.uncovered_notices(bundle, complete), [])
+            missing = STAGE.uncovered_notices(bundle, 'native crate notice\nzlib terms text')
+            self.assertEqual(len(missing), 2)
+            self.assertIn('nested zlib terms', missing[0])
+            self.assertIn('do not name this component', missing[1])
+            self.assertIn('NOTICE-native-runtime-dependencies', STAGE.uncovered_notices(bundle, complete.replace('native crate', 'stale'))[0])
+
+    def test_rust_runtime_texts_must_be_in_the_notices(self):
+        import io
+        import tarfile
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+
+            def archive(path, members):
+                with tarfile.open(path, 'w:xz') as tar:
+                    for name, text in members.items():
+                        data = text.encode()
+                        info = tarfile.TarInfo(name)
+                        info.size = len(data)
+                        tar.addfile(info, io.BytesIO(data))
+
+            prefix = 'rust-src-1.0.0/rust-src/lib/rustlib/src/rust/'
+            bundle = root / 'Native-Licenses'
+            (bundle / 'static' / '0').mkdir(parents=True)
+            archive(bundle / 'static/0/0-rust-src-1.0.0.tar.xz', {prefix + 'library/vendor/gimli/LICENSE-MIT': 'gimli terms',
+                                                                   prefix + 'library/core/src/lib.rs': 'not a licence'})
+            (bundle / 'static/0/1-rust-terms-7-compiler-rt-LICENSE.TXT').write_text('compiler-rt terms')
+            records = [{'name': 'Rust standard library and compiler runtimes', 'version': '1.0.0',
+                        'source_archives': {'rust-src-1.0.0.tar.xz': 'x', 'rustc-1.0.0-src.tar.xz': 'y'},
+                        'license_files': ['rust-terms-7-compiler-rt-LICENSE.TXT', 'rust-terms-8-LICENSE-unrelated-tool'],
+                        'retained_evidence': [{'path': 'static/0/0-rust-src-1.0.0.tar.xz'},
+                                              {'path': 'static/0/1-rust-terms-7-compiler-rt-LICENSE.TXT'}]}]
+            (bundle / 'runtime-manifest.json').write_text(STAGE.json.dumps({'components': records}))
+            self.assertEqual(STAGE.uncovered_notices(bundle, 'gimli terms compiler-rt terms'), [])
+            self.assertEqual(len(STAGE.uncovered_notices(bundle, 'gimli terms')), 1)
+            self.assertIn('library/vendor/gimli/LICENSE-MIT', STAGE.uncovered_notices(bundle, 'compiler-rt terms')[0])
+            # The checked-in notice is rendered from the same archives.
+            rustc = root / 'rustc-1.0.0-src.tar.xz'
+            archive(rustc, {'rustc-1.0.0-src/src/llvm-project/compiler-rt/LICENSE.TXT': 'compiler-rt terms'})
+            rendered = STAGE.rust_runtime_notice(bundle / 'static/0/0-rust-src-1.0.0.tar.xz', rustc)
+            self.assertEqual(STAGE.uncovered_notices(bundle, rendered), [])
+            self.assertIn('Files: library/vendor/gimli/LICENSE-MIT', rendered)
 
 
 if __name__ == '__main__':

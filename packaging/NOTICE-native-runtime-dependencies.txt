@@ -3292,9 +3292,9 @@ Copyright notice:
   jloup@gzip.org          madler@alumni.caltech.edu
 
 
-libsqlite3-sys 0.35.0
+libsqlite3-sys 0.40.0
 
-Source: libsqlite3-sys-0.35.0/LICENSE
+Source: libsqlite3-sys-0.40.0/LICENSE
 SHA256: c10c1f27337546471e5f7e4e97fdd398b35b9d4e126115dcd22de8d8e65abf6f
 
 Copyright (c) 2014 The rusqlite developers
@@ -3318,39 +3318,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 
-Source: libsqlite3-sys-0.35.0/sqlcipher/LICENSE
-SHA256: ea4fcb309f14a22065e1ea45362d494d320012249ed865fe9c7c0946db754131
-
-Copyright (c) 2008-2020 Zetetic LLC
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the ZETETIC LLC nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY ZETETIC LLC ''AS IS'' AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL ZETETIC LLC BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-Source: libsqlite3-sys-0.35.0/sqlite3/sqlite3.c (first 45 lines)
+Source: libsqlite3-sys-0.40.0/sqlite3/sqlite3.c (first 45 lines)
 /******************************************************************************
 ** This file is an amalgamation of many separate C source files from SQLite
-** version 3.50.2.  By combining all the individual C code files into this
+** version 3.54.1.  By combining all the individual C code files into this
 ** single large file, the entire code can be compiled as a single translation
 ** unit.  This allows many compilers to do optimizations that would not be
 ** possible if the files were compiled separately.  Performance improvements
@@ -3368,7 +3339,7 @@ Source: libsqlite3-sys-0.35.0/sqlite3/sqlite3.c (first 45 lines)
 ** separate file. This file contains only code for the core SQLite library.
 **
 ** The content in this amalgamation comes from Fossil check-in
-** 2af157d77fb1304a74176eaee7fbc7c7e932 with changes in files:
+** 555e07ef33f69a0957d24d8e555b702464a1 with changes in files:
 **
 **    
 */
@@ -3680,9 +3651,9 @@ SHA256: f7f9633cf9ff2f1333f3d7ce46973a8716a4d2a2815ad56f30d437d5fea7bafe
  */
 
 
-libz-sys 1.1.29
+libz-sys 1.1.33
 
-Source: libz-sys-1.1.29/LICENSE-APACHE
+Source: libz-sys-1.1.33/LICENSE-APACHE
 SHA256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 
                               Apache License
@@ -3888,7 +3859,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
-Source: libz-sys-1.1.29/LICENSE-MIT
+Source: libz-sys-1.1.33/LICENSE-MIT
 SHA256: 34c467b6945a22696d060b8fdd2379d464acb3408d4c599d3dc5fe4fa1b4c84f
 
 Copyright (c) 2014 Alex Crichton
@@ -3919,7 +3890,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 
-Source: libz-sys-1.1.29/src/zlib-ng/LICENSE.md
+Source: libz-sys-1.1.33/src/zlib-ng/LICENSE.md
 SHA256: 6c9f0d975b41afaa34d22f55bb8986ce69e5cb7ad327cb2b28820cd425edf5ee
 
 (C) 1995-2024 Jean-loup Gailly and Mark Adler
@@ -3943,7 +3914,7 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 
 
-Source: libz-sys-1.1.29/src/zlib/LICENSE
+Source: libz-sys-1.1.33/src/zlib/LICENSE
 SHA256: e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2
 
 Copyright notice:
@@ -3970,7 +3941,7 @@ Copyright notice:
   jloup@gzip.org          madler@alumni.caltech.edu
 
 
-Source: libz-sys-1.1.29/src/zlib/contrib/dotzlib/LICENSE_1_0.txt
+Source: libz-sys-1.1.33/src/zlib/contrib/dotzlib/LICENSE_1_0.txt
 SHA256: 36266a8fd073568394cb81cdb2b124f7fdae2c64c1a7ed09db34b4d22efa2951
 
 Boost Software License - Version 1.0 - August 17th, 2003
@@ -3997,7 +3968,7 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-Source: libz-sys-1.1.29/src/zlib/contrib/minizip/LICENSE.Info-Zip
+Source: libz-sys-1.1.33/src/zlib/contrib/minizip/LICENSE.Info-Zip
 SHA256: fc686023047ce5ce3a18a9b8a777156f0e475929d3de06bac279f3c025d2b2ca
 
 This is version 2009-Jan-02 of the Info-ZIP license. The definitive version of

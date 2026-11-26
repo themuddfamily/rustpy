@@ -77,7 +77,7 @@
     "packaging/cargo-license-overrides/zrzka--anes-rs-378ac7461eca/LICENSE-MIT": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
     "qa/Cargo.lock": "38b2c076f4cc644c2b0410bd6333a600331079a5c05471648e34b2e65553a093",
     "qa/fuzz/Cargo.lock": "6a0d8e3e5e7c251976f591230ad1ae35fa0c34275ffa614b10019795d55cfbf6",
-    "scripts/generate-cargo-notices.py": "ca14542340a9fc7166175e295163e565f696b7c5be347d48c6a7daec72984b5e"
+    "scripts/generate-cargo-notices.py": "55130b1d18e28a5c3070e3beacebe1e59643b76d98607dfd783eb0b94fd7f050"
   },
   "packages": [
     {
@@ -19084,5 +19084,5 @@
       ]
     }
   ],
-  "notice_sha256": "238574bc2c48427c135fee71bcae401187e42a4d43530c6596e060fb87ae3a83"
+  "notice_sha256": "a3743f777b4f6a12eb5d24d5187306d37a0ba792bdec9c2fb2de66e5bc2284c2"
 }

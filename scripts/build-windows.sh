@@ -89,12 +89,14 @@ cp THIRD-PARTY-NOTICES.txt "$package_dir/"
 cp LICENSE "$package_dir/"
 files+=("$package_dir/LICENSE" "$package_dir/THIRD-PARTY-NOTICES.txt")
 
-python3 packaging/stage-native-licenses.py --binary "$package_dir/rustpy.exe" --runtime-root "$package_dir" --output "$package_dir/Native-Licenses.zip"
-files+=("$package_dir/Native-Licenses.zip")
+# Corresponding source and licence evidence for this exact executable: published beside the
+# archive (THIRD-PARTY-NOTICES.txt names it), not inside it.
+python3 packaging/stage-native-licenses.py --binary "$package_dir/rustpy.exe" --runtime-root "$package_dir" --output "${archive%.zip}-native-licenses.zip"
 
 rm -f "$archive"
 (cd "$package_dir" && zip -j "$archive" "${files[@]}")
 echo "Windows executable: $package_dir/rustpy.exe"
 echo "Portable ZIP: $archive"
+echo "Licence evidence: ${archive%.zip}-native-licenses.zip"
 echo 'Imported DLLs:'
 x86_64-w64-mingw32-objdump -p "$package_dir/rustpy.exe" | awk '/DLL Name:/ {print "  " $3}'

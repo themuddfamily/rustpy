@@ -3,20 +3,136 @@
 
 Run after copying runtime libraries and before creating the final artifact.
 RUSTPY_NATIVE_RUNTIME_MANIFEST supplies reviewed runtime component evidence.
+The ZIP is published next to the packages, not inside them, so staging also
+checks that every licence and notice text it retains is in the shipped
+THIRD-PARTY-NOTICES.txt.
 """
 import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
 STORED_SUFFIXES = ('.crate', '.gz', '.tgz', '.xz', '.bz2', '.zst', '.zip', '.nupkg', '.docx')
+NOTICES = ROOT / 'THIRD-PARTY-NOTICES.txt'
+NOTICE_NAMES = ('license', 'licence', 'copying', 'copyright', 'notice')
+# Vendor licence agreements kept as documents: the notices must name the component instead.
+DOCUMENT_SUFFIXES = ('.docx', '.rtf', '.html', '.htm', '.pdf')
+REGENERATE = ('add the missing texts to the notices (packaging/update-notices.py SOURCES; '
+              'for the Rust runtime: stage-native-licenses.py --rust-runtime-notice) and '
+              'run packaging/update-notices.py')
+
+
+def normalise(text):
+    return re.sub(r'\s+', ' ', text.replace('\ufeff', '')).strip()
+
+
+def read_text(path):
+    data = path.read_bytes()
+    try:
+        text = data.decode('utf-8')
+    except UnicodeDecodeError:
+        text = data.decode('cp1252', errors='replace')  # bundles written before UTF-8 was explicit
+    return text.replace('\r\n', '\n')
+
+
+def notice_texts(text):
+    """Split a retained notice into its licence texts (dropping Source/SHA256 headers)."""
+    if text.startswith('Locked Cargo package:'):
+        text = text.split('\n', 2)[2] if text.count('\n') >= 2 else ''
+    parts = re.split(r'\nSource: [^\n]*\n(?:SHA256: [0-9a-f]{64}\n)?', '\n' + text)
+    return [part for part in parts if part.strip()]
+
+
+def rust_source_texts(archive):
+    """Licence files of the rust-src component: the standard library and its vendored crates."""
+    texts = []
+    with tarfile.open(archive) as source:
+        for member in source:
+            if member.isfile() and Path(member.name).name.lower().startswith(NOTICE_NAMES):
+                prefix = '/rust-src/lib/rustlib/src/rust/'
+                path = member.name.split(prefix, 1)[1] if prefix in member.name else member.name.split('/', 1)[-1]
+                texts.append((path, source.extractfile(member).read().decode('utf-8', errors='replace')))
+    return texts
+
+
+def uncovered_notices(bundle, notices):
+    """Licence texts retained in a staged bundle that the shipped notices lack."""
+    shipped = normalise(notices)
+    missing = []
+    runtime_notice = bundle / 'NOTICE-native-runtime-dependencies.txt'
+    if runtime_notice.is_file() and normalise(read_text(runtime_notice)) not in shipped:
+        missing.append('native crate notices differ from packaging/NOTICE-native-runtime-dependencies.txt '
+                       '(regenerate it with scripts/collect-native-licenses.py --notice-only)')
+    manifest = json.loads((bundle / 'runtime-manifest.json').read_text(encoding='utf-8'))
+    for record in manifest.get('components', []):
+        label = f"{record.get('name')} {record.get('version')}"
+        retained = {}
+        for entry in record.get('retained_evidence', []):
+            relative = entry['path'].replace('\\', '/')  # recorded with the build host's separator
+            name = relative.rsplit('/', 1)[-1]
+            retained[name.split('-', 1)[1] if '-' in name else name] = bundle / relative
+        sources = record.get('source_archives') or {}
+        if any(name.startswith('rust-src-') for name in sources):
+            for name in sources:
+                if name.startswith('rust-src-'):
+                    for path, text in rust_source_texts(retained[name]):
+                        if normalise(text) not in shipped:
+                            missing.append(f'{label}: {path}')
+            if any(name.startswith('rustc-') for name in sources):
+                compiler_rt = [path for name, path in retained.items() if name.endswith('-compiler-rt-LICENSE.TXT')]
+                if not compiler_rt:
+                    missing.append(f'{label}: the compiler-rt licence was not retained')
+                for path in compiler_rt:
+                    if normalise(read_text(path)) not in shipped:
+                        missing.append(f'{label}: compiler-rt LICENSE.TXT')
+            continue
+        for name in record.get('license_files', []):
+            path = retained.get(name)
+            if path is None:
+                missing.append(f'{label}: {name} was not retained')
+            elif path.suffix.lower() in DOCUMENT_SUFFIXES:
+                if record.get('name') not in notices:
+                    missing.append(f'{label}: the notices do not name this component ({name})')
+            else:
+                for text in notice_texts(read_text(path)):
+                    if normalise(text) not in shipped:
+                        missing.append(f'{label}: {name}: {normalise(text)[:60]}')
+    return missing
+
+
+def rust_runtime_notice(rust_source, compiler_rt_source=None):
+    """Render packaging/NOTICE-rust-runtime.txt from the official Rust source archives."""
+    texts = {}
+    for path, text in rust_source_texts(rust_source):
+        texts.setdefault(text, []).append(path)
+    if compiler_rt_source:
+        with tarfile.open(compiler_rt_source) as source:
+            for member in source:
+                if member.isfile() and member.name.endswith('/src/llvm-project/compiler-rt/LICENSE.TXT'):
+                    text = source.extractfile(member).read().decode('utf-8', errors='replace')
+                    texts.setdefault(text, []).append('src/llvm-project/compiler-rt/LICENSE.TXT')
+                    break
+            else:
+                raise ValueError('The Rust source archive has no compiler-rt licence')
+    version = re.search(r'rust-src-([0-9][^/]*?)\.tar', Path(rust_source).name)
+    rendered = ['Rust standard library and compiler runtime\n',
+                f"Licence files of the official Rust {version[1] if version else ''} rust-src component (the standard\n"
+                'library and the crates it vendors, statically linked into every RustPy executable)\n'
+                'and of the compiler-rt runtime built into compiler_builtins. Generated by\n'
+                'packaging/stage-native-licenses.py --rust-runtime-notice; identical texts appear once.\n']
+    for text, paths in sorted(texts.items(), key=lambda item: sorted(item[1])[0]):
+        rendered.append('\nFiles: ' + ', '.join(sorted(paths)) + '\n' + '-' * 72 + '\n'
+                        + text + ('' if text.endswith('\n') else '\n'))
+    return ''.join(rendered)
 
 
 def main():
@@ -26,6 +142,10 @@ def main():
     runtime.add_argument('--runtime-file', type=Path)
     runtime.add_argument('--check-existing', type=Path, metavar='ZIP',
                          help='Verify that a bundle staged earlier in this build matches --binary, without collecting again')
+    runtime.add_argument('--rust-runtime-notice', type=Path, metavar='OUT',
+                         help='Write the Rust runtime notice from --rust-source (and --compiler-rt-source)')
+    parser.add_argument('--rust-source', type=Path, help='Official rust-src-<version>.tar.xz')
+    parser.add_argument('--compiler-rt-source', type=Path, help='Official rustc-<version>-src.tar.xz')
     parser.add_argument('--output', type=Path)
     parser.add_argument('--source-revision', help='With --check-existing: required source revision of the build')
     parser.add_argument('--target', help='With --check-existing: required Rust target of the build')
@@ -34,13 +154,19 @@ def main():
     parser.add_argument('--required-native-file', action='append', default=[],
                         help='Artifact-relative runtime path that must be declared in manifest components')
     args = parser.parse_args()
+    if args.rust_runtime_notice:
+        if not args.rust_source:
+            parser.error('--rust-runtime-notice requires --rust-source')
+        args.rust_runtime_notice.write_text(rust_runtime_notice(args.rust_source, args.compiler_rt_source),
+                                            encoding='utf-8', newline='\n')
+        return
     if args.check_existing:
         if not args.binary:
             parser.error('--check-existing requires --binary')
         try:
             check_existing(args.check_existing, args.binary, args.source_revision, args.target)
         except (ValueError, OSError, KeyError, zipfile.BadZipFile) as error:
-            parser.exit(1, f'Native-Licenses.zip check failed: {error}\n')
+            parser.exit(1, f'Licence evidence bundle check failed: {error}\n')
         return
     if not args.output:
         parser.error('--output is required')
@@ -84,6 +210,10 @@ def main():
         if vendor:
             cargo_command += ['--cargo-vendor', str(Path(vendor).resolve())]
         subprocess.run(cargo_command, cwd=ROOT, check=True)
+        missing = uncovered_notices(bundle, NOTICES.read_text(encoding='utf-8'))
+        if missing:
+            parser.exit(1, 'THIRD-PARTY-NOTICES.txt lacks licence texts that the packages must carry:\n  '
+                        + '\n  '.join(missing[:40]) + f'\n({len(missing)} in all) To fix: {REGENERATE}\n')
         staged = output.with_suffix(output.suffix + '.part')
         try:
             with zipfile.ZipFile(staged, 'w', compression=zipfile.ZIP_DEFLATED, allowZip64=True) as archive:

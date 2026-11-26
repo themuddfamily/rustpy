@@ -334,7 +334,7 @@ def main():
             notice += '\n\n' + package['name'] + ' ' + package['version'] + '\n' + archive_notices(package, archive)
             records.append({'name': package['name'], 'version': package['version'], 'sha256': package['checksum'], 'source_url': f'https://static.crates.io/crates/{package["name"]}/{package["name"]}-{package["version"]}.crate'})
         if args.notice_only:
-            args.notice_only.write_text(notice)
+            args.notice_only.write_text(notice, encoding='utf-8')
             return
         if not args.output or not args.runtime_root or not args.binary:
             raise ValueError('--output, --runtime-root and --binary are required for a distribution gate')
@@ -349,7 +349,7 @@ def main():
                     tf.add(archive, arcname=archive.name)
             else:
                 shutil.copyfile(archive, output / 'sources' / archive.name)
-        (output / 'NOTICE-native-runtime-dependencies.txt').write_text(notice)
+        (output / 'NOTICE-native-runtime-dependencies.txt').write_text(notice, encoding='utf-8')
         (output / 'native-crates.json').write_text(json.dumps(records, indent=2) + '\n')
         collect_runtime(args.runtime_manifest, args.runtime_root, output, args.binary, args.binary_stage)
         (output / 'COMPLETE').write_text('Native source and runtime evidence collection completed.\n')

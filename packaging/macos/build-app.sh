@@ -289,7 +289,9 @@ if command -v plutil >/dev/null 2>&1; then
   plutil -lint "$APP/Contents/Info.plist" >/dev/null
 fi
 
-python3 packaging/stage-native-licenses.py --binary-stage pre-sign --binary "$APP/Contents/MacOS/rustpy" --runtime-root "$APP" --output "$APP/Contents/Resources/Native-Licenses.zip"
+# Corresponding source and licence evidence for this exact (pre-sign) binary: published
+# beside the .dmg (THIRD-PARTY-NOTICES.txt names it), not inside the bundle.
+python3 packaging/stage-native-licenses.py --binary-stage pre-sign --binary "$APP/Contents/MacOS/rustpy" --runtime-root "$APP" --output "$OUT/RustPy-$VERSION-$ARCH-native-licenses.zip"
 
 # --- 5. signing -------------------------------------------------------------
 if command -v codesign >/dev/null 2>&1; then

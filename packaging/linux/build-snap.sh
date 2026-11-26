@@ -63,6 +63,11 @@ for snap in "$STAGE"/*.snap; do
   [[ -f $snap ]] || continue
   mv -f -- "$snap" "$OUT/"
   echo "Snap: $OUT/$(basename -- "$snap")"
+  name="$(basename -- "$snap" .snap)"
   found=1
 done
 ((found)) || die "snapcraft did not produce a .snap in $STAGE"
+# The licence evidence written by the prime step is published beside the snap, not inside it.
+[[ -f $STAGE/rustpy-snap-native-licenses.zip ]] || die "snapcraft did not write the licence evidence bundle"
+mv -f -- "$STAGE/rustpy-snap-native-licenses.zip" "$OUT/$name-native-licenses.zip"
+echo "Licence evidence: $OUT/$name-native-licenses.zip"

@@ -6,10 +6,11 @@ All discovered upstream license/notice texts are retained, including alternative
 and nested native-component terms. The resource/native supplements also apply.
 A wrapper's selected terms do not override licenses of embedded native code.
 
-Covered source: Native-Licenses.zip contains cargo-covered-sources.tar.gz
-with the exact MPL package and selected native covered source. Extract the zip
-and read its build/source instructions. Each package below also has an exact
-public source archive URL. Covered MPL sources and modifications remain MPL.
+Covered source: each release build's native-licenses asset (see the start of
+THIRD-PARTY-NOTICES.txt) contains cargo-covered-sources.tar.gz with the exact
+MPL package and selected native covered source, and its build/source
+instructions. Each package below also has an exact public source archive
+URL. Covered MPL sources and modifications remain MPL.
 The application and its separate source files are licensed independently.
 
 accesskit@0.24.1
