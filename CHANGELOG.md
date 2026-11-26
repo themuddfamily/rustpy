@@ -14,6 +14,10 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
+- **Code completion:** when type inference took longer than the lookup's time budget, smart
+  completion (Ctrl+Shift+Space) left out its expected-type suggestions such as `Point()` or
+  `Color.RED`. The lookup now opens with what was found and fills in the rest when inference
+  finishes, keeping the selected item.
 - **Terminal (Windows):** WSL profiles now start the configured distribution and shell;
   before, `wsl.exe` did not recognise its options and ran the whole command line in the
   default distribution's shell.

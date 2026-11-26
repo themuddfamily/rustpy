@@ -93,6 +93,17 @@ pub(super) fn extends(
         && typed.chars().all(rustpy_core::is_ident_continue)
 }
 
+/// Recomputes a lookup's candidates without the inference deadline (still
+/// cancellable), for a result whose inference ran out of its budget.
+type Refine = Box<dyn FnOnce(&CancellationToken) -> Vec<CompletionItem> + Send>;
+
+/// Python candidates computed by a request, and the follow-up that completes
+/// them when their inference was cut off by the budget.
+struct Computed {
+    items: Vec<CompletionItem>,
+    refine: Option<Refine>,
+}
+
 struct Job<T> {
     origin: Origin,
     explicit: bool,
@@ -121,7 +132,9 @@ pub(super) struct CompletionWorker {
     /// Test hook: a slow provider (the worker sleeps this long first).
     #[cfg(test)]
     pub delay: Duration,
-    python: Option<Job<Vec<CompletionItem>>>,
+    /// Inference time one Python lookup may spend before it shows what it has.
+    pub budget: Duration,
+    python: Option<Job<Computed>>,
     python_done: Option<(Origin, Vec<CompletionItem>)>,
     template: Option<(String, Job<Vec<CompletionItem>>)>,
     template_done: Option<(String, Vec<CompletionItem>)>,
@@ -142,6 +155,7 @@ impl Default for CompletionWorker {
             },
             #[cfg(test)]
             delay: Duration::ZERO,
+            budget: INFERENCE_BUDGET,
             python: None,
             python_done: None,
             template: None,
@@ -237,19 +251,33 @@ impl IdeApp {
             return found;
         }
         let (db, source) = (analysis.clone(), file.clone());
+        let budget = self.completion_worker.budget;
         self.python_request(origin, explicit, second_press, move |token| {
-            let token = Some(token.clone());
-            if smart {
-                rustpy_semantic::completion2::smart_complete_bounded(
-                    &db,
-                    &source,
-                    caret,
-                    INFERENCE_BUDGET,
-                    token,
-                )
-            } else {
-                features::complete_bounded(&db, &source, caret, INFERENCE_BUDGET, token)
+            let started = std::time::Instant::now();
+            let bounded = Some(token.clone());
+            if !smart {
+                let items = features::complete_bounded(&db, &source, caret, budget, bounded);
+                return Computed {
+                    items,
+                    refine: None,
+                };
             }
+            let items = rustpy_semantic::completion2::smart_complete_bounded(
+                &db, &source, caret, budget, bounded,
+            );
+            // Once the budget is spent the remaining inference yields
+            // `Unknown`, which drops the expected-type suggestions themselves
+            // (`Point()`, `Color.RED`, `await pending`), not just their
+            // ranking. The list shows what was found; the rest is computed
+            // without the deadline and refreshes the open lookup.
+            let refine = (started.elapsed() >= budget).then(|| -> Refine {
+                Box::new(move |token: &CancellationToken| {
+                    rustpy_semantic::infer::with_cancellation(token, || {
+                        rustpy_semantic::completion2::smart_complete(&db, &source, caret)
+                    })
+                })
+            });
+            Computed { items, refine }
         })
     }
 
@@ -278,8 +306,15 @@ impl IdeApp {
             return found;
         }
         let (query, target, at) = build(self)?;
-        self.python_request(origin, explicit, false, move |token| {
-            features::complete_bounded(&query, &target, at, INFERENCE_BUDGET, Some(token.clone()))
+        self.python_request(origin, explicit, false, move |token| Computed {
+            items: features::complete_bounded(
+                &query,
+                &target,
+                at,
+                INFERENCE_BUDGET,
+                Some(token.clone()),
+            ),
+            refine: None,
         })
     }
 
@@ -413,11 +448,12 @@ impl IdeApp {
         if let Some(job) = worker.python.as_mut() {
             if let Some(result) = job.handle.try_result() {
                 let job = worker.python.take().unwrap();
-                if let Ok(items) = result {
-                    worker.python_done = Some((job.origin.clone(), items));
+                if let Ok(computed) = result {
+                    self.python_finished(job, computed);
                 }
             }
         }
+        let worker = &mut self.completion_worker;
         let serves = |known: &Origin| {
             known.start == origin.start
                 && known.mode == origin.mode
@@ -445,22 +481,57 @@ impl IdeApp {
         origin: Origin,
         explicit: bool,
         second_press: bool,
-        work: impl FnOnce(&CancellationToken) -> Vec<CompletionItem> + Send + 'static,
+        work: impl FnOnce(&CancellationToken) -> Computed + Send + 'static,
     ) -> Option<Vec<CompletionItem>> {
         let worker = &mut self.completion_worker;
         worker.python = None;
         let mut handle = worker.spawn("Completing", work);
-        if let Some(Ok(items)) = handle.wait_timeout(worker.grace) {
-            worker.python_done = Some((origin, items.clone()));
-            return Some(items);
-        }
-        worker.python = Some(Job {
+        let result = handle.wait_timeout(worker.grace);
+        let job = Job {
             origin,
             explicit,
             second_press,
             handle,
-        });
+        };
+        if let Some(Ok(computed)) = result {
+            self.python_finished(job, computed);
+            // The follow-up's result when it, too, finished within the grace.
+            return self
+                .completion_worker
+                .python_done
+                .as_ref()
+                .map(|(_, items)| items.clone());
+        }
+        self.completion_worker.python = Some(job);
         None
+    }
+
+    /// Records a finished request's candidates for its origin and, when its
+    /// inference ran out of budget, starts the unbounded follow-up for the
+    /// same origin: the lookup shows the candidates at once and is refreshed
+    /// when the follow-up's result arrives (see
+    /// [`IdeApp::poll_completion_worker`]).
+    fn python_finished(&mut self, job: Job<Computed>, computed: Computed) {
+        let worker = &mut self.completion_worker;
+        worker.python_done = Some((job.origin.clone(), computed.items));
+        let Some(refine) = computed.refine else {
+            return;
+        };
+        let mut handle = worker.spawn("Completing", move |token| Computed {
+            items: refine(token),
+            refine: None,
+        });
+        let result = handle.wait_timeout(worker.grace);
+        let job = Job {
+            origin: job.origin.clone(),
+            explicit: job.explicit,
+            second_press: job.second_press,
+            handle,
+        };
+        match result {
+            Some(Ok(computed)) => worker.python_done = Some((job.origin.clone(), computed.items)),
+            _ => worker.python = Some(job),
+        }
     }
 
     /// Template candidates computed from the project's views (render-context
@@ -622,13 +693,13 @@ impl IdeApp {
                 self.completion_worker.python = None;
             } else if let Some(result) = job.handle.try_result() {
                 let job = self.completion_worker.python.take().unwrap();
-                if let Ok(items) = result {
+                if let Ok(computed) = result {
                     reopen = Some((
                         job.explicit,
                         Some(job.second_press),
                         job.origin.mode == Mode::Smart,
                     ));
-                    self.completion_worker.python_done = Some((job.origin.clone(), items));
+                    self.python_finished(job, computed);
                 }
             }
         }
