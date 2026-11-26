@@ -31,6 +31,10 @@
     Do not create the portable zip.
 .PARAMETER SkipInstaller
     Do not run Inno Setup.
+.PARAMETER NativeLicenses
+    Use this Native-Licenses.zip, staged earlier in the same build for the same executable
+    (scripts\build-windows-release.ps1 stages it once for all packages). It must describe the
+    exact rustpy.exe being packaged. By default the bundle is collected again.
 #>
 #Requires -Version 5.1
 [CmdletBinding()]
@@ -39,7 +43,8 @@ param(
     [string]$Target = "",
     [string]$OutDir = "",
     [switch]$SkipZip,
-    [switch]$SkipInstaller
+    [switch]$SkipInstaller,
+    [string]$NativeLicenses = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -116,41 +121,48 @@ if (-not (Test-Path -LiteralPath $Exe)) { throw "release binary not found: $Exe 
 
 # --- 2. icon (optional, needs ImageMagick) -----------------------------------
 $IconFile = ""
-$Magick = Get-Command "magick" -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
-if ($Magick) {
-    $IconFile = Join-Path $OutDir "rustpy.ico"
-    $Svg = Join-Path $Root "packaging\linux\rustpy.svg"
-    try {
-        Invoke-Tool $Magick.Path @("-background", "none", "-density", "384", $Svg, "-define", "icon:auto-resize=256,128,64,48,32,16", $IconFile)
-    } catch {
-        Write-Warning "could not render rustpy.ico with ImageMagick: $_"
-        $IconFile = ""
+# Only the installer uses the icon, so a zip-only run (possibly in parallel) leaves it alone.
+if (-not $SkipInstaller) {
+    $Magick = Get-Command "magick" -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($Magick) {
+        $IconFile = Join-Path $OutDir "rustpy.ico"
+        $Svg = Join-Path $Root "packaging\linux\rustpy.svg"
+        try {
+            Invoke-Tool $Magick.Path @("-background", "none", "-density", "384", $Svg, "-define", "icon:auto-resize=256,128,64,48,32,16", $IconFile)
+        } catch {
+            Write-Warning "could not render rustpy.ico with ImageMagick: $_"
+            $IconFile = ""
+        }
+    } else {
+        # rustpy.iss then picks up packaging\windows\rustpy.ico (committed, rendered from the SVG).
+        Write-Host "ImageMagick (magick) not found: the installer uses packaging\windows\rustpy.ico"
     }
-} else {
-    # rustpy.iss then picks up packaging\windows\rustpy.ico (committed, rendered from the SVG).
-    Write-Host "ImageMagick (magick) not found: the installer uses packaging\windows\rustpy.ico"
 }
 
-$NativeLicenses = Join-Path $OutDir "Native-Licenses.zip"
-& python (Join-Path $Root "packaging/stage-native-licenses.py") --runtime-file $Exe --output $NativeLicenses
-if ($LASTEXITCODE) { throw "Native license/source collection failed" }
+if ($NativeLicenses) {
+    $NativeLicenses = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($CallerDir, $NativeLicenses))
+    & python (Join-Path $Root "packaging/stage-native-licenses.py") --check-existing $NativeLicenses --binary $Exe
+    if ($LASTEXITCODE) { throw "The supplied Native-Licenses.zip does not belong to $Exe" }
+} else {
+    $NativeLicenses = Join-Path $OutDir "Native-Licenses.zip"
+    & python (Join-Path $Root "packaging/stage-native-licenses.py") --runtime-file $Exe --output $NativeLicenses
+    if ($LASTEXITCODE) { throw "Native license/source collection failed" }
+}
 
 # --- 3. portable zip ---------------------------------------------------------
+# Written straight from the sources (no staging copy). Native-Licenses.zip holds
+# already-compressed archives, so it is stored rather than deflated a second time.
 if (-not $SkipZip) {
-    $Stage = Join-Path $OutDir "portable"
-    if (Test-Path -LiteralPath $Stage) { Remove-Item -LiteralPath $Stage -Recurse -Force }
-    New-Item -ItemType Directory -Path $Stage | Out-Null
-    Copy-Item -LiteralPath $Exe -Destination $Stage
-    Copy-Item -LiteralPath (Join-Path $Root "THIRD-PARTY-NOTICES.txt") -Destination $Stage
-    Copy-Item -LiteralPath (Join-Path $Root "LICENSE") -Destination $Stage
-    Copy-Item -LiteralPath $NativeLicenses -Destination $Stage
-    Set-Content -LiteralPath (Join-Path $Stage "rustpy-portable.cmd") -Encoding Ascii -Value @(
+    Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+    $Zip = Join-Path $OutDir "rustpy-$Version-windows-$Arch-portable.zip"
+    if (Test-Path -LiteralPath $Zip) { Remove-Item -LiteralPath $Zip -Force }
+    $Launcher = @(
         '@echo off',
         'rem Starts RustPy with its settings in the "config" folder next to this file.',
         'set "RUSTPY_CONFIG_DIR=%~dp0config"',
         'start "" "%~dp0rustpy.exe" %*'
     )
-    Set-Content -LiteralPath (Join-Path $Stage "README.txt") -Encoding Ascii -Value @(
+    $Readme = @(
         "RustPy $Version for Windows ($Arch), portable build",
         "",
         "rustpy.exe            starts the IDE; settings, logs and local history go to",
@@ -163,9 +175,25 @@ if (-not $SkipZip) {
         "Python is not included: install it from https://www.python.org/ or the Microsoft",
         "Store, then pick the interpreter in Settings > Project > Python Interpreter."
     )
-    $Zip = Join-Path $OutDir "rustpy-$Version-windows-$Arch-portable.zip"
-    if (Test-Path -LiteralPath $Zip) { Remove-Item -LiteralPath $Zip -Force }
-    Compress-Archive -Path (Join-Path $Stage "*") -DestinationPath $Zip
+    $Optimal = [System.IO.Compression.CompressionLevel]::Optimal
+    $Archive = [System.IO.Compression.ZipFile]::Open($Zip, [System.IO.Compression.ZipArchiveMode]::Create)
+    try {
+        foreach ($Item in @(
+            @($Exe, "rustpy.exe", $Optimal),
+            @((Join-Path $Root "THIRD-PARTY-NOTICES.txt"), "THIRD-PARTY-NOTICES.txt", $Optimal),
+            @((Join-Path $Root "LICENSE"), "LICENSE", $Optimal),
+            @($NativeLicenses, "Native-Licenses.zip", [System.IO.Compression.CompressionLevel]::NoCompression)
+        )) {
+            $null = [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($Archive, $Item[0], $Item[1], $Item[2])
+        }
+        foreach ($Text in @(@("rustpy-portable.cmd", $Launcher), @("README.txt", $Readme))) {
+            $Bytes = [System.Text.Encoding]::ASCII.GetBytes((($Text[1] -join "`r`n") + "`r`n"))
+            $Stream = $Archive.CreateEntry($Text[0], $Optimal).Open()
+            try { $Stream.Write($Bytes, 0, $Bytes.Length) } finally { $Stream.Dispose() }
+        }
+    } finally {
+        $Archive.Dispose()
+    }
     Write-Host "Portable zip: $Zip"
 }
 

@@ -42,6 +42,46 @@ class LicensePackagingTests(unittest.TestCase):
             with zipfile.ZipFile(output) as archive:
                 self.assertEqual(archive.read('Native-Licenses/native-license.txt'), b'retained terms')
                 self.assertEqual(archive.read('Native-Licenses/cargo-covered-sources.tar.gz'), b'exact sources')
+                # Already-compressed source archives are stored, text is deflated.
+                self.assertEqual(archive.getinfo('Native-Licenses/cargo-covered-sources.tar.gz').compress_type, zipfile.ZIP_STORED)
+                self.assertEqual(archive.getinfo('Native-Licenses/native-license.txt').compress_type, zipfile.ZIP_DEFLATED)
+
+    def test_shared_bundle_must_describe_the_packaged_executable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            executable = root / 'rustpy.exe'
+            executable.write_bytes(b'fixture')
+            bundle = root / 'Native-Licenses.zip'
+
+            def write(manifest, complete=True, revision='a' * 40, target='x86_64-pc-windows-msvc'):
+                record = {'link': {'binary_sha256': STAGE.hashlib.sha256(b'fixture').hexdigest()},
+                          'toolchain': {'source_revision': revision, 'target': target}}
+                with zipfile.ZipFile(bundle, 'w') as archive:
+                    archive.writestr('Native-Licenses/runtime-manifest.json', manifest)
+                    archive.writestr('Native-Licenses/cargo-covered-sources.tar.gz', b'exact sources')
+                    archive.writestr('Native-Licenses/static/0/4-build-record.json', STAGE.json.dumps(record))
+                    if complete:
+                        archive.writestr('Native-Licenses/COMPLETE', 'done')
+
+            def check(*extra):
+                with patch.object(sys, 'argv', ['stage', '--check-existing', str(bundle), '--binary', str(executable), *extra]):
+                    STAGE.main()
+
+            write('{"binary_sha256": "%s"}' % STAGE.hashlib.sha256(b'fixture').hexdigest())
+            check()
+            write('{"binary_sha256": "%s"}' % STAGE.hashlib.sha256(b'other build').hexdigest())
+            with self.assertRaises(SystemExit):
+                check()
+            write('{"binary_sha256": "%s"}' % STAGE.hashlib.sha256(b'fixture').hexdigest(), complete=False)
+            with self.assertRaises(SystemExit):
+                check()
+            # A binary restored from an earlier build must come from this revision and target.
+            good = '{"binary_sha256": "%s"}' % STAGE.hashlib.sha256(b'fixture').hexdigest()
+            write(good)
+            check('--source-revision', 'a' * 40, '--target', 'x86_64-pc-windows-msvc')
+            for arguments in (('--source-revision', 'b' * 40), ('--target', 'aarch64-pc-windows-msvc')):
+                with self.subTest(arguments=arguments), self.assertRaises(SystemExit):
+                    check(*arguments)
 
     def test_collection_failure_does_not_replace_reviewed_bundle(self):
         with tempfile.TemporaryDirectory() as directory:

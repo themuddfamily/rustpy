@@ -121,9 +121,12 @@ class QualityRecipes(unittest.TestCase):
             if name != 'publish':
                 self.assertNotIn('contents: write', '\n'.join(lines))
         self.assertIn('    if: ${{ false }}', jobs['msix-bundle'])
-        windows = '\n'.join(jobs['windows'])
+        windows = '\n'.join(jobs['package'])
         self.assertIn('      - name: MSIX package (Microsoft Store)\n        if: ${{ false }}', windows)
         self.assertIn('      - uses: actions/upload-artifact@v7\n        if: ${{ false }}\n        with:\n          name: msix-', windows)
+        # The package job takes the binary built for this exact commit and target.
+        self.assertIn('rustpy-binary-${{ matrix.target }}-${{ github.sha }}', '\n'.join(jobs['package']))
+        self.assertIn('-PackageOnly', '\n'.join(jobs['package']))
 
     def test_expensive_gates_are_explicit_and_fuzz_is_bounded(self):
         recipe = load('quality_recipe', ROOT / 'scripts/quality.py')
