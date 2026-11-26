@@ -125,6 +125,24 @@ impl Inferer<'_> {
         if !Self::predicate_subject_stable(call.syntax(), name) {
             return None;
         }
+        // Only the first positional argument or a keyword argument can be the
+        // narrowed subject. Decide that from the syntax before inferring the
+        // arguments, which reads every earlier condition on them again.
+        let mut first_positional = true;
+        let names_subject = call.arg_list().is_some_and(|arguments| {
+            arguments.args().take(33).any(|argument| match argument {
+                ast::AnyArg::Positional(argument) => argument.expr().is_some_and(|expression| {
+                    std::mem::take(&mut first_positional) && is_subject(&expression, name)
+                }),
+                ast::AnyArg::Keyword(argument) => argument
+                    .value()
+                    .is_some_and(|expression| is_subject(&expression, name)),
+                _ => false,
+            })
+        });
+        if !names_subject {
+            return None;
+        }
         let (pos, kw) = self.call_args(file, call);
         let signature = match self.type_of_expr(file, &call.callee()?) {
             Type::Function(signature) | Type::BoundMethod(signature, _) => signature,
@@ -152,16 +170,16 @@ impl Inferer<'_> {
         }
         let definition = signature.def.as_ref()?;
         let owner = self.db.file(definition.file)?;
+        // Found by position, not by walking the file: a predicate call to a
+        // function of a large stub (`isinstance` in builtins) stays cheap.
         let function = owner
             .parse
             .syntax_node()
-            .descendants()
-            .take(16_384)
-            .find_map(|node| {
-                (node.text_range() == definition.range)
-                    .then(|| ast::FuncDef::cast(node))
-                    .flatten()
-            })?;
+            .covering_element(definition.range)
+            .into_node()?
+            .ancestors()
+            .take_while(|node| node.text_range() == definition.range)
+            .find_map(ast::FuncDef::cast)?;
         if function.name_text() != definition.name.as_str()
             || !Self::predicate_namespace_intact(file, &definition.name, call.text_range().start())
             || call.callee().is_some_and(|callee| matches!(callee.unparen(), ast::Expr::Attribute(attribute) if !Self::predicate_namespace_intact(file, &attribute.attr_text(), call.text_range().start())))
@@ -1052,25 +1070,44 @@ impl Inferer<'_> {
         if file.is_stub {
             return true;
         }
+        // The scan answers `false` at the first node (in preorder) that writes
+        // `wanted` or exhausts the budget, whatever `before` is, and preorder
+        // starts never decrease: remember that point once per source version.
+        // Rescanning the file prefix for every narrowing condition made
+        // inspection quadratic in the file size.
+        if let Some(point) = file.predicate_retirements.lock().get(wanted) {
+            return point.is_none_or(|point| point >= before);
+        }
+        let point = Self::predicate_retirement_point(file, wanted);
+        file.predicate_retirements
+            .lock()
+            .insert(smol_str::SmolStr::new(wanted), point);
+        point.is_none_or(|point| point >= before)
+    }
+
+    /// Start of the first node at which [`Self::predicate_namespace_intact`]
+    /// stops trusting `wanted`, if any.
+    fn predicate_retirement_point(
+        file: &Arc<FileInfo>,
+        wanted: &str,
+    ) -> Option<rustpy_core::TextSize> {
         let mut budget = 16_384usize;
         for node in file.parse.syntax_node().descendants() {
-            if node.text_range().start() >= before {
-                break;
-            }
+            let point = node.text_range().start();
             if budget == 0 {
-                return false;
+                return Some(point);
             }
             budget -= 1;
             let Some(targets) = written_targets(node, budget) else {
-                return false;
+                return Some(point);
             };
             for target in targets {
                 if retired_target(target, wanted, &mut budget, 0) {
-                    return false;
+                    return Some(point);
                 }
             }
         }
-        true
+        None
     }
 }
 

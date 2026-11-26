@@ -88,7 +88,13 @@ struct Frame {
     low: usize,
     /// Provisional binding types that depend on this computation being unfinished.
     dependents: Vec<(FileId, TextRange)>,
+    /// Provisional load types (see `Inferer::provisional_loads`) likewise.
+    load_dependents: Vec<LoadKey>,
 }
+
+/// A load (name, attribute or call): its file, whether parent adaptation is
+/// off (a contextual session), and its range.
+type LoadKey = (FileId, bool, TextRange);
 
 type GuardKey = (FileId, TextRange, GuardKind);
 
@@ -97,6 +103,13 @@ thread_local! {
     /// Test-only: how many more binding types this thread may compute, so a
     /// test catches runaway recomputation quickly instead of hanging.
     pub(crate) static BINDING_BUDGET: std::cell::Cell<usize> = const { std::cell::Cell::new(usize::MAX) };
+}
+#[cfg(test)]
+thread_local! {
+    /// Test-only: how many more name, attribute and call types this thread may
+    /// infer (in every session), so a test catches exponential re-inference
+    /// quickly instead of hanging.
+    pub(crate) static LOAD_BUDGET: std::cell::Cell<usize> = const { std::cell::Cell::new(usize::MAX) };
 }
 thread_local! {
     /// The token of the background job running on this thread (see
@@ -152,8 +165,27 @@ pub struct Inferer<'a> {
     /// Binding types no unfinished computation contributed to.
     binding_cache: RefCell<FxHashMap<(FileId, TextRange), Type>>,
     binary_memo: RefCell<Option<BinaryMemo>>,
+    /// Final types of loads (names, attributes and calls), per file and by
+    /// whether parent adaptation is off (a contextual session). A name's type
+    /// is its reaching bindings narrowed by every condition on the way, and
+    /// each condition reads names again; a call or attribute is inferred
+    /// again by every rule that looks at its receiver. Without reuse, a row
+    /// of `if` statements testing and rebinding one variable, or a method
+    /// chain on an unknown receiver (`q.filter(a).filter(b)…`), took time
+    /// exponential in its length.
+    load_memo: RefCell<FxHashMap<(FileId, bool), BinaryMemo>>,
+    load_memo_entries: std::cell::Cell<usize>,
+    /// Load types computed inside a cycle, like [`Self::provisional`] for
+    /// bindings: a narrowing condition that calls a method whose return type
+    /// is being inferred would otherwise make every load below it recomputed
+    /// for every reader, exponential in the conditions' nesting.
+    provisional_loads: RefCell<FxHashMap<LoadKey, (usize, Type)>>,
     #[cfg(test)]
     binary_applications: std::cell::Cell<usize>,
+    #[cfg(test)]
+    name_computations: std::cell::Cell<usize>,
+    #[cfg(test)]
+    member_and_call_computations: std::cell::Cell<usize>,
     expected_context: expected_context::ExpectedContext,
     /// Binding types computed inside a cycle, with the depth of the
     /// unfinished computation they read (the cycle's head): they hold while
@@ -240,8 +272,15 @@ impl<'a> Inferer<'a> {
             frames: RefCell::new(Vec::new()),
             binding_cache: RefCell::new(FxHashMap::default()),
             binary_memo: RefCell::new(None),
+            load_memo: RefCell::new(FxHashMap::default()),
+            load_memo_entries: std::cell::Cell::new(0),
+            provisional_loads: RefCell::new(FxHashMap::default()),
             #[cfg(test)]
             binary_applications: std::cell::Cell::new(0),
+            #[cfg(test)]
+            name_computations: std::cell::Cell::new(0),
+            #[cfg(test)]
+            member_and_call_computations: std::cell::Cell::new(0),
             expected_context: expected_context::ExpectedContext::default(),
             provisional: RefCell::new(FxHashMap::default()),
             class_cache: RefCell::new(FxHashMap::default()),
@@ -653,6 +692,7 @@ impl<'a> Inferer<'a> {
         frames.push(Frame {
             low: usize::MAX,
             dependents: Vec::new(),
+            load_dependents: Vec::new(),
         });
         guard.insert(key, frames.len());
         true
@@ -669,6 +709,14 @@ impl<'a> Inferer<'a> {
         if !frame.dependents.is_empty() {
             let mut provisional = self.provisional.borrow_mut();
             for k in &frame.dependents {
+                if provisional.get(k).is_some_and(|(head, _)| *head == depth) {
+                    provisional.remove(k);
+                }
+            }
+        }
+        if !frame.load_dependents.is_empty() {
+            let mut provisional = self.provisional_loads.borrow_mut();
+            for k in &frame.load_dependents {
                 if provisional.get(k).is_some_and(|(head, _)| *head == depth) {
                     provisional.remove(k);
                 }
@@ -1256,9 +1304,90 @@ impl<'a> Inferer<'a> {
         }
     }
 
+    /// The authority under which load types are reused: this session's
+    /// own (an isolated contextual session keeps its fixed overrides for its
+    /// whole life, as its binding cache does) and the file's current source
+    /// and dependency epoch. Member lookups may publish: their depth limit
+    /// cuts like a cycle, so a load it shortened never becomes final.
+    fn load_memo_epoch(&self, file: &Arc<FileInfo>) -> Option<u64> {
+        if self
+            .db
+            .file(file.id)
+            .is_none_or(|current| !Arc::ptr_eq(&current, file))
+        {
+            return None;
+        }
+        // The stored path is already normalized: no file system lookups here,
+        // on a path taken for every load.
+        Some(self.db.revision_excluding_file(file))
+    }
+
+    fn memoized_load(&self, file: &Arc<FileInfo>, epoch: u64, range: TextRange) -> Option<Type> {
+        let memo = self.load_memo.borrow();
+        let entry = memo.get(&(file.id, self.expected_context.active.get()))?;
+        if !Arc::ptr_eq(&entry.file, file) || entry.epoch != epoch {
+            return None;
+        }
+        entry.values.get(&range).cloned()
+    }
+
+    fn remember_load(&self, file: &Arc<FileInfo>, epoch: u64, range: TextRange, ty: Type) {
+        if self.load_memo_epoch(file) != Some(epoch) || self.spent.get() {
+            return;
+        }
+        let mut memo = self.load_memo.borrow_mut();
+        let key = (file.id, self.expected_context.active.get());
+        let entry = memo.entry(key).or_insert_with(|| BinaryMemo {
+            file: file.clone(),
+            epoch,
+            values: FxHashMap::default(),
+        });
+        if !Arc::ptr_eq(&entry.file, file) || entry.epoch != epoch {
+            let dropped = entry.values.len();
+            self.load_memo_entries
+                .set(self.load_memo_entries.get().saturating_sub(dropped));
+            *entry = BinaryMemo {
+                file: file.clone(),
+                epoch,
+                values: FxHashMap::default(),
+            };
+        }
+        // Exhaustion changes reuse only; it never changes an inferred result.
+        if self.load_memo_entries.get() < MAX_BINARY_MEMO_ENTRIES
+            && entry.values.insert(range, ty).is_none()
+        {
+            self.load_memo_entries.set(self.load_memo_entries.get() + 1);
+        }
+    }
+
     pub fn type_of_expr(&self, file: &Arc<FileInfo>, expr: &ast::Expr) -> Type {
         if let Some(expected) = self.parent_expected_type(file, expr) {
             return self.type_of_expr_with_expected(file, expr, &expected);
+        }
+        // A load is reused at any depth once no unfinished computation
+        // contributed to it, exactly like a binding type.
+        let load_epoch = matches!(
+            expr,
+            ast::Expr::Name(_) | ast::Expr::Attribute(_) | ast::Expr::Call(_)
+        )
+        .then(|| self.load_memo_epoch(file))
+        .flatten();
+        if let Some(ty) =
+            load_epoch.and_then(|epoch| self.memoized_load(file, epoch, expr.text_range()))
+        {
+            return ty;
+        }
+        let load_key = (
+            file.id,
+            self.expected_context.active.get(),
+            expr.text_range(),
+        );
+        if load_epoch.is_some() {
+            let provisional = self.provisional_loads.borrow().get(&load_key).cloned();
+            if let Some((head, ty)) = provisional {
+                self.note_cycle(head);
+                return ty;
+            }
         }
         let memo_epoch = (matches!(expr, ast::Expr::Binary(_)) && self.frames.borrow().is_empty())
             .then(|| self.binary_memo_epoch(file))
@@ -1281,6 +1410,36 @@ impl<'a> Inferer<'a> {
         self.enum_query_file.replace(previous_enum_query);
         let dependency = self.leave(key);
         let ty = self.simplify_inferred_string_unions(t, &mut 1024, 0);
+        #[cfg(test)]
+        if matches!(
+            expr,
+            ast::Expr::Name(_) | ast::Expr::Attribute(_) | ast::Expr::Call(_)
+        ) {
+            LOAD_BUDGET.with(|left| {
+                assert!(left.get() > 0, "load type computations over the test budget");
+                left.set(left.get() - 1);
+            });
+            if matches!(expr, ast::Expr::Name(_)) {
+                self.name_computations.set(self.name_computations.get() + 1);
+            } else {
+                let computed = &self.member_and_call_computations;
+                computed.set(computed.get() + 1);
+            }
+        }
+        if let Some(epoch) = load_epoch {
+            match dependency {
+                None => self.remember_load(file, epoch, expr.text_range(), ty.clone()),
+                // Read an enclosing unfinished computation: valid until it ends.
+                Some(head) => {
+                    self.provisional_loads
+                        .borrow_mut()
+                        .insert(load_key, (head, ty.clone()));
+                    if let Some(frame) = self.frames.borrow_mut().get_mut(head - 1) {
+                        frame.load_dependents.push(load_key);
+                    }
+                }
+            }
+        }
         if let Some(epoch) = memo_epoch
             .filter(|epoch| dependency.is_none() && self.binary_memo_epoch(file) == Some(*epoch))
         {
@@ -2889,6 +3048,8 @@ impl<'a> Inferer<'a> {
     pub fn lookup_member(&self, ty: &Type, name: &str) -> Option<Type> {
         let depth = self.member_protocol_depth.get();
         if depth >= 32 {
+            // A cut like a cycle's: nothing in progress may become final.
+            self.note_cycle(1);
             return Some(Type::Unknown);
         }
         self.member_protocol_depth.set(depth + 1);
@@ -4901,3 +5062,6 @@ mod tests {
 #[cfg(test)]
 #[path = "infer_binary_memo_tests.rs"]
 mod binary_memo_tests;
+#[cfg(test)]
+#[path = "infer_load_memo_tests.rs"]
+mod load_memo_tests;

@@ -23,6 +23,14 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
+- **Command-line inspection:** `rustpy inspect` could run for hours on ordinary code, such
+  as a folder of standard-library modules: functions that test and rebind one variable in a
+  row of `if` statements took time exponential in the length of the row, and every file
+  was re-read from disk thousands of times. Ninety standard-library modules (74,000 lines)
+  now take about half a minute. The command also prints each file as it starts
+  (`[12/90] Inspecting path`) and names files that take ten seconds or more, so a long run
+  no longer looks hung; `-v0` stays quiet. Project-wide inspection in the IDE is faster on
+  such code too.
 - **Build:** removed unused workspace dependencies and inherited the repository URL in
   the application package, clearing Cargo's three workspace manifest warnings.
 - **Code completion:** when type inference took longer than the lookup's time budget, smart

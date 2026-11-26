@@ -99,6 +99,10 @@ pub struct FileInfo {
     /// replaced that namespace member (see `namespace_member_retired`).
     pub(crate) member_retirements:
         parking_lot::Mutex<FxHashMap<smol_str::SmolStr, Option<rustpy_core::TextSize>>>,
+    /// Name → first offset from which narrowing by a call to that name is
+    /// off (see `predicate_namespace_intact`).
+    pub(crate) predicate_retirements:
+        parking_lot::Mutex<FxHashMap<smol_str::SmolStr, Option<rustpy_core::TextSize>>>,
     /// `(member, excepted declaration)` → `match_support::member_source_stable_except`.
     pub(crate) member_stability:
         parking_lot::Mutex<FxHashMap<(smol_str::SmolStr, Option<rustpy_core::TextRange>), bool>>,
@@ -158,6 +162,7 @@ impl FileInfo {
             deprecated_names: std::sync::OnceLock::new(),
             member_retirements: Default::default(),
             member_stability: Default::default(),
+            predicate_retirements: Default::default(),
             class_declarations: std::sync::OnceLock::new(),
         }
     }
@@ -202,6 +207,7 @@ impl FileInfo {
             deprecated_names: std::sync::OnceLock::new(),
             member_retirements: Default::default(),
             member_stability: Default::default(),
+            predicate_retirements: Default::default(),
             class_declarations: std::sync::OnceLock::new(),
         }
     }
