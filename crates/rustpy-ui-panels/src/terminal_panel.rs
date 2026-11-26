@@ -278,7 +278,8 @@ fn color(c: vt100::Color, default: Color32) -> Color32 {
 
 impl TerminalPanel {
     /// The App supplies the actual modal owner before painting this panel.
-    pub(crate) fn claims_context_menu(
+    #[doc(hidden)]
+    pub fn claims_context_menu(
         &self,
         ctx: &egui::Context,
         key: egui::Key,
@@ -294,7 +295,8 @@ impl TerminalPanel {
             })
     }
 
-    pub(crate) fn set_announcement_owner(&mut self, available: bool) {
+    #[doc(hidden)]
+    pub fn set_announcement_owner(&mut self, available: bool) {
         self.announcement_owner = available;
     }
 

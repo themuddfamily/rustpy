@@ -142,13 +142,15 @@ pub struct ServicesPanel {
 }
 
 impl ServicesPanel {
-    pub(crate) fn set_accessibility_owner(&mut self, available: bool) {
+    #[doc(hidden)]
+    pub fn set_accessibility_owner(&mut self, available: bool) {
         self.accessibility_blocked = !available;
         if !available {
             self.menu_owner = None;
         }
     }
-    pub(crate) fn claims_context_menu(
+    #[doc(hidden)]
+    pub fn claims_context_menu(
         &self,
         ctx: &egui::Context,
         key: egui::Key,

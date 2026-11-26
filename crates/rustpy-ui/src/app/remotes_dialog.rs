@@ -255,7 +255,7 @@ mod tests {
 
     #[test]
     fn a_repository_without_remotes_suggests_origin() {
-        let dir = crate::git_jobs::TestDir::new("remotes-dialog");
+        let dir = rustpy_ui_base::test_support::TestDir::new("remotes-dialog");
         let repo = GitRepo::init(dir.path()).unwrap();
         assert_eq!(RemotesState::new(&repo).new_name, "origin");
         repo.add_remote_checked("origin", "git@github.com:me/r.git")
@@ -279,7 +279,7 @@ mod tests {
         {
             return;
         }
-        let dir = crate::git_jobs::TestDir::new("remotes-pushurl");
+        let dir = rustpy_ui_base::test_support::TestDir::new("remotes-pushurl");
         let repo = GitRepo::init(dir.path()).unwrap();
         repo.add_remote_checked("origin", "https://github.com/me/repo.git")
             .unwrap();

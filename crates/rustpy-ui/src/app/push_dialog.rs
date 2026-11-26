@@ -466,7 +466,7 @@ mod tests {
         {
             return;
         }
-        let dir = crate::git_jobs::TestDir::new("push-dialog");
+        let dir = rustpy_ui_base::test_support::TestDir::new("push-dialog");
         let (bare, work) = (dir.path().join("o.git"), dir.path().join("w"));
         std::fs::create_dir_all(&bare).unwrap();
         std::fs::create_dir_all(&work).unwrap();
@@ -519,7 +519,7 @@ mod tests {
         {
             return;
         }
-        let dir = crate::git_jobs::TestDir::new("push-quick");
+        let dir = rustpy_ui_base::test_support::TestDir::new("push-quick");
         let (bare, work) = (dir.path().join("o.git"), dir.path().join("w"));
         std::fs::create_dir_all(&bare).unwrap();
         std::fs::create_dir_all(&work).unwrap();

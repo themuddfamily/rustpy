@@ -1,0 +1,30 @@
+[package]
+name = "rustpy-ui-base"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: UI foundation (theme, fonts, localization, accessibility, actions)"
+
+[dependencies]
+rustpy-highlight.workspace = true
+rustpy-i18n.workspace = true
+rustpy-settings.workspace = true
+arboard = { version = "3", default-features = false }
+crossbeam-channel.workspace = true
+egui.workspace = true
+fontdb = "0.24"
+log.workspace = true
+# Large font files are mapped rather than read (src/fonts.rs); already in the tree.
+memmap2 = "0.9"
+roxmltree = "=0.20.0"
+rustc-hash.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+# Validates a system CJK font with the parser egui uses (egui panics on fonts it cannot read).
+skrifa = { version = "0.44", default-features = false, features = ["std"] }
+tempfile.workspace = true
+unicode-normalization = "0.1"
+
+[dev-dependencies]
+dirs.workspace = true

@@ -443,7 +443,7 @@ The binary (`rustpy_ui::run`) understands these arguments. They work in normal s
 | `--goto <line>:<col>` | Move the caret in the active editor (1-based; a missing or invalid number means 1). |
 | `--run` | Run the active Python file, like *Run context configuration* (Ctrl+Shift+F10): pytest for `test_*.py` and `*_test.py`, otherwise the script with its existing run configuration (for example one set to *Run with Python Console*), or a new temporary one. |
 | `--welcome` | Show the Welcome screen. |
-| `--action <id>` | Queue an action by id. Repeatable. The ids are those of `Action::ALL` in `crates/rustpy-ui/src/actions.rs`, for example `SaveAll`, `ShowSettings`, `$Undo`, `ReformatCode` or `LocalHistory.ShowHistory`. Queued actions start 1.2 seconds after launch and run one every 0.25 seconds, pausing while the debugger runs. |
+| `--action <id>` | Queue an action by id. Repeatable. The ids are those of `Action::ALL` in `crates/rustpy-ui-base/src/actions.rs`, for example `SaveAll`, `ShowSettings`, `$Undo`, `ReformatCode` or `LocalHistory.ShowHistory`. Queued actions start 1.2 seconds after launch and run one every 0.25 seconds, pausing while the debugger runs. |
 | `--tool <name>` | Open a tool window or a dialog (see below). |
 | `--terminal "<cmd>"` | Open the Terminal tool window and type `<cmd>` and Enter about a second after launch. Ignored when `--tool console` selects the Python Console; use `--tool pyconsole:` there. |
 | `--screenshot <png>` | Smoke mode. Once `RUSTPY_SMOKE_DELAY` seconds have passed and the queued actions have run, capture the window into the PNG, save the workspace and settings, and exit. After 20 seconds it gives up (`screenshot timed out`), so delays above 20 never capture. |

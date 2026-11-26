@@ -6,7 +6,8 @@
 #[path = "actions/reference.rs"]
 mod reference;
 #[path = "actions/shortcuts.rs"]
-pub(crate) mod shortcuts;
+#[doc(hidden)]
+pub mod shortcuts;
 
 use std::fmt;
 

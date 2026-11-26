@@ -924,7 +924,7 @@ mod tests {
     /// "Renamed …" (apply_file_ops' "not changed" status was overwritten).
     #[test]
     fn closed_files_are_checked_first_and_a_failed_write_is_no_success() {
-        let dir = crate::git_jobs::TestDir::new("rename-closed");
+        let dir = rustpy_ui_base::test_support::TestDir::new("rename-closed");
         let path = dir.path().join("other.py");
         std::fs::write(&path, "from main import run\nrun()\n").unwrap();
         let r = |s: u32| TextRange::at(TextSize::new(s), TextSize::new(3));

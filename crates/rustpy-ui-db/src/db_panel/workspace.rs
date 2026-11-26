@@ -461,20 +461,23 @@ impl DatabaseWorkspace {
 }
 impl DbPanel {
     /// Poll even with the tool window hidden; retained owners survive project switches.
-    pub(crate) fn set_database_execution_allowed(&mut self, allowed: bool) {
+    #[doc(hidden)]
+    pub fn set_database_execution_allowed(&mut self, allowed: bool) {
         self.execution_allowed = allowed;
         self.workspace.admitted = allowed;
         if !allowed {
             self.workspace.native.stop_all();
         }
     }
-    pub(crate) fn poll_database(&mut self) {
+    #[doc(hidden)]
+    pub fn poll_database(&mut self) {
         self.workspace.poll();
         // A closed panel can drop its session before its worker has joined.
         // Keep those retained workers moving even while Database is hidden.
         let _ = rustpy_db::native::poll_retiring();
     }
-    pub(crate) fn database_owners(&self) -> Vec<(u64, String, bool, bool)> {
+    #[doc(hidden)]
+    pub fn database_owners(&self) -> Vec<(u64, String, bool, bool)> {
         self.workspace
             .owners
             .iter()
@@ -496,7 +499,8 @@ impl DbPanel {
             )
             .collect()
     }
-    pub(crate) fn select_database_owner(&mut self, id: u64) -> bool {
+    #[doc(hidden)]
+    pub fn select_database_owner(&mut self, id: u64) -> bool {
         if let Some(source) = self.workspace.native.source(Some(id)) {
             self.workspace.active = Some(id);
             self.workspace.selected = Some(source.id);
@@ -514,7 +518,8 @@ impl DbPanel {
         self.workspace.selected = Some(console.owner.source.id);
         true
     }
-    pub(crate) fn stop_database(&mut self, id: u64) {
+    #[doc(hidden)]
+    pub fn stop_database(&mut self, id: u64) {
         self.workspace.native.stop(id);
         if let Some(c) = self
             .workspace
@@ -531,7 +536,8 @@ impl DbPanel {
             }
         }
     }
-    pub(crate) fn stop_all_database(&mut self) {
+    #[doc(hidden)]
+    pub fn stop_all_database(&mut self) {
         self.workspace.native.stop_all();
         for c in self
             .workspace
@@ -545,23 +551,28 @@ impl DbPanel {
             let _ = p.kill();
         }
     }
-    pub(crate) fn database_native_pending_changes(&self) -> usize {
+    #[doc(hidden)]
+    pub fn database_native_pending_changes(&self) -> usize {
         self.workspace.native.pending_changes()
     }
-    pub(crate) fn database_native_stamps(&self) -> Vec<String> {
+    #[doc(hidden)]
+    pub fn database_native_stamps(&self) -> Vec<String> {
         self.workspace.native.stamps()
     }
-    pub(crate) fn database_pending_changes(&self) -> usize {
+    #[doc(hidden)]
+    pub fn database_pending_changes(&self) -> usize {
         self.workspace.changes.len()
             + self.workspace.owners.iter().filter(|c| c.dirty).count()
             + self.workspace.native.pending_changes()
     }
-    pub(crate) fn database_has_owners(&self) -> bool {
+    #[doc(hidden)]
+    pub fn database_has_owners(&self) -> bool {
         !self.database_owners().is_empty()
             || self.workspace.extractor_process.is_some()
             || !rustpy_db::native::poll_retiring().is_empty()
     }
-    pub(crate) fn database_project_changed(&mut self, root: &Path) {
+    #[doc(hidden)]
+    pub fn database_project_changed(&mut self, root: &Path) {
         self.workspace.load(root);
     }
     pub(super) fn workspace_ui(&mut self, ui: &mut egui::Ui, root: &Path) -> Vec<DbEvent> {
@@ -849,11 +860,8 @@ impl DbPanel {
 }
 impl DbPanel {
     /// Executes captured SQL only in an already admitted scoped session.
-    pub(crate) fn open_scoped_sql(
-        &mut self,
-        path: Option<&Path>,
-        sql: String,
-    ) -> Result<(), String> {
+    #[doc(hidden)]
+    pub fn open_scoped_sql(&mut self, path: Option<&Path>, sql: String) -> Result<(), String> {
         let source = path
             .and_then(|p| self.workspace.model.scope(p))
             .map(|s| s.source)
@@ -885,12 +893,14 @@ impl DbPanel {
             Err(self.workspace.last_error.clone())
         }
     }
-    pub(crate) fn edit_database_scope(&mut self, path: &Path) {
+    #[doc(hidden)]
+    pub fn edit_database_scope(&mut self, path: &Path) {
         self.workspace.scope_path = path.display().to_string();
         self.workspace.settings = true;
     }
     /// Facet/SQLAlchemy import authority: no settings module is imported here.
-    pub(crate) fn import_database_source(&mut self, mut source: Source, secret: String) {
+    #[doc(hidden)]
+    pub fn import_database_source(&mut self, mut source: Source, secret: String) {
         source.id = self
             .workspace
             .model
@@ -907,11 +917,8 @@ impl DbPanel {
 }
 
 impl DbPanel {
-    pub(crate) fn sql_schema_hints(
-        &self,
-        path: Option<&Path>,
-        text: &str,
-    ) -> (Vec<String>, Vec<String>) {
+    #[doc(hidden)]
+    pub fn sql_schema_hints(&self, path: Option<&Path>, text: &str) -> (Vec<String>, Vec<String>) {
         let source = path
             .and_then(|p| self.workspace.model.scope(p))
             .map(|s| s.source)
@@ -935,7 +942,8 @@ impl DbPanel {
 }
 impl DbPanel {
     /// Merely registers a local file; opening it never starts a database connection.
-    pub(crate) fn register_database_file(&mut self, root: &Path, path: &Path) {
+    #[doc(hidden)]
+    pub fn register_database_file(&mut self, root: &Path, path: &Path) {
         self.workspace.load(root);
         let dialect = if path
             .extension()
@@ -976,7 +984,8 @@ impl DbPanel {
     }
 }
 impl DbPanel {
-    pub(crate) fn database_diagram_snapshot(&self) -> Result<(String, Vec<Object>), String> {
+    #[doc(hidden)]
+    pub fn database_diagram_snapshot(&self) -> Result<(String, Vec<Object>), String> {
         let console = self
             .workspace
             .owners
@@ -993,7 +1002,8 @@ impl DbPanel {
             objects.clone(),
         ))
     }
-    pub(crate) fn open_diagram_object(
+    #[doc(hidden)]
+    pub fn open_diagram_object(
         &mut self,
         identity: &str,
         captured_json: &str,

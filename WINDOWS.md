@@ -68,8 +68,9 @@ output. Its outputs are `windows-test/rustpy.exe` and
 `rustpy-windows-x86_64-test.zip`. The profile turns off LTO, uses many codegen
 units, omits debug information and compiles workspace crates incrementally.
 Dependencies are built at full optimization once; workspace crates use
-opt-level 2 and the large `rustpy-ui` crate opt-level 0, because at a higher
-level an edit in it spends minutes in code generation. Change them with
+opt-level 2 and the large `rustpy-ui` crate (with the `rustpy-ui-*` crates split out
+of it) opt-level 0, because at a higher level an edit in it spends minutes in code
+generation. Change them with
 `--opt-level N` and `--ui-opt-level N`.
 
 ### Toolchains

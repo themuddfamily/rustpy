@@ -33,7 +33,8 @@ pub struct DbPanel {
 }
 
 impl DbPanel {
-    pub(crate) fn service_rows(&self) -> Vec<(String, DataSource, bool)> {
+    #[doc(hidden)]
+    pub fn service_rows(&self) -> Vec<(String, DataSource, bool)> {
         self.workspace
             .model
             .sources
@@ -57,7 +58,8 @@ impl DbPanel {
             })
             .collect()
     }
-    pub(crate) fn select_service(&mut self, id: &str) -> bool {
+    #[doc(hidden)]
+    pub fn select_service(&mut self, id: &str) -> bool {
         let Some(source) = self
             .workspace
             .model
@@ -82,7 +84,8 @@ impl DbPanel {
         }
         true
     }
-    pub(crate) fn connect_service(&mut self, id: &str) -> Result<(), String> {
+    #[doc(hidden)]
+    pub fn connect_service(&mut self, id: &str) -> Result<(), String> {
         if !self.select_service(id) {
             return Err("Database source no longer exists".into());
         }
@@ -96,7 +99,8 @@ impl DbPanel {
             .unwrap();
         self.workspace.connect(source)
     }
-    pub(crate) fn disconnect_service(&mut self, id: &str) {
+    #[doc(hidden)]
+    pub fn disconnect_service(&mut self, id: &str) {
         if let Some(source) = self
             .workspace
             .model

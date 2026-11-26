@@ -1,0 +1,50 @@
+[package]
+name = "rustpy-ui-panels"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "RustPy IDE: tool window panels (terminal, services, deployment, coverage, profiler, VCS, collaboration, previews)"
+
+[dependencies]
+rustpy-ui-base.workspace = true
+rustpy-core.workspace = true
+rustpy-deploy.workspace = true
+rustpy-docker.workspace = true
+rustpy-http.workspace = true
+rustpy-index.workspace = true
+rustpy-lsp.workspace = true
+rustpy-net.workspace = true
+rustpy-project.workspace = true
+rustpy-run.workspace = true
+rustpy-secrets.workspace = true
+rustpy-semantic.workspace = true
+rustpy-settings.workspace = true
+rustpy-terminal.workspace = true
+rustpy-vcs.workspace = true
+anyhow.workspace = true
+base64 = "0.22"
+chrono.workspace = true
+crossbeam-channel.workspace = true
+dunce.workspace = true
+egui.workspace = true
+getrandom.workspace = true
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "bmp", "webp", "ico"] }
+log.workspace = true
+notify.workspace = true
+parking_lot.workspace = true
+pulldown-cmark = { workspace = true, features = ["html"] }
+regex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+ureq = { version = "2", default-features = false, features = ["tls", "gzip"] }
+url.workspace = true
+
+[dev-dependencies]
+which.workspace = true
+
+# The SSH fixture shared with rustpy-ui's configured_openssh test (remote_gateway).
+[target.'cfg(unix)'.dev-dependencies]
+libc.workspace = true

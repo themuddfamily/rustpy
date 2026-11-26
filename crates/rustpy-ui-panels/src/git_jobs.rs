@@ -513,32 +513,8 @@ impl GitJobs {
     }
 }
 
-/// A scratch directory for tests, removed on drop.
 #[cfg(test)]
-pub(crate) struct TestDir(PathBuf);
-
-#[cfg(test)]
-impl TestDir {
-    pub(crate) fn new(name: &str) -> TestDir {
-        static N: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
-        let n = N.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        let dir = std::env::temp_dir().join(format!("rustpy-{name}-{}-{n}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir_all(&dir).unwrap();
-        TestDir(dir)
-    }
-
-    pub(crate) fn path(&self) -> &Path {
-        &self.0
-    }
-}
-
-#[cfg(test)]
-impl Drop for TestDir {
-    fn drop(&mut self) {
-        let _ = std::fs::remove_dir_all(&self.0);
-    }
-}
+pub(crate) use rustpy_ui_base::test_support::TestDir;
 
 #[cfg(test)]
 mod tests {

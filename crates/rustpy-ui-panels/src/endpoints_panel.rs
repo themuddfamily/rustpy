@@ -95,7 +95,8 @@ fn method_color(m: &str, theme: &UiTheme) -> Color32 {
 }
 
 impl EndpointsPanel {
-    pub(crate) fn set_accessibility_owner(&mut self, available: bool) {
+    #[doc(hidden)]
+    pub fn set_accessibility_owner(&mut self, available: bool) {
         self.accessibility_blocked = !available;
     }
 

@@ -3,7 +3,8 @@ use super::*;
 use rustpy_lsp::gateway::Query;
 use sha2::{Digest, Sha256};
 use std::{fs, os::unix::fs::MetadataExt, process::Command, thread};
-#[path = "../../tests/support/configured_openssh.rs"]
+// Shared with the `configured_openssh` integration test of rustpy-ui.
+#[path = "../../../rustpy-ui/tests/support/configured_openssh.rs"]
 mod openssh_support;
 
 struct OwnedSshSessions(Vec<openssh_support::PinnedSession>);

@@ -81,7 +81,8 @@ impl Default for ProfilerPanel {
 }
 
 impl ProfilerPanel {
-    pub(crate) fn set_accessibility_owner(&mut self, available: bool) {
+    #[doc(hidden)]
+    pub fn set_accessibility_owner(&mut self, available: bool) {
         self.accessibility_blocked = !available;
     }
 
