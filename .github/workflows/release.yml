@@ -120,6 +120,8 @@ jobs:
     timeout-minutes: 180
     env:
       RUSTFLAGS: -C target-feature=+crt-static
+      # Also the build script's default; stated here so the dependency cache key tracks it.
+      CARGO_PROFILE_RELEASE_DEBUG: '0'
     strategy:
       fail-fast: false
       matrix:
