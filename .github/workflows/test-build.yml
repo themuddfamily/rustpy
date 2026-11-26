@@ -1,0 +1,16 @@
+name: Test build
+# A quick Windows package for hands-on testing. Not a release: nothing is tagged or published.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: test-build-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - run: echo "placeholder until the quick build steps land"
