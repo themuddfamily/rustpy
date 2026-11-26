@@ -3,6 +3,7 @@ name = "rustpy"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
 rust-version.workspace = true
 description = "RustPy: a full-featured Python IDE written in Rust"
 default-run = "rustpy"

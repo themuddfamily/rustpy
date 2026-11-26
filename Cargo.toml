@@ -74,7 +74,6 @@ unicode-width = "0.2"
 unicode-segmentation = "1"
 unicode-ident = "1"
 memchr = "2"
-bitflags = "2"
 dirs = "6"
 
 pulldown-cmark = { version = "0.13", default-features = false }
@@ -89,7 +88,6 @@ similar = "3"
 chrono = "0.4"
 egui = "0.36"
 eframe = { version = "0.36", default-features = false, features = ["default_fonts", "glow", "wayland", "x11", "persistence", "accesskit"] }
-egui_extras = { version = "0.36", features = ["syntect"] }
 # macOS only: the "open documents" Apple Event handler (rustpy-ui/src/macos_open.rs).
 objc2 = "0.6"
 objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSAppleEventDescriptor", "NSAppleEventManager", "NSNotification", "NSString", "NSURL"] }

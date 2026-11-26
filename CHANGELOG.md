@@ -14,6 +14,8 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
+- **Build:** removed unused workspace dependencies and inherited the repository URL in
+  the application package, clearing Cargo's three workspace manifest warnings.
 - **Code completion:** when type inference took longer than the lookup's time budget, smart
   completion (Ctrl+Shift+Space) left out its expected-type suggestions such as `Point()` or
   `Color.RED`. The lookup now opens with what was found and fills in the rest when inference
