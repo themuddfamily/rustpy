@@ -21,7 +21,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: release
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 env:
   CARGO_BUILD_JOBS: '2'
