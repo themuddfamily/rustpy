@@ -36,12 +36,27 @@ pub struct Model {
     pub family: Family,
     pub fields: Vec<Field>,
 }
+/// The outermost expression with exactly `range` (the first in preorder).
+/// Found by position: a walk of the whole file for every framework call
+/// query made inspection quadratic in the file size.
 fn expression(file: &FileInfo, range: TextRange) -> Option<ast::Expr> {
-    file.parse
-        .syntax_node()
-        .descendants()
-        .filter(|node| node.text_range() == range)
-        .find_map(ast::Expr::cast)
+    let root = file.parse.syntax_node();
+    if range.is_empty() || !root.text_range().contains_range(range) {
+        return root
+            .descendants()
+            .filter(|node| node.text_range() == range)
+            .find_map(ast::Expr::cast);
+    }
+    let start = match root.covering_element(range) {
+        rustpy_syntax::rowan::NodeOrToken::Node(node) => node,
+        rustpy_syntax::rowan::NodeOrToken::Token(token) => token.parent()?,
+    };
+    start
+        .ancestors()
+        .skip_while(|node| node.text_range() != range)
+        .take_while(|node| node.text_range() == range)
+        .filter_map(ast::Expr::cast)
+        .last()
 }
 pub fn origin(file: &FileInfo, expr: &ast::Expr) -> Option<String> {
     origin_inner(file, expr, 0)

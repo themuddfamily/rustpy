@@ -209,7 +209,8 @@ Runs the code inspections over a project without opening a window.
                      .descriptions.xml), json (the same as .json),
                      plain (printed, and saved as inspections.txt) or sarif (one
                      SARIF 2.1.0 log, results.sarif).
-  -v0, -v1, -v2      Quiet, summary (default), or every file and problem.
+  -v0, -v1, -v2      Quiet; progress per file and a summary (default); or also
+                     every problem.
 
 Exit status: 0 when no problem has the Error severity, 1 when some do, 2 when the
 inspection could not run (bad arguments, unknown profile, unwritable output).

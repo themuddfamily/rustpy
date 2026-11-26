@@ -490,6 +490,19 @@ pub fn dictionary() -> rustpy_spell::Dictionary {
     rustpy_spell::Dictionary::bundled().with_user_words(&words)
 }
 
+/// What [`inspect_files`] reports while it runs, from its worker threads.
+#[derive(Clone, Copy, Debug)]
+pub enum Progress<'a> {
+    /// A worker starts on this file.
+    Started(&'a Path),
+    /// A worker is done with this file, after this long.
+    Finished(&'a Path, std::time::Duration),
+}
+
+/// A file that takes at least this long is named in the progress output, so
+/// a slow run shows where its time goes.
+const SLOW_FILE: std::time::Duration = std::time::Duration::from_secs(10);
+
 /// Inspects `files` (absolute paths in `project`), in parallel.
 /// Analysis cancellation is a failure, never a partial successful report.
 pub fn inspect_files(
@@ -498,8 +511,11 @@ pub fn inspect_files(
     files: &[PathBuf],
     profile: &Profile,
     opts: &InspectionOptions,
-    mut progress: impl FnMut(&Path) + Send,
+    mut progress: impl FnMut(Progress<'_>) + Send,
 ) -> Result<Vec<Finding>, Cancelled> {
+    // Inference asks for the same files thousands of times; without this
+    // guard every request re-read and re-hashed the file from disk.
+    let _batch = analysis.batch_reads();
     let dictionary = dictionary();
     let token = CancellationToken::new();
     let errors: Mutex<Option<Cancelled>> = Mutex::new(None);
@@ -521,8 +537,14 @@ pub fn inspect_files(
                         let i = next.fetch_add(1, Ordering::SeqCst);
                         let Some(path) = files.get(i) else { break };
                         if let Ok(mut p) = progress.lock() {
-                            (*p)(path);
+                            (*p)(Progress::Started(path));
                         }
+                        let started = std::time::Instant::now();
+                        let finished = || {
+                            if let Ok(mut p) = progress.lock() {
+                                (*p)(Progress::Finished(path, started.elapsed()));
+                            }
+                        };
                         let (text, diags) = if is_python(path) {
                             match analysis.file_for_path(path) {
                                 Some(file) => {
@@ -548,6 +570,7 @@ pub fn inspect_files(
                                 }
                                 None => {
                                     let Some(error) = analysis.file_encoding_error(path) else {
+                                        finished();
                                         continue;
                                     };
                                     // Report a source failure without pretending a decoded
@@ -570,7 +593,10 @@ pub fn inspect_files(
                                         markdown_diagnostics(&text, &profile.groups, &dictionary);
                                     (text, diags)
                                 }
-                                Err(_) => continue,
+                                Err(_) => {
+                                    finished();
+                                    continue;
+                                }
                             }
                         };
                         let index = LineIndex::new(&text);
@@ -581,6 +607,7 @@ pub fn inspect_files(
                         if let Ok(mut r) = results.lock() {
                             r.extend(found);
                         }
+                        finished();
                     }
                 })
                 .expect("cannot start an inspection worker");
@@ -786,26 +813,46 @@ pub fn run_with(
             return 2;
         }
     };
-    let progress_out: Mutex<Vec<String>> = Mutex::new(Vec::new());
-    let findings = match inspect_files(&analysis, &project, &files, &profile, &opts, |p| {
-        if verbose >= 2 {
-            if let Ok(mut lines) = progress_out.lock() {
-                lines.push(format!(
-                    "Inspecting {}",
-                    p.strip_prefix(&project).unwrap_or(p).display()
-                ));
-            }
+    if verbose >= 1 {
+        let _ = writeln!(out, "{} file(s) to inspect", files.len());
+        let _ = out.flush();
+    }
+    // Workers report through a channel; this thread prints each line as it
+    // comes, so a long run shows which file it is on instead of looking hung.
+    let (sender, receiver) = std::sync::mpsc::channel::<String>();
+    let total = files.len();
+    let relative = |p: &Path| p.strip_prefix(&project).unwrap_or(p).display().to_string();
+    let inspected = std::thread::scope(|s| {
+        let worker = s.spawn(|| {
+            let mut started = 0usize;
+            inspect_files(&analysis, &project, &files, &profile, &opts, move |event| {
+                let line = match event {
+                    Progress::Started(p) if verbose >= 1 => {
+                        started += 1;
+                        format!("[{started}/{total}] Inspecting {}", relative(p))
+                    }
+                    Progress::Finished(p, took) if verbose >= 1 && took >= SLOW_FILE => {
+                        format!("{} took {:.1} s", relative(p), took.as_secs_f64())
+                    }
+                    _ => return,
+                };
+                let _ = sender.send(line);
+            })
+        });
+        for line in receiver {
+            let _ = writeln!(out, "{line}");
+            let _ = out.flush();
         }
-    }) {
-        Ok(findings) => findings,
-        Err(error) => {
+        worker.join()
+    });
+    let findings = match inspected {
+        Ok(Ok(findings)) => findings,
+        Ok(Err(error)) => {
             let _ = writeln!(err, "rustpy inspect: {error}");
             return 2;
         }
+        Err(panic) => std::panic::resume_unwind(panic),
     };
-    for line in progress_out.into_inner().unwrap_or_default() {
-        let _ = writeln!(out, "{line}");
-    }
     let written = match report::write(
         args.format,
         &args.output,
@@ -1084,7 +1131,11 @@ mod tests {
             std::slice::from_ref(&path),
             &profile,
             &opts,
-            |p| visited.push(p.to_path_buf()),
+            |event| {
+                if let Progress::Started(p) = event {
+                    visited.push(p.to_path_buf())
+                }
+            },
         )
         .unwrap();
         assert_eq!(visited, [path]);
@@ -1484,5 +1535,132 @@ mod tests {
             "{error}"
         );
         assert!(!a.output.exists());
+    }
+
+    /// A module like the standard library's: functions that test and rebind
+    /// one variable in a row of `if` statements, checked with `isinstance`
+    /// and with a plain function, and a query-builder method chain on an
+    /// unresolved name. Inspection used to be exponential in the length of
+    /// such a row or chain (seven of either took minutes).
+    fn rebinding_module(n: usize) -> String {
+        let mut source = String::from(
+            "\"\"\"Generated.\"\"\"\n\n\ndef check(x):\n    \"\"\"Check.\"\"\"\n    return bool(x)\n\n\ndef f(value):\n    \"\"\"Rebind.\"\"\"\n",
+        );
+        for i in 0..n {
+            let test = if i % 2 == 0 {
+                "isinstance(value, int)"
+            } else {
+                "check(value)"
+            };
+            source.push_str(&format!("    if {test}:\n        value = value\n"));
+        }
+        source.push_str(
+            "    return value\n\n\ndef chain(x):\n    \"\"\"Chain.\"\"\"\n    return Query.rows",
+        );
+        source.push_str(&".filter(x)".repeat(n));
+        source.push('\n');
+        source
+    }
+
+    /// Runs `inspect_files` over `files` on another thread; `None` when it
+    /// is still running after `limit`.
+    fn inspect_within(
+        project: &Path,
+        files: Vec<PathBuf>,
+        limit: std::time::Duration,
+    ) -> Option<(usize, std::time::Duration)> {
+        let project = project.to_path_buf();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        std::thread::spawn(move || {
+            let analysis = Analysis::for_project(&project);
+            let groups = InspectionSettings {
+                spelling: false,
+                grammar: false,
+                ..Default::default()
+            };
+            let profile = Profile::from_groups("Default", "test", groups);
+            let opts = inspection_options(&profile.groups, 120, (3, 12));
+            let started = std::time::Instant::now();
+            let mut visited = 0;
+            let result = inspect_files(&analysis, &project, &files, &profile, &opts, |event| {
+                if let Progress::Started(_) = event {
+                    visited += 1;
+                }
+            });
+            let _ = sender.send((result.is_ok().then_some(visited), started.elapsed()));
+        });
+        let (visited, took) = receiver.recv_timeout(limit).ok()?;
+        Some((visited.expect("inspection cancelled"), took))
+    }
+
+    #[test]
+    fn conditional_rebinding_chain_is_inspected_in_bounded_time() {
+        let source = rebinding_module(40);
+        let dir = project_with(&[("chain.py", source.as_str())]);
+        let file = dir.path().join("chain.py");
+        let limit = std::time::Duration::from_secs(120);
+        let (visited, _) = inspect_within(dir.path(), vec![file], limit).expect(
+            "a 40-long rebinding row and method chain were still being inspected after 120 s",
+        );
+        assert_eq!(visited, 1);
+    }
+
+    #[test]
+    fn inspection_time_grows_linearly_with_the_number_of_files() {
+        const N: usize = 8;
+        let sources: Vec<(String, String)> = (0..2 * N)
+            .map(|i| (format!("pkg/m{i}.py"), rebinding_module(12)))
+            .collect();
+        let entries: Vec<(&str, &str)> = sources
+            .iter()
+            .map(|(name, text)| (name.as_str(), text.as_str()))
+            .collect();
+        let dir = project_with(&entries);
+        let files: Vec<PathBuf> = sources
+            .iter()
+            .map(|(name, _)| dir.path().join(name))
+            .collect();
+        let limit = std::time::Duration::from_secs(120);
+        // Warm the bundled stubs once so neither measurement pays for them.
+        inspect_within(dir.path(), files[..1].to_vec(), limit).expect("warm-up");
+        let (_, half) = inspect_within(dir.path(), files[..N].to_vec(), limit)
+            .expect("N files were still being inspected after 120 s");
+        let (visited, all) = inspect_within(dir.path(), files.clone(), limit)
+            .expect("2N files were still being inspected after 120 s");
+        assert_eq!(visited, 2 * N);
+        assert!(
+            all <= half * 4 + std::time::Duration::from_secs(2),
+            "{N} files took {half:?}, {} took {all:?}",
+            2 * N
+        );
+    }
+
+    #[test]
+    fn progress_is_reported_per_file_as_it_happens() {
+        let dir = project_with(&[("a.py", "x = 1\n"), ("b/c.py", "y = 2\n")]);
+        let out_dir = dir.path().join("out");
+        let (code, out, err) = run_inspect(
+            &args(dir.path(), &out_dir, ReportFormat::Json),
+            &quiet_settings(),
+        );
+        assert_eq!(code, 0, "{out}{err}");
+        let out = out.replace('\\', "/");
+        assert!(out.contains("2 file(s) to inspect"), "{out}");
+        assert!(
+            out.contains("[1/2] Inspecting ") && out.contains("[2/2] Inspecting "),
+            "{out}"
+        );
+        assert!(
+            out.contains("Inspecting a.py") && out.contains("Inspecting b/c.py"),
+            "{out}"
+        );
+        let (_, quiet, _) = run_inspect(
+            &InspectArgs {
+                verbosity: 0,
+                ..args(dir.path(), &out_dir, ReportFormat::Json)
+            },
+            &quiet_settings(),
+        );
+        assert!(quiet.is_empty(), "{quiet}");
     }
 }

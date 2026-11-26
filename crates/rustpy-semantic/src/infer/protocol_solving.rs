@@ -26,6 +26,8 @@ impl Inferer<'_> {
         }
         let depth = PROTOCOL_SOLVE_DEPTH.with(Cell::get);
         if depth >= 8 {
+            // A cut like a cycle's: nothing in progress may become final.
+            self.note_cycle(1);
             return;
         }
         let Some(names) = self.protocol_member_names(protocol) else {

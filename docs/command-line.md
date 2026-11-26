@@ -39,7 +39,9 @@ rustpy --headless http requests.http --env staging --json
 Formatting accepts `-s`/`-settings`, `-r`/`-R`, `-m`/`-mask`, `-charset`,
 `-d`/`-dry` and `-allowDefaults`. Dry format exits 1 when changes are needed.
 Inspections accept XML, JSON, plain text and SARIF output, a profile name or file,
-`-changes`, `-d` directory and `-v0`/`-v1`/`-v2`. See each command's `--help`
+`-changes`, `-d` directory and `-v0`/`-v1`/`-v2`. With `-v1` (the default) and `-v2`,
+`inspect` prints each file as it starts (`[12/90] Inspecting pkg/mod.py`) and names any
+file that takes ten seconds or more; `-v0` prints nothing. See each command's `--help`
 for its report and exit-status policy.
 
 ### Tests

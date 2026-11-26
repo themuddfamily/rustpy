@@ -771,6 +771,8 @@ impl Inferer<'_> {
     pub(super) fn implicit_slot(&self, receiver: &Type, name: &str) -> Option<Type> {
         let depth = self.member_protocol_depth.get();
         if depth >= 32 {
+            // A cut like a cycle's: nothing in progress may become final.
+            self.note_cycle(1);
             return Some(Type::Unknown);
         }
         self.member_protocol_depth.set(depth + 1);
