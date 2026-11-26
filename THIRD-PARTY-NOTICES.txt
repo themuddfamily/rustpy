@@ -42593,7 +42593,7 @@ SOFTWARE.
 
 
 Hack font license
-Source: crates/rustpy-ui/assets/fonts/LICENSE-Hack.txt
+Source: crates/rustpy-ui-base/assets/fonts/LICENSE-Hack.txt
 ------------------------------------------------------------------------
 The work in the Hack project is Copyright 2018 Source Foundry Authors and licensed under the MIT License
 
@@ -42643,7 +42643,7 @@ Except as contained in this notice, the names of Gnome, the Gnome Foundation, an
 
 
 Noto Emoji font license
-Source: crates/rustpy-ui/assets/fonts/OFL-NotoEmoji.txt
+Source: crates/rustpy-ui-base/assets/fonts/OFL-NotoEmoji.txt
 ------------------------------------------------------------------------
 Copyright 2013 Google LLC
 

@@ -51,6 +51,7 @@ rustpy-net = { path = "crates/rustpy-net", version = "1.0.0" }
 rustpy-secrets = { path = "crates/rustpy-secrets", version = "1.0.0" }
 rustpy-cli = { path = "crates/rustpy-cli", version = "1.0.0" }
 rustpy-ui = { path = "crates/rustpy-ui", version = "1.0.0" }
+rustpy-ui-base = { path = "crates/rustpy-ui-base", version = "1.0.0" }
 rustpy-lsp = { path = "crates/rustpy-lsp", version = "1.0.0" }
 
 anyhow = "1"
@@ -112,8 +113,12 @@ debug = "line-tables-only"
 opt-level = 2
 debug = false
 # UI integration tests exercise behavior; avoid optimizing this large crate
-# and retaining full type debug information on every semantic change.
+# and retaining full type debug information on every semantic change. The
+# crates split out of rustpy-ui keep the same settings.
 [profile.test.package.rustpy-ui]
+opt-level = 0
+debug = "line-tables-only"
+[profile.test.package.rustpy-ui-base]
 opt-level = 0
 debug = "line-tables-only"
 [profile.release]

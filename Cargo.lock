@@ -6308,7 +6308,6 @@ version = "1.0.0"
 dependencies = [
  "anyhow",
  "arabic_reshaper",
- "arboard",
  "base64 0.22.1",
  "blake3",
  "chrono",
@@ -6325,7 +6324,6 @@ dependencies = [
  "image",
  "libc",
  "log",
- "memmap2",
  "notify",
  "objc2 0.6.5",
  "objc2-foundation 0.3.2",
@@ -6373,13 +6371,13 @@ dependencies = [
  "rustpy-test",
  "rustpy-text",
  "rustpy-textmate",
+ "rustpy-ui-base",
  "rustpy-updates",
  "rustpy-vcs",
  "serde",
  "serde_json",
  "sha2 0.10.9",
  "similar 3.2.0",
- "skrifa",
  "tempfile",
  "toml 1.1.8+spec-1.1.0",
  "unicode-bidi",
@@ -6392,6 +6390,29 @@ dependencies = [
  "windows-sys 0.61.2",
  "wry",
  "zbus",
+]
+
+[[package]]
+name = "rustpy-ui-base"
+version = "1.0.0"
+dependencies = [
+ "arboard",
+ "crossbeam-channel",
+ "dirs 6.0.0",
+ "egui",
+ "fontdb",
+ "log",
+ "memmap2",
+ "roxmltree 0.20.0",
+ "rustc-hash 2.1.3",
+ "rustpy-highlight",
+ "rustpy-i18n",
+ "rustpy-settings",
+ "serde",
+ "serde_json",
+ "skrifa",
+ "tempfile",
+ "unicode-normalization",
 ]
 
 [[package]]

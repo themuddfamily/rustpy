@@ -64,7 +64,7 @@ pub struct ColorSchemeContribution {
     pub scheme: ColorScheme,
 }
 
-/// One keymap, in the shape of `rustpy-ui/assets/keymaps/*.json`: layered over
+/// One keymap, in the shape of `rustpy-ui-base/assets/keymaps/*.json`: layered over
 /// the Default keymap, each listed action gets exactly the given shortcuts.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct KeymapContribution {

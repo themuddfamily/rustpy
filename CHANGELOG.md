@@ -21,6 +21,11 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
   licence evidence for each build is published once per architecture beside the packages, as
   the release asset `rustpy-<version>-windows-<arch>-native-licenses.zip`.
 
+- **Build:** the UI foundation (theme, fonts, localization, accessibility, actions and
+  keymaps) moved out of the large `rustpy-ui` crate into `rustpy-ui-base`, which compiles in
+  parallel with the rest of the workspace and is not rebuilt by edits in `rustpy-ui`. The IDE
+  behaves exactly as before.
+
 ### Fixed
 
 - **Build:** removed unused workspace dependencies and inherited the repository URL in

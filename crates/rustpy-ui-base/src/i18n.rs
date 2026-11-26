@@ -148,7 +148,7 @@ impl<'u> LocalizedUi<'u> {
             add_contents(&mut LocalizedUi(ui))
         });
         if top_level {
-            crate::custom_menus::mnemonic(&response.response, &source);
+            crate::menu_snapshot::mnemonic(&response.response, &source);
         }
         response
     }
@@ -421,59 +421,6 @@ mod tests {
         for t in ["File", "Status Bar", "item"] {
             assert!(texts.iter().any(|s| s == t), "{t} in {texts:?}");
         }
-    }
-
-    #[test]
-    fn the_main_menu_and_the_editor_context_menu_are_localized() {
-        // Their labels are English literals that `LocalizedUi` translates: without it they stay English.
-        let app = include_str!("app.rs");
-        let menu_bar = &app[app.find("    fn menu_bar(").expect("IdeApp::menu_bar")..];
-        let menu_bar = &menu_bar[..menu_bar[1..]
-            .find("\n    fn ")
-            .map_or(menu_bar.len(), |end| end + 1)];
-        assert!(
-            menu_bar.contains("LocalizedUi::new(ui)"),
-            "IdeApp::menu_bar builds its menus on crate::i18n::LocalizedUi"
-        );
-        let view = include_str!("editor/view.rs");
-        assert!(
-            context_menu_prologue(view).contains("LocalizedUi::new(ui)"),
-            "the editor context menu is built on crate::i18n::LocalizedUi"
-        );
-    }
-
-    /// The editor context menu's closure up to its first item (`run(ui, …)`): where its `ui`
-    /// has to become a `LocalizedUi` for the submenus to be translated.
-    fn context_menu_prologue(view: &str) -> &str {
-        let menu = &view[view
-            .find("crate::a11y::bound_keyboard_context_menu(")
-            .expect("the authority-bound editor context menu")..];
-        let body = &menu[menu
-            .find(".show(|ui| {")
-            .expect("the editor context menu's actual popup closure")..];
-        &body[..body
-            .find("run(ui, ")
-            .expect("the context menu adds its items with run(ui, …)")]
-    }
-
-    #[test]
-    fn the_context_menu_check_reads_the_whole_prologue() {
-        // Main's has_cells line, merged in before the wrapper, pushed it past the 300 characters
-        // the check used to read.
-        let long = format!("crate::a11y::bound_keyboard_context_menu(&resp, cfg.keyboard, authority).show(|ui| {{\n    let has_cells = {};\n    let ui = &mut crate::i18n::LocalizedUi::new(ui);\n    let mut run = |ui: &mut egui::Ui, a: Action| {{}};\n    run(ui, Action::Cut);\n", "x".repeat(400));
-        assert!(context_menu_prologue(&long).contains("LocalizedUi::new(ui)"));
-        let unrelated = format!(
-            "other.show(|ui| {{ let ui = LocalizedUi::new(ui); run(ui, Action::Copy); }});\n{long}"
-        );
-        assert!(
-            context_menu_prologue(&unrelated).contains("has_cells"),
-            "the prologue comes from the actual bound menu, not an unrelated popup"
-        );
-        let late = "crate::a11y::bound_keyboard_context_menu(&resp, cfg.keyboard, authority).show(|ui| {\n    run(ui, Action::Cut);\n    let ui = &mut crate::i18n::LocalizedUi::new(ui);\n";
-        assert!(
-            !context_menu_prologue(late).contains("LocalizedUi::new(ui)"),
-            "a wrapper after the first item does not count"
-        );
     }
 
     /// The texts painted by a frame.

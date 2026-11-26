@@ -9,6 +9,7 @@ how to run the checks on a shared or small machine, and what a pull request shou
 |---|---|
 | `crates/rustpy` | The binary: argument handling, logging, startup |
 | `crates/rustpy-ui` | The egui application: editor view, tool windows, dialogs, settings pages |
+| `crates/rustpy-ui-base` | UI foundation split out of `rustpy-ui`: theme, fonts, localization, accessibility, actions and keymaps; `rustpy-ui` re-exports its modules under their old paths |
 | `crates/rustpy-*` | Engine and integration crates; see [architecture.md](architecture.md) |
 | `crates/rustpy-semantic/typeshed` | Bundled typeshed stubs (third-party, do not edit by hand) |
 | `vendor/` | Patched copies of `eframe` and `egui_glow`, excluded from the workspace |

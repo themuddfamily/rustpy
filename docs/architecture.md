@@ -13,6 +13,7 @@ entry points. The source tree, rather than this guide, defines exact API names.
 | `rustpy-settings`, `rustpy-secrets`, `rustpy-net` | Serializable preferences, machine/project scope, credential storage and HTTP trust/proxy policy |
 | `rustpy-run`, `rustpy-debug`, `rustpy-test` | Owned children/PTYs, DAP, tests/coverage/profiling/concurrency, cancellation/drain/reap |
 | `rustpy-ui` | Editor state/view mapping, window/dialog/tool-window state and explicit dispatch into backends |
+| `rustpy-ui-base` | UI foundation below `rustpy-ui` (theme, fonts, localization glue, accessibility, actions/keymaps, clipboard seam); depends on no other UI module |
 | `rustpy-cli`, `rustpy-lsp`, `rustpy` | Argument/IPC/headless policy, language-server transport and binary startup |
 | Integration crates | VCS, terminal/console, packages, deployment, database, Docker, HTTP, AI, notebook and plugin protocols |
 

@@ -1,12 +1,12 @@
 //! Presentation of a retained live content identity; closing is delegated to its owner.
 #[derive(Default)]
-pub(crate) struct Appearance {
+pub struct Appearance {
     pub title: String,
     pub color: Option<[u8; 3]>,
     pub pinned: bool,
 }
 #[derive(Clone, Copy, Default)]
-pub(crate) enum Command {
+pub enum Command {
     #[default]
     None,
     Close,
@@ -51,11 +51,7 @@ impl Appearance {
 
 /// Typing from an actual tree/list row starts its real filter. A focused text
 /// field and editor retain their events; this never acts on mere panel visibility.
-pub(crate) fn type_to_filter(
-    ctx: &egui::Context,
-    owner: Option<egui::Id>,
-    filter: &mut String,
-) -> bool {
+pub fn type_to_filter(ctx: &egui::Context, owner: Option<egui::Id>, filter: &mut String) -> bool {
     let Some(owner) = owner else {
         return false;
     };

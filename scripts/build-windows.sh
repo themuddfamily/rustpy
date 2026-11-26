@@ -39,7 +39,7 @@ signature. Output:
                    gnu: MinGW (x86_64-pc-windows-gnu), linked with ld.lld when
                    installed. auto (default): msvc when available, else gnu.
   --opt-level N    optimization level of the workspace crates (0-3, default 2)
-  --ui-opt-level N optimization level of the large rustpy-ui crate (0-3,
+  --ui-opt-level N optimization level of the large rustpy-ui crates (0-3,
                    default 0): an edit there rebuilds in about 20 s at 0 and
                    about a minute at 1; raise it if the UI feels slow
   --linker NAME    gnu only: lld (default when ld.lld is installed) or bfd
@@ -207,8 +207,11 @@ if (( fast )); then
         --config "profile.$profile.incremental=true"
         --config "profile.$profile.package.'*'.opt-level=3"
         --config "profile.$profile.package.'*'.codegen-units=16"
-        --config "profile.$profile.package.rustpy-ui.opt-level=$ui_opt_level"
     )
+    # The UI crates split out of rustpy-ui keep its optimization level.
+    for ui_crate in rustpy-ui rustpy-ui-base; do
+        cargo_args+=(--config "profile.$profile.package.$ui_crate.opt-level=$ui_opt_level")
+    done
     if [[ $linker == lld ]]; then
         # Scoped to the Windows target: build scripts and proc macros are unaffected.
         cargo_args+=(--config "target.$target.rustflags=['-C','link-arg=-fuse-ld=lld']")

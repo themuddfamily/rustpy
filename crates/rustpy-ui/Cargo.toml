@@ -54,9 +54,9 @@ rustpy-index.workspace = true
 rustpy-net.workspace = true
 rustpy-secrets.workspace = true
 rustpy-cli.workspace = true
+rustpy-ui-base.workspace = true
 base64 = "0.22"
 blake3 = "1"
-arboard = { version = "3", default-features = false }
 rustpy-console.workspace = true
 rustpy-plugins.workspace = true
 dirs.workspace = true
@@ -74,8 +74,6 @@ eframe.workspace = true
 raw-window-handle = "0.6"
 anyhow.workspace = true
 log.workspace = true
-# Large font files are mapped rather than read (src/fonts.rs); already in the tree.
-memmap2 = "0.9"
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
@@ -91,8 +89,6 @@ image = { version = "0.25", default-features = false, features = ["png", "jpeg",
 # Installed fonts (Settings › Editor › Font, fallbacks for CJK and other scripts).
 fontdb = "0.24"
 resvg = { version = "0.48.1", default-features = false, features = ["text", "raster-images"] }
-# Validates a system CJK font with the parser egui uses (egui panics on fonts it cannot read).
-skrifa = { version = "0.44", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 which.workspace = true

@@ -1,10 +1,14 @@
 //! RustPy IDE — egui/eframe front-end (roadmap §0.3, §1, §5).
+//!
+//! The foundation widgets and services (theme, fonts, localization, accessibility,
+//! actions and keymaps) live in `rustpy-ui-base` and are re-exported here under
+//! their old paths.
 
-pub mod a11y;
+pub use rustpy_ui_base::a11y;
 mod accessibility_announcements;
 mod accessibility_palette;
-mod accessibility_policy;
-pub mod actions;
+use rustpy_ui_base::accessibility_policy;
+pub use rustpy_ui_base::actions;
 pub mod ai_panel;
 pub mod app;
 mod appearance_assets;
@@ -34,7 +38,7 @@ pub mod endpoints_panel;
 mod external_tool_settings;
 mod external_tool_workspace;
 pub mod external_tools;
-pub mod fonts;
+pub use rustpy_ui_base::fonts;
 pub mod freeze;
 pub mod git_jobs;
 pub mod git_panel;
@@ -42,7 +46,7 @@ mod github_panel;
 pub mod hierarchy_panel;
 pub mod history_store;
 pub mod http_panel;
-pub mod i18n;
+pub use rustpy_ui_base::i18n;
 pub mod input_script;
 pub mod launch;
 pub mod learn_panel;
@@ -75,18 +79,20 @@ mod settings_archive;
 mod status_text;
 pub mod switcher;
 pub mod symbol_index;
-mod system_clipboard;
+use rustpy_ui_base::system_clipboard;
 mod system_notifications;
 pub mod terminal_panel;
 #[cfg(test)]
 mod test_isolation;
 pub mod test_panel;
-pub mod text_selection;
-pub mod theme;
+pub use rustpy_ui_base::text_selection;
+pub use rustpy_ui_base::theme;
 mod todo_patterns;
-mod tool_tabs;
+use rustpy_ui_base::tool_tabs;
 #[cfg(test)]
 mod ui_snapshot;
+#[cfg(test)]
+mod ui_source_checks;
 // Public for the Windows acceptance helper (examples/windows_browser_acceptance.rs).
 #[doc(hidden)]
 pub mod web_browser_workspace;
