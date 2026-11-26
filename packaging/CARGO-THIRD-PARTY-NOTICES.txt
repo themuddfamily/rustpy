@@ -329,12 +329,12 @@ Text SHA-256: a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
 Notice: LICENSE-MIT
 Text SHA-256: 15656cc11a8331f28c0986b8ab97220d3e76f98e60ed388b5ffad37dfac4710c
 
-arboard@3.6.1
+arboard@3.7.0
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
 Selected: MIT
-Source: https://crates.io/api/v1/crates/arboard/3.6.1/download
-Source SHA-256: 0348a1c054491f4bfe6ab86a7b6ab1e44e45d899005de92f58b3df180b36ddaf
+Source: https://crates.io/api/v1/crates/arboard/3.7.0/download
+Source SHA-256: aeb9553e62312c8756a5979254fc6d7da8bbeb5986a1e17037fab932f7037917
 Notice: LICENSE-APACHE.txt
 Text SHA-256: 0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594
 Notice: LICENSE-MIT.txt
@@ -8165,28 +8165,6 @@ Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
 Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
 
-windows-sys@0.59.0
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows-sys/0.59.0/download
-Source SHA-256: 1e38bc4d79ed67fd075bcc251a1c39b32a1776bbe92e5bef1f0bf1f8c531853b
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
-windows-sys@0.60.2
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows-sys/0.60.2/download
-Source SHA-256: f2f500e4d28234f72040990ec9d39e3a6b950f9f22d3dba18416c35882612bcb
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
 windows-sys@0.61.2
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
@@ -8215,17 +8193,6 @@ Declared: MIT OR Apache-2.0
 Selected: MIT
 Source: https://crates.io/api/v1/crates/windows-targets/0.52.6/download
 Source SHA-256: 9b724f72796e036ab90c1021d4780d4d3d648aca59e491e6b98e725b84e99973
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
-windows-targets@0.53.5
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows-targets/0.53.5/download
-Source SHA-256: 4945f9f551b88e0d65f3db0bc25c33b8acea4d9e41163edf90dcd0b19f9069f3
 Notice: license-apache-2.0
 Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
@@ -8286,17 +8253,6 @@ Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
 Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
 
-windows_aarch64_gnullvm@0.53.1
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows_aarch64_gnullvm/0.53.1/download
-Source SHA-256: a9d8416fa8b42f5c947f8482c43e7d89e73a173cead56d044f6a56104a6d1b53
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
 windows_aarch64_msvc@0.42.2
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
@@ -8314,17 +8270,6 @@ Declared: MIT OR Apache-2.0
 Selected: MIT
 Source: https://crates.io/api/v1/crates/windows_aarch64_msvc/0.52.6/download
 Source SHA-256: 09ec2a7bb152e2252b53fa7803150007879548bc709c039df7627cabbd05d469
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
-windows_aarch64_msvc@0.53.1
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows_aarch64_msvc/0.53.1/download
-Source SHA-256: b9d782e804c2f632e395708e99a94275910eb9100b2114651e04744e9b125006
 Notice: license-apache-2.0
 Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
@@ -8352,34 +8297,12 @@ Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
 Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
 
-windows_i686_gnu@0.53.1
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows_i686_gnu/0.53.1/download
-Source SHA-256: 960e6da069d81e09becb0ca57a65220ddff016ff2d6af6a223cf372a506593a3
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
 windows_i686_gnullvm@0.52.6
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
 Selected: MIT
 Source: https://crates.io/api/v1/crates/windows_i686_gnullvm/0.52.6/download
 Source SHA-256: 0eee52d38c090b3caa76c563b86c3a4bd71ef1a819287c19d586d7334ae8ed66
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
-windows_i686_gnullvm@0.53.1
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows_i686_gnullvm/0.53.1/download
-Source SHA-256: fa7359d10048f68ab8b09fa71c3daccfb0e9b559aed648a8f95469c27057180c
 Notice: license-apache-2.0
 Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
@@ -8407,17 +8330,6 @@ Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
 Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
 
-windows_i686_msvc@0.53.1
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows_i686_msvc/0.53.1/download
-Source SHA-256: 1e7ac75179f18232fe9c285163565a57ef8d3c89254a30685b57d83a38d326c2
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
 windows_x86_64_gnu@0.42.2
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
@@ -8435,17 +8347,6 @@ Declared: MIT OR Apache-2.0
 Selected: MIT
 Source: https://crates.io/api/v1/crates/windows_x86_64_gnu/0.52.6/download
 Source SHA-256: 147a5c80aabfbf0c7d901cb5895d1de30ef2907eb21fbbab29ca94c5b08b1a78
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
-windows_x86_64_gnu@0.53.1
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows_x86_64_gnu/0.53.1/download
-Source SHA-256: 9c3842cdd74a865a8066ab39c8a7a473c0778a3f29370b5fd6b4b9aa7df4a499
 Notice: license-apache-2.0
 Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
@@ -8473,17 +8374,6 @@ Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
 Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
 
-windows_x86_64_gnullvm@0.53.1
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows_x86_64_gnullvm/0.53.1/download
-Source SHA-256: 0ffa179e2d07eee8ad8f57493436566c7cc30ac536a3379fdf008f47f6bb7ae1
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
 windows_x86_64_msvc@0.42.2
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
@@ -8501,17 +8391,6 @@ Declared: MIT OR Apache-2.0
 Selected: MIT
 Source: https://crates.io/api/v1/crates/windows_x86_64_msvc/0.52.6/download
 Source SHA-256: 589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
-windows_x86_64_msvc@0.53.1
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows_x86_64_msvc/0.53.1/download
-Source SHA-256: d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650
 Notice: license-apache-2.0
 Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit

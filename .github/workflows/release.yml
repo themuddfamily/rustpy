@@ -28,8 +28,9 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 env:
-  CARGO_BUILD_JOBS: '2'
-  RAYON_NUM_THREADS: '2'
+  # Hosted runners have 4 vCPUs and run one job each: build on all of them.
+  CARGO_BUILD_JOBS: '4'
+  RAYON_NUM_THREADS: '4'
   RUST_TEST_THREADS: '2'
 jobs:
   linux:
@@ -120,6 +121,8 @@ jobs:
     timeout-minutes: 180
     env:
       RUSTFLAGS: -C target-feature=+crt-static
+      # Also the build script's default; stated here so the dependency cache key tracks it.
+      CARGO_PROFILE_RELEASE_DEBUG: '0'
     strategy:
       fail-fast: false
       matrix:

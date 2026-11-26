@@ -1,7 +1,7 @@
 {
   "format": 1,
   "input_sha256": {
-    "Cargo.lock": "cc4ba2bb0be2e4be8818568d10067942d1178ba9e28fce228828b28b7034b339",
+    "Cargo.lock": "a26622328398b017fc6d78f9c73a526a5d19cdfe154a21dddd2e80947a753699",
     "packaging/cargo-license-overrides.json": "8470a6b4ea9444a9c6a4c50e1e51cc597ea71ba9c1b65ff87e5ba5194777112a",
     "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/AUTHORS": "3bab8c36f6a85657504aaefb37c7ff34e29b8c917290f3d28a1f0920c992e502",
     "packaging/cargo-license-overrides/AccessKit--accesskit-1bbcf100942b/LICENSE-APACHE": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
@@ -75,8 +75,8 @@
     "packaging/cargo-license-overrides/wravery--webview2-rs-edc2caf88617/LICENSE": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73",
     "packaging/cargo-license-overrides/zrzka--anes-rs-378ac7461eca/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
     "packaging/cargo-license-overrides/zrzka--anes-rs-378ac7461eca/LICENSE-MIT": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
-    "qa/Cargo.lock": "38b2c076f4cc644c2b0410bd6333a600331079a5c05471648e34b2e65553a093",
-    "qa/fuzz/Cargo.lock": "6a0d8e3e5e7c251976f591230ad1ae35fa0c34275ffa614b10019795d55cfbf6",
+    "qa/Cargo.lock": "5d912637bc84cbc1d356ab91aa304f1cdd7403547b1bedc3c222b115b2dc0dd3",
+    "qa/fuzz/Cargo.lock": "7fe8236466031d78d7c2c1e6c1470b709f3015ef6f66e50ed8683cf7e7f3227f",
     "scripts/generate-cargo-notices.py": "55130b1d18e28a5c3070e3beacebe1e59643b76d98607dfd783eb0b94fd7f050"
   },
   "packages": [
@@ -746,13 +746,13 @@
       ]
     },
     {
-      "package": "arboard@3.6.1",
+      "package": "arboard@3.7.0",
       "license": "MIT OR Apache-2.0",
       "selected_terms": [
         "MIT"
       ],
-      "source_url": "https://crates.io/api/v1/crates/arboard/3.6.1/download",
-      "source_sha256": "0348a1c054491f4bfe6ab86a7b6ab1e44e45d899005de92f58b3df180b36ddaf",
+      "source_url": "https://crates.io/api/v1/crates/arboard/3.7.0/download",
+      "source_sha256": "aeb9553e62312c8756a5979254fc6d7da8bbeb5986a1e17037fab932f7037917",
       "lockfiles": [
         "Cargo.lock"
       ],
@@ -17377,54 +17377,6 @@
       ]
     },
     {
-      "package": "windows-sys@0.59.0",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows-sys/0.59.0/download",
-      "source_sha256": "1e38bc4d79ed67fd075bcc251a1c39b32a1776bbe92e5bef1f0bf1f8c531853b",
-      "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows-sys@0.60.2",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows-sys/0.60.2/download",
-      "source_sha256": "f2f500e4d28234f72040990ec9d39e3a6b950f9f22d3dba18416c35882612bcb",
-      "lockfiles": [
-        "Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
       "package": "windows-sys@0.61.2",
       "license": "MIT OR Apache-2.0",
       "selected_terms": [
@@ -17480,31 +17432,6 @@
       ],
       "source_url": "https://crates.io/api/v1/crates/windows-targets/0.52.6/download",
       "source_sha256": "9b724f72796e036ab90c1021d4780d4d3d648aca59e491e6b98e725b84e99973",
-      "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows-targets@0.53.5",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows-targets/0.53.5/download",
-      "source_sha256": "4945f9f551b88e0d65f3db0bc25c33b8acea4d9e41163edf90dcd0b19f9069f3",
       "lockfiles": [
         "Cargo.lock"
       ],
@@ -17621,31 +17548,6 @@
       "source_url": "https://crates.io/api/v1/crates/windows_aarch64_gnullvm/0.52.6/download",
       "source_sha256": "32a4622180e7a0ec044bb555404c800bc9fd9ec262ec147edd5989ccd0c02cd3",
       "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows_aarch64_gnullvm@0.53.1",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows_aarch64_gnullvm/0.53.1/download",
-      "source_sha256": "a9d8416fa8b42f5c947f8482c43e7d89e73a173cead56d044f6a56104a6d1b53",
-      "lockfiles": [
         "Cargo.lock"
       ],
       "covered_source_bundled": false,
@@ -17691,31 +17593,6 @@
       ],
       "source_url": "https://crates.io/api/v1/crates/windows_aarch64_msvc/0.52.6/download",
       "source_sha256": "09ec2a7bb152e2252b53fa7803150007879548bc709c039df7627cabbd05d469",
-      "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows_aarch64_msvc@0.53.1",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows_aarch64_msvc/0.53.1/download",
-      "source_sha256": "b9d782e804c2f632e395708e99a94275910eb9100b2114651e04744e9b125006",
       "lockfiles": [
         "Cargo.lock"
       ],
@@ -17763,31 +17640,6 @@
       "source_url": "https://crates.io/api/v1/crates/windows_i686_gnu/0.52.6/download",
       "source_sha256": "8e9b5ad5ab802e97eb8e295ac6720e509ee4c243f69d781394014ebfe8bbfa0b",
       "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows_i686_gnu@0.53.1",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows_i686_gnu/0.53.1/download",
-      "source_sha256": "960e6da069d81e09becb0ca57a65220ddff016ff2d6af6a223cf372a506593a3",
-      "lockfiles": [
         "Cargo.lock"
       ],
       "covered_source_bundled": false,
@@ -17810,31 +17662,6 @@
       ],
       "source_url": "https://crates.io/api/v1/crates/windows_i686_gnullvm/0.52.6/download",
       "source_sha256": "0eee52d38c090b3caa76c563b86c3a4bd71ef1a819287c19d586d7334ae8ed66",
-      "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows_i686_gnullvm@0.53.1",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows_i686_gnullvm/0.53.1/download",
-      "source_sha256": "fa7359d10048f68ab8b09fa71c3daccfb0e9b559aed648a8f95469c27057180c",
       "lockfiles": [
         "Cargo.lock"
       ],
@@ -17882,31 +17709,6 @@
       "source_url": "https://crates.io/api/v1/crates/windows_i686_msvc/0.52.6/download",
       "source_sha256": "240948bc05c5e7c6dabba28bf89d89ffce3e303022809e73deaefe4f6ec56c66",
       "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows_i686_msvc@0.53.1",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows_i686_msvc/0.53.1/download",
-      "source_sha256": "1e7ac75179f18232fe9c285163565a57ef8d3c89254a30685b57d83a38d326c2",
-      "lockfiles": [
         "Cargo.lock"
       ],
       "covered_source_bundled": false,
@@ -17952,31 +17754,6 @@
       ],
       "source_url": "https://crates.io/api/v1/crates/windows_x86_64_gnu/0.52.6/download",
       "source_sha256": "147a5c80aabfbf0c7d901cb5895d1de30ef2907eb21fbbab29ca94c5b08b1a78",
-      "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows_x86_64_gnu@0.53.1",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows_x86_64_gnu/0.53.1/download",
-      "source_sha256": "9c3842cdd74a865a8066ab39c8a7a473c0778a3f29370b5fd6b4b9aa7df4a499",
       "lockfiles": [
         "Cargo.lock"
       ],
@@ -18024,31 +17801,6 @@
       "source_url": "https://crates.io/api/v1/crates/windows_x86_64_gnullvm/0.52.6/download",
       "source_sha256": "24d5b23dc417412679681396f2b49f3de8c1473deb516bd34410872eff51ed0d",
       "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows_x86_64_gnullvm@0.53.1",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows_x86_64_gnullvm/0.53.1/download",
-      "source_sha256": "0ffa179e2d07eee8ad8f57493436566c7cc30ac536a3379fdf008f47f6bb7ae1",
-      "lockfiles": [
         "Cargo.lock"
       ],
       "covered_source_bundled": false,
@@ -18094,31 +17846,6 @@
       ],
       "source_url": "https://crates.io/api/v1/crates/windows_x86_64_msvc/0.52.6/download",
       "source_sha256": "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec",
-      "lockfiles": [
-        "Cargo.lock",
-        "qa/Cargo.lock",
-        "qa/fuzz/Cargo.lock"
-      ],
-      "covered_source_bundled": false,
-      "texts": [
-        {
-          "path": "license-apache-2.0",
-          "text_sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
-        },
-        {
-          "path": "license-mit",
-          "text_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
-        }
-      ]
-    },
-    {
-      "package": "windows_x86_64_msvc@0.53.1",
-      "license": "MIT OR Apache-2.0",
-      "selected_terms": [
-        "MIT"
-      ],
-      "source_url": "https://crates.io/api/v1/crates/windows_x86_64_msvc/0.53.1/download",
-      "source_sha256": "d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650",
       "lockfiles": [
         "Cargo.lock"
       ],
@@ -19084,5 +18811,5 @@
       ]
     }
   ],
-  "notice_sha256": "a3743f777b4f6a12eb5d24d5187306d37a0ba792bdec9c2fb2de66e5bc2284c2"
+  "notice_sha256": "289594ec7c2547aaa478ee8301471c7fabed74501fe4ff6458d540f3878f9060"
 }
