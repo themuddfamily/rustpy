@@ -20,6 +20,9 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 - **Certificates (macOS):** CAs trusted as roots in the keychain trust settings without a
   policy restriction (as `security add-trusted-cert -r trustRoot` records them) are now used
   for HTTPS connections.
+- **Project:** saving settings (in this or another RustPy window) no longer counts as a
+  project change: the project is no longer rescanned, the IDE no longer keeps waking up, and
+  the settings files are no longer queued for upload to deployment servers.
 - **Debugger (Windows):** stopping a debug session whose adapter is idle now closes the
   adapter connection at once instead of waiting until the adapter disconnects.
 - **Run:** a running process's PID (used by attach actions and the Run console) no longer

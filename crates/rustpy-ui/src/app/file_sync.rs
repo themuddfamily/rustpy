@@ -146,6 +146,29 @@ impl IdeApp {
         }
         self.sync_external_file_watches();
     }
+    /// The configuration directory is watched only for the file template
+    /// store. Other files there (settings saved by this or another RustPy
+    /// process) are not project changes: they must not dirty the project,
+    /// queue uploads or keep the UI polling. An open editor's file still counts.
+    fn is_configuration_only_event(&self, paths: &[PathBuf]) -> bool {
+        let config = rustpy_core::vfs::normalize_path(&Settings::config_dir());
+        !paths.is_empty()
+            && paths.iter().all(|path| {
+                let path = rustpy_core::vfs::normalize_path(path);
+                path.starts_with(&config)
+                    && !self.is_template_store_event(&path)
+                    && !self.is_native_skeleton_event(&path)
+                    && !self.project.as_ref().is_some_and(|project| {
+                        path.starts_with(rustpy_core::vfs::normalize_path(&project.root))
+                    })
+                    && !self.tabs.iter().any(|tab| {
+                        tab.state
+                            .path
+                            .as_ref()
+                            .is_some_and(|open| rustpy_core::vfs::normalize_path(open) == path)
+                    })
+            })
+    }
     pub(super) fn poll_fs_events(&mut self, now: f64) {
         let project_safe_mode = self.project_safe_mode();
         let mut touched = Vec::new();
@@ -174,6 +197,9 @@ impl IdeApp {
                             "watcher_event",
                             serde_json::json!({"paths":event.paths,"rescan":event.need_rescan()}),
                         );
+                        if !event.need_rescan() && self.is_configuration_only_event(&event.paths) {
+                            continue;
+                        }
                         let history_kind = match event.kind {
                             notify::EventKind::Create(_) => {
                                 Some(crate::history_store::EventKind::Created)
@@ -226,7 +252,16 @@ impl IdeApp {
                                     });
                                 }
                                 if !project_safe_mode {
-                                    if let Some(project) = &self.project {
+                                    // The watcher also covers directories outside the
+                                    // project (the IDE configuration directory for the
+                                    // template store, external editors' folders): only
+                                    // project files map to deployment paths.
+                                    if let Some(project) = self.project.as_ref().filter(|project| {
+                                        path.starts_with(&project.root)
+                                            || rustpy_core::vfs::normalize_path(&path).starts_with(
+                                                rustpy_core::vfs::normalize_path(&project.root),
+                                            )
+                                    }) {
                                         self.deploy.on_external_change(
                                             &project.root,
                                             &path,
@@ -470,6 +505,54 @@ mod tests {
         assert!(forwards_watcher_event(&Err(notify::Error::generic(
             "overflow"
         ))));
+    }
+
+    /// The watcher also covers the IDE configuration directory (template
+    /// store parent). Settings saves there, from this or another RustPy
+    /// process, are no project changes: they neither dirty the project nor
+    /// queue uploads; only project files queue uploads.
+    #[test]
+    fn only_project_file_events_queue_deployment_changes() {
+        use notify::event::{DataChange, ModifyKind};
+        let dir = tempfile::tempdir().unwrap();
+        let project = dir.path().join("project");
+        // The configuration directory of this test process.
+        let config = Settings::config_dir();
+        std::fs::create_dir_all(&project).unwrap();
+        std::fs::create_dir_all(&config).unwrap();
+        let mut settings = Settings::default();
+        settings.trust_project(&project);
+        let mut app = IdeApp::new(settings, Some(project.clone()));
+        // Opening a project pauses background uploads until the deployment
+        // view adopts the new root on the next frame.
+        app.deploy.resume_background();
+        let (tx, rx) = crossbeam_channel::bounded(16);
+        app.fs_events = Some(rx);
+        let modified = |path: PathBuf| {
+            Ok(
+                notify::Event::new(notify::EventKind::Modify(ModifyKind::Data(
+                    DataChange::Content,
+                )))
+                .add_path(path),
+            )
+        };
+        tx.send(modified(config.join("settings.json"))).unwrap();
+        tx.send(modified(config.join("settings.json.tmp"))).unwrap();
+        app.poll_fs_events(1.0);
+        assert_eq!(
+            app.fs_dirty_since, None,
+            "settings saves dirtied the project"
+        );
+        assert!(
+            app.deploy.pending_transfers().is_empty(),
+            "configuration files queued as deployment changes: {:?}",
+            app.deploy.pending_transfers()
+        );
+        tx.send(modified(project.join("main.py"))).unwrap();
+        app.poll_fs_events(1.1);
+        let pending = app.deploy.pending_transfers();
+        assert_eq!(pending.len(), 1, "{pending:?}");
+        assert!(pending[0].2.contains("main.py"), "{pending:?}");
     }
 
     #[test]
