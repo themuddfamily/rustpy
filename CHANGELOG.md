@@ -29,14 +29,15 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
-- **Command-line inspection:** `rustpy inspect` could run for hours on ordinary code, such
-  as a folder of standard-library modules: functions that test and rebind one variable in a
-  row of `if` statements took time exponential in the length of the row, and every file
-  was re-read from disk thousands of times. Ninety standard-library modules (74,000 lines)
-  now take about half a minute. The command also prints each file as it starts
-  (`[12/90] Inspecting path`) and names files that take ten seconds or more, so a long run
-  no longer looks hung; `-v0` stays quiet. Project-wide inspection in the IDE is faster on
-  such code too.
+- **Command-line inspection:** `rustpy inspect` could run for hours on ordinary code. Type
+  inference was exponential in a row of `if` statements that test and rebind one variable
+  and in a method chain on an unresolved name (`query.filter(a).filter(b)…`), rescanned
+  the whole file for every narrowing condition, and the command re-read every file from
+  disk on each access. Ninety standard-library modules now take about 20 seconds and the
+  RustPy checkout (5,700 files) about 12 seconds on eight cores. The command prints each
+  file as it starts (`[12/90] Inspecting path`) and names files that take ten seconds or
+  more; `-v0` stays quiet. Folders tagged with `CACHEDIR.TAG` (Cargo target directories
+  under any name) are no longer project files. The IDE's inspections benefit as well.
 - **Build:** removed unused workspace dependencies and inherited the repository URL in
   the application package, clearing Cargo's three workspace manifest warnings.
 - **Code completion:** when type inference took longer than the lookup's time budget, smart

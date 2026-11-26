@@ -1416,7 +1416,10 @@ impl<'a> Inferer<'a> {
             ast::Expr::Name(_) | ast::Expr::Attribute(_) | ast::Expr::Call(_)
         ) {
             LOAD_BUDGET.with(|left| {
-                assert!(left.get() > 0, "load type computations over the test budget");
+                assert!(
+                    left.get() > 0,
+                    "load type computations over the test budget"
+                );
                 left.set(left.get() - 1);
             });
             if matches!(expr, ast::Expr::Name(_)) {
