@@ -302,3 +302,47 @@ fn doctest_prompt_completion_runs_in_the_background() {
         labels(&app)
     );
 }
+
+#[test]
+fn smart_lookup_cut_off_by_its_budget_refreshes_with_the_expected_type_items() {
+    // Inference that runs out of budget yields `Unknown`, which drops the
+    // expected-type suggestions themselves. The lookup shows what was found
+    // and refreshes, keeping the selection, when the unbounded result arrives.
+    let source = "class Point:\n    def __init__(self, x: int):\n        self.x = x\n\n\ndef use(value: Point):\n    pass\n\n\nuse(";
+    let (_root, mut app, _ctx) = slow_python(source, Duration::from_millis(300));
+    app.completion_worker.budget = Duration::ZERO;
+    app.open_smart_completion();
+    assert!(app.completion_loading());
+    let until = Instant::now() + Duration::from_secs(60);
+    while app.completion.items.is_empty() {
+        app.poll_completion_worker();
+        assert!(Instant::now() < until, "budgeted request never finished");
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    assert!(app.completion.visible);
+    assert!(
+        !labels(&app).contains(&"Point()".to_string()),
+        "{:?}",
+        labels(&app)
+    );
+    let kept = app
+        .completion
+        .items
+        .iter()
+        .position(|item| item.label == "use")
+        .expect("basic candidates while the follow-up runs");
+    app.completion.selected = kept;
+    settle(&mut app);
+    assert!(app.completion.visible && app.completion.explicit);
+    let point = app
+        .completion
+        .items
+        .iter()
+        .find(|item| item.insert == "Point()")
+        .unwrap_or_else(|| panic!("{:?}", labels(&app)));
+    assert_eq!(point.caret_offset, Some(6));
+    assert_eq!(
+        app.completion.items[app.completion.selected].label, "use",
+        "the refresh keeps the selected item"
+    );
+}

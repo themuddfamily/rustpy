@@ -3549,15 +3549,22 @@ impl IdeApp {
         let tab = &self.tabs[i];
         let items = self.order_completion_items(items, &text[prefix_start..off]);
         let n = items.len();
+        // A lookup refreshed by a later, more complete result (see
+        // `python_finished`) keeps the item the user had selected.
+        let kept = (self.completion.visible
+            && usize::from(self.completion.prefix_start) == prefix_start)
+            .then(|| self.completion.items.get(self.completion.selected))
+            .flatten()
+            .and_then(|old| items.iter().position(|item| item.label == old.label));
         self.completion = CompletionPopup {
             visible: n > 0,
             items,
             imports: vec![None; n],
-            selected: if self.settings.completion.preselect_first {
+            selected: kept.unwrap_or(if self.settings.completion.preselect_first {
                 0
             } else {
                 usize::MAX
-            },
+            }),
             prefix_start: TextSize::new(prefix_start as u32),
             doc_version: tab.state.doc.version(),
             caret: tab.state.primary().head(),
