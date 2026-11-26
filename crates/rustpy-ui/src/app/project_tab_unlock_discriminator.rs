@@ -51,7 +51,7 @@ fn named(update: &egui::accesskit::TreeUpdate, ctx: &egui::Context) -> bool {
 }
 #[test]
 fn coordinated_foreign_unlock_waiter_reproduces_real_project_tab_focus_trap() {
-    if crate::netsec::isolated_unlock_test("app::project_tab_unlock_discriminator::coordinated_foreign_unlock_waiter_reproduces_real_project_tab_focus_trap") { return; }
+    if rustpy_ui_base::test_support::isolated_unlock_test("app::project_tab_unlock_discriminator::coordinated_foreign_unlock_waiter_reproduces_real_project_tab_focus_trap") { return; }
     struct UnlockOwner(Option<std::thread::JoinHandle<bool>>);
     impl Drop for UnlockOwner {
         fn drop(&mut self) {

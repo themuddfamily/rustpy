@@ -1,7 +1,7 @@
 //! Shared by the catalog tests and `examples/i18n_extract.rs`:
 //!
-//! * extraction of the translatable UI vocabulary from the `rustpy-ui`
-//!   sources (action texts, menus, tool window titles, settings pages and
+//! * extraction of the translatable UI vocabulary from the sources of
+//!   `rustpy-ui` and the UI crates split out of it (`rustpy-ui-*`) (action texts, menus, tool window titles, settings pages and
 //!   every literal given to `tr`/`tr_static`/`tr_fmt`/`tr_n`), read at run
 //!   time so that the coverage report always reflects the current UI. A
 //!   string without a translation is shown in English, so a missing one is
@@ -29,9 +29,38 @@ pub fn crate_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
-/// `crates/rustpy-ui`, the crate whose strings are extracted.
+/// `crates/rustpy-ui`, the crate whose strings are extracted (with the UI
+/// crates split out of it, see [`ui_source_dirs`]).
 pub fn ui_crate_dir() -> PathBuf {
     crate_dir().join("../rustpy-ui")
+}
+
+/// The `src` directories of the UI crates beside `ui_dir` (`crates/rustpy-ui`):
+/// its own and those of every `rustpy-ui-*` crate split out of it.
+pub fn ui_source_dirs(ui_dir: &Path) -> Vec<PathBuf> {
+    let mut dirs = vec![ui_dir.join("src")];
+    if let Some(crates) = ui_dir.parent() {
+        let mut split: Vec<PathBuf> = std::fs::read_dir(crates)
+            .into_iter()
+            .flatten()
+            .filter_map(Result::ok)
+            .filter(|e| {
+                e.file_name()
+                    .to_str()
+                    .is_some_and(|n| n.starts_with("rustpy-ui-"))
+            })
+            .map(|e| e.path().join("src"))
+            .filter(|src| src.is_dir())
+            .collect();
+        split.sort();
+        dirs.extend(split);
+    }
+    dirs
+}
+
+/// `actions.rs` of the UI (in `rustpy-ui-base` beside `ui_dir`).
+pub fn actions_source(ui_dir: &Path) -> PathBuf {
+    ui_dir.join("../rustpy-ui-base/src/actions.rs")
 }
 
 pub fn locales_dir() -> PathBuf {
@@ -801,7 +830,8 @@ pub struct UiStrings {
 }
 
 impl UiStrings {
-    /// Extracts the strings of the workspace's `crates/rustpy-ui`.
+    /// Extracts the strings of the workspace's `crates/rustpy-ui` and the UI
+    /// crates split out of it.
     pub fn from_workspace() -> Result<Self, String> {
         Self::from_ui_crate(&ui_crate_dir())
     }
@@ -811,13 +841,13 @@ impl UiStrings {
             std::fs::read_to_string(path)
                 .map_err(|e| format!("cannot read {}: {e}", path.display()))
         };
-        let actions = tokenize(&read(&dir.join("src/actions.rs"))?);
+        let actions = tokenize(&read(&actions_source(dir))?);
         let app = tokenize(&read(&dir.join("src/app.rs"))?);
         let settings = tokenize(&read(&dir.join("src/app/settings_ui.rs"))?);
         let view = tokenize(&read(&dir.join("src/editor/view.rs"))?);
         let mut tr = Vec::new();
         let (mut lists, mut untranslated_lists) = (Vec::new(), Vec::new());
-        for file in rust_files(&dir.join("src")) {
+        for file in ui_source_dirs(dir).iter().flat_map(|src| rust_files(src)) {
             let toks = tokenize(&read(&file)?);
             tr.extend(tr_calls(&toks));
             let (translated, shown) = label_list_strings(&toks);

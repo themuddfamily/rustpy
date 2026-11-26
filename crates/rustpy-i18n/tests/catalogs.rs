@@ -110,7 +110,7 @@ fn extraction_finds_the_ui_vocabulary() {
     // Only the shape of the vocabulary: the UI changes all the time.
     let ui = ui();
     let actions_rs =
-        std::fs::read_to_string(support::ui_crate_dir().join("src/actions.rs")).unwrap();
+        std::fs::read_to_string(support::actions_source(&support::ui_crate_dir())).unwrap();
     assert!(
         ui.actions.len() >= actions_rs.matches(" => (\"").count(),
         "every one-line `Name => (\"Id\", \"Text\", [...])` action is extracted"

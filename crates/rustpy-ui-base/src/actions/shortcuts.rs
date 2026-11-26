@@ -6,7 +6,7 @@ use super::{Action, KeyChord, Keymap};
 /// separate physical one. Defaults to the operating system;
 /// `RUSTPY_KEYMAP_PLATFORM=default` selects the Windows/Linux semantics that the
 /// keyboard tests are written against.
-pub(crate) fn mac_keymap() -> bool {
+pub fn mac_keymap() -> bool {
     static MAC: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     *MAC.get_or_init(|| {
         cfg!(target_os = "macos")

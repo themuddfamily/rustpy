@@ -1,6 +1,6 @@
 # Keymap reference
 
-This table is generated from `crates/rustpy-ui/src/actions.rs`. It lists built-in
+This table is generated from `crates/rustpy-ui-base/src/actions.rs`. It lists built-in
 base bindings, including unbound actions. Settings › Keymap, the selected parent
 map, plugins and user overrides determine the effective bindings. Find Action
 shows the current binding; macOS and alternative parent maps can differ. Search
@@ -9,7 +9,7 @@ in their active context, and editor input/IME must not be treated as a global ch
 
 To change a binding, select an action in Settings › Keymap, add keyboard/mouse
 shortcuts, and resolve displayed conflicts. Duplicate or export a map before
-large changes. The bundled map assets live in `crates/rustpy-ui/assets/keymaps/`.
+large changes. The bundled map assets live in `crates/rustpy-ui-base/assets/keymaps/`.
 Regenerate this reference with `python3 scripts/update-keymap-reference.py` after
 changing base action metadata.
 

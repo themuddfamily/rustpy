@@ -1769,7 +1769,7 @@ mod clone_tests {
         {
             return;
         }
-        let dir = crate::git_jobs::TestDir::new("clone-cancel");
+        let dir = rustpy_ui_base::test_support::TestDir::new("clone-cancel");
         struct RetainFiles(Vec<u64>);
         impl Drop for RetainFiles {
             fn drop(&mut self) {
@@ -1832,7 +1832,7 @@ mod clone_tests {
 
     #[test]
     fn leftovers_of_a_killed_clone_are_removed_but_nothing_else() {
-        let dir = crate::git_jobs::TestDir::new("clone-leftovers");
+        let dir = rustpy_ui_base::test_support::TestDir::new("clone-leftovers");
         // The clone created the directory: it goes.
         let made = dir.path().join("made");
         assert_eq!(clone_prior(&made), ClonePrior::Missing);
