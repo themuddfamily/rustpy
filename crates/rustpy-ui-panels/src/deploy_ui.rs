@@ -222,7 +222,8 @@ impl rustpy_deploy::Transport for WithoutSavedPassword {
 }
 
 /// The transport for `server`, with its password from the password safe.
-pub(crate) fn transport(server: &Server) -> anyhow::Result<Box<dyn rustpy_deploy::Transport>> {
+#[doc(hidden)]
+pub fn transport(server: &Server) -> anyhow::Result<Box<dyn rustpy_deploy::Transport>> {
     let (server, locked) = with_stored_password(server.clone());
     let transport = rustpy_deploy::transport_for(&server)?;
     Ok(if locked {

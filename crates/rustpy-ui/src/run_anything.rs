@@ -269,21 +269,7 @@ pub fn plan_command(line: &str, root: &Path) -> Option<CommandPlan> {
     })
 }
 
-/// Joins arguments into a parameter string that [`RunConfig::split_args`] splits back.
-pub fn quote_args(args: &[String]) -> String {
-    args.iter()
-        .map(|a| {
-            if !a.is_empty() && !a.contains(|c: char| c.is_whitespace() || c == '"' || c == '\'') {
-                a.clone()
-            } else if a.contains('"') {
-                format!("'{a}'")
-            } else {
-                format!("\"{a}\"")
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
-}
+pub use rustpy_ui_base::command_line::quote_args;
 
 /// A command started from Run Anything (kept for Rerun).
 #[derive(Clone, Debug, PartialEq, Eq)]

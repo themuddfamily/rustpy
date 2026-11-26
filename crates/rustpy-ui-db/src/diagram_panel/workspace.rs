@@ -84,7 +84,8 @@ impl Drop for Job {
     }
 }
 impl DiagramPanel {
-    pub(crate) fn project_context(&mut self, root: &Path) {
+    #[doc(hidden)]
+    pub fn project_context(&mut self, root: &Path) {
         if self.workspace.root.as_deref() == Some(root) {
             return;
         }
@@ -102,7 +103,8 @@ impl DiagramPanel {
             .and_then(|b| serde_json::from_slice(&b).ok())
             .unwrap_or_default();
     }
-    pub(crate) fn capture_sources(&mut self, analysis: &rustpy_semantic::Analysis) {
+    #[doc(hidden)]
+    pub fn capture_sources(&mut self, analysis: &rustpy_semantic::Analysis) {
         self.workspace.fingerprints = self
             .classes
             .iter()
@@ -113,13 +115,15 @@ impl DiagramPanel {
             })
             .collect();
     }
-    pub(crate) fn navigation_current(&self, path: &Path, text: &str) -> bool {
+    #[doc(hidden)]
+    pub fn navigation_current(&self, path: &Path, text: &str) -> bool {
         self.workspace
             .fingerprints
             .get(path)
             .is_none_or(|stamp| *stamp == fingerprint(text))
     }
-    pub(crate) fn request_django(
+    #[doc(hidden)]
+    pub fn request_django(
         &mut self,
         root: PathBuf,
         analysis: Arc<rustpy_semantic::Analysis>,
@@ -259,7 +263,8 @@ impl DiagramPanel {
             thread,
         });
     }
-    pub(crate) fn set_er(&mut self, source: String, objects: Vec<rustpy_db::workspace::Object>) {
+    #[doc(hidden)]
+    pub fn set_er(&mut self, source: String, objects: Vec<rustpy_db::workspace::Object>) {
         let (classes, relations, issues) = models::er(&source, &objects);
         self.set("Database ER — captured introspection".into(), classes);
         self.workspace.relations = relations;
@@ -277,15 +282,18 @@ impl DiagramPanel {
         self.apply_layout();
         self.restore_positions();
     }
-    pub(crate) fn capture_owner(&self) -> Option<u64> {
+    #[doc(hidden)]
+    pub fn capture_owner(&self) -> Option<u64> {
         self.workspace.job.as_ref().map(|job| job.id)
     }
-    pub(crate) fn cancel_capture(&mut self) {
+    #[doc(hidden)]
+    pub fn cancel_capture(&mut self) {
         if let Some(job) = &self.workspace.job {
             job.cancelled.store(true, Ordering::Release);
         }
     }
-    pub(crate) fn poll_capture(&mut self) -> bool {
+    #[doc(hidden)]
+    pub fn poll_capture(&mut self) -> bool {
         // Observe termination first: a send racing a later is_finished check must
         // not lose the result when the handle is retired on this frame.
         let finished = self
@@ -513,7 +521,8 @@ impl DiagramPanel {
     }
 }
 impl DiagramPanel {
-    pub(crate) fn take_request(&mut self) -> Option<u8> {
+    #[doc(hidden)]
+    pub fn take_request(&mut self) -> Option<u8> {
         self.workspace.request.take()
     }
     pub fn graphviz(&self) -> String {

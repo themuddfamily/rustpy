@@ -7,6 +7,7 @@ pub mod a11y;
 #[doc(hidden)]
 pub mod accessibility_policy;
 pub mod actions;
+pub mod command_line;
 pub mod fonts;
 pub mod i18n;
 #[doc(hidden)]

@@ -52,6 +52,8 @@ rustpy-secrets = { path = "crates/rustpy-secrets", version = "1.0.0" }
 rustpy-cli = { path = "crates/rustpy-cli", version = "1.0.0" }
 rustpy-ui = { path = "crates/rustpy-ui", version = "1.0.0" }
 rustpy-ui-base = { path = "crates/rustpy-ui-base", version = "1.0.0" }
+rustpy-ui-db = { path = "crates/rustpy-ui-db", version = "1.0.0" }
+rustpy-ui-panels = { path = "crates/rustpy-ui-panels", version = "1.0.0" }
 rustpy-lsp = { path = "crates/rustpy-lsp", version = "1.0.0" }
 
 anyhow = "1"
@@ -119,6 +121,12 @@ debug = false
 opt-level = 0
 debug = "line-tables-only"
 [profile.test.package.rustpy-ui-base]
+opt-level = 0
+debug = "line-tables-only"
+[profile.test.package.rustpy-ui-db]
+opt-level = 0
+debug = "line-tables-only"
+[profile.test.package.rustpy-ui-panels]
 opt-level = 0
 debug = "line-tables-only"
 [profile.release]

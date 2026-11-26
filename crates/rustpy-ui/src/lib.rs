@@ -2,7 +2,8 @@
 //!
 //! The foundation widgets and services (theme, fonts, localization, accessibility,
 //! actions and keymaps) live in `rustpy-ui-base` and are re-exported here under
-//! their old paths.
+//! their old paths, as are the tool window panels of `rustpy-ui-panels` and
+//! `rustpy-ui-db`.
 
 pub use rustpy_ui_base::a11y;
 mod accessibility_announcements;
@@ -13,34 +14,34 @@ pub mod ai_panel;
 pub mod app;
 mod appearance_assets;
 pub mod breakpoints;
-mod collaboration;
-mod concurrency_panel;
+use rustpy_ui_panels::collaboration;
+use rustpy_ui_panels::concurrency_panel;
 pub mod console_panel;
 pub mod console_view;
 mod console_workspace;
-pub mod coverage_panel;
+pub use rustpy_ui_panels::coverage_panel;
 pub mod custom_menus;
-pub mod db_panel;
+pub use rustpy_ui_db::db_panel;
 pub mod debug_backend_workspace;
 pub mod debug_console;
 pub mod debug_editor;
 pub mod debug_panel;
 pub mod debug_protocol_workspace;
-pub mod deploy_ui;
+pub use rustpy_ui_panels::deploy_ui;
 mod diagnostic_tools;
-pub mod diagram_panel;
+pub use rustpy_ui_db::diagram_panel;
 pub mod diff_view;
 mod documentation_assets;
 mod documentation_view;
 pub mod dumb_mode;
 pub mod editor;
-pub mod endpoints_panel;
+pub use rustpy_ui_panels::endpoints_panel;
 mod external_tool_settings;
 mod external_tool_workspace;
 pub mod external_tools;
 pub use rustpy_ui_base::fonts;
 pub mod freeze;
-pub mod git_jobs;
+pub use rustpy_ui_panels::git_jobs;
 pub mod git_panel;
 mod github_panel;
 pub mod hierarchy_panel;
@@ -52,36 +53,36 @@ pub mod launch;
 pub mod learn_panel;
 pub mod macos_open;
 pub mod markdown_view;
-mod markdown_workspace;
+use rustpy_ui_panels::markdown_workspace;
 pub mod merge_tool;
 pub mod nav_history;
-pub mod netsec;
+pub use rustpy_ui_panels::netsec;
 pub mod notebook_view;
 pub mod notifications;
-pub mod other_vcs_panel;
+pub use rustpy_ui_panels::other_vcs_panel;
 pub mod packages_panel;
 pub mod parsed_field;
 mod performance_trace;
 pub mod plugin_host;
-pub mod profiler_panel;
+pub use rustpy_ui_panels::profiler_panel;
 pub mod progress_ui;
 pub mod project_tree;
 pub mod refactor_preview;
-mod remote_gateway;
+use rustpy_ui_panels::remote_gateway;
 pub mod run_anything;
 pub mod run_config_dialog;
 pub mod run_context;
 pub mod run_panel;
 pub mod scratches;
 pub mod search_ui;
-pub mod services_panel;
+pub use rustpy_ui_panels::services_panel;
 mod settings_archive;
 mod status_text;
 pub mod switcher;
 pub mod symbol_index;
 use rustpy_ui_base::system_clipboard;
 mod system_notifications;
-pub mod terminal_panel;
+pub use rustpy_ui_panels::terminal_panel;
 #[cfg(test)]
 mod test_isolation;
 pub mod test_panel;
@@ -98,7 +99,7 @@ mod ui_source_checks;
 pub mod web_browser_workspace;
 mod web_preview_host;
 #[doc(hidden)]
-pub mod web_preview_server;
+pub use rustpy_ui_panels::web_preview_server;
 
 /// Run as `GIT_ASKPASS`/`SSH_ASKPASS` by a git process of the IDE: forwards
 /// the prompt to the running IDE and returns the exit code (`None`: a normal
@@ -126,12 +127,11 @@ pub mod stack_trace;
 pub use rustpy_run::redirect_input::{
     helper_main as redirected_input_helper_main, register_host as register_run_host,
 };
-mod task_trackers;
+use rustpy_ui_panels::task_trackers;
 
-mod scientific_export;
-mod scientific_panel;
+use rustpy_ui_panels::scientific_panel;
 
 mod data_archive;
-mod shared_index_download;
+use rustpy_ui_panels::shared_index_download;
 
 mod web_language_protocol;

@@ -6,7 +6,7 @@ use serde_json::{json, Value};
 use std::io::Read;
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct Issue {
+pub struct Issue {
     pub id: String,
     pub remote_id: String,
     pub summary: String,
@@ -204,7 +204,7 @@ fn secret(s: &Tracker) -> Result<String, String> {
         .map(|value| value.unwrap_or_default())
 }
 
-pub(crate) fn search(
+pub fn search(
     s: &Tracker,
     query: &str,
     accounts: &rustpy_settings::github::GitHubSettings,
@@ -487,7 +487,7 @@ pub(crate) fn worklog_request(s: &Tracker, id: &str, item: &WorkItem) -> Result<
         _=>return Err(format!("{} has no native time-entry adapter; configure an explicit REST worklog endpoint if your installation provides one",s.kind.label())),
     })
 }
-pub(crate) fn send_time(
+pub fn send_time(
     s: &Tracker,
     id: &str,
     item: &WorkItem,
@@ -724,7 +724,7 @@ mod tests {
 }
 
 #[derive(Clone, Default)]
-pub(crate) struct CommitTasks {
+pub struct CommitTasks {
     pub suggestions: Vec<(String, String)>,
     pub known: Vec<(String, String)>,
     pub patterns: Vec<rustpy_settings::tasks_workspace::IssueNavigation>,
@@ -732,7 +732,7 @@ pub(crate) struct CommitTasks {
 fn commit_data_id() -> egui::Id {
     egui::Id::new("rustpy-task-commit-authority")
 }
-pub(crate) fn set_commit_tasks(ctx: &egui::Context, tasks: CommitTasks) {
+pub fn set_commit_tasks(ctx: &egui::Context, tasks: CommitTasks) {
     ctx.data_mut(|data| data.insert_temp(commit_data_id(), tasks));
 }
 /// Suggestions complete the word at the actual TextEdit caret, including Unicode prefixes.
@@ -750,11 +750,7 @@ pub(crate) fn completion_range(message: &str, caret: usize) -> (usize, usize, &s
         .unwrap_or(0);
     (start, end, &message[start..end])
 }
-pub(crate) fn commit_completion(
-    ui: &mut egui::Ui,
-    message: &mut String,
-    response: &egui::Response,
-) {
+pub fn commit_completion(ui: &mut egui::Ui, message: &mut String, response: &egui::Response) {
     if !response.has_focus() {
         return;
     }
@@ -813,7 +809,7 @@ pub(crate) fn commit_completion(
         response.request_focus();
     }
 }
-pub(crate) fn issue_navigation(ui: &mut egui::Ui, message: &str) {
+pub fn issue_navigation(ui: &mut egui::Ui, message: &str) {
     let Some(tasks) = ui
         .ctx()
         .data(|data| data.get_temp::<CommitTasks>(commit_data_id()))

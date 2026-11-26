@@ -11,12 +11,12 @@ use std::{
     time::{Duration, Instant},
 };
 #[derive(Clone, Debug)]
-pub(crate) struct Request {
+pub struct Request {
     pub url: String,
     pub sha256: String,
     pub limit: u64,
 }
-pub(crate) struct Ready {
+pub struct Ready {
     pub stage: StagedIndex,
     pub path: PathBuf,
     pub label: String,
@@ -73,7 +73,7 @@ fn verified_bundle(
     }
     Ok(index)
 }
-pub(crate) fn fetch(
+pub fn fetch(
     request: Request,
     store: IndexStore,
     progress: &ProgressReporter,

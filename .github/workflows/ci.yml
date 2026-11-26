@@ -81,7 +81,7 @@ jobs:
           echo "TMPDIR=${RUNNER_TEMP}" >> "$GITHUB_ENV"
           # The keyboard tests are written against the Windows/Linux keymap semantics.
           echo "RUSTPY_KEYMAP_PLATFORM=default" >> "$GITHUB_ENV"
-      # fish for the terminal-profile end-to-end test (terminal_panel.rs).
+      # fish for the terminal-profile end-to-end test (rustpy-ui-panels, terminal_panel.rs).
       - name: Linux fish shell
         if: runner.os == 'Linux' && matrix.shard == 'ui'
         run: |
@@ -154,12 +154,12 @@ jobs:
       # installs Python packages.
       - name: UI tests
         if: matrix.shard == 'ui'
-        run: cargo test --locked -p rustpy-ui -p rustpy-ui-base --no-fail-fast -- --test-threads=2 --skip app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly
+        run: cargo test --locked -p rustpy-ui -p rustpy-ui-base -p rustpy-ui-panels -p rustpy-ui-db --no-fail-fast -- --test-threads=2 --skip app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly
       - name: Cancellation latency (isolated)
         if: matrix.shard == 'ui'
         run: cargo test --locked -p rustpy-ui --lib app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly -- --exact --test-threads=1
       - if: matrix.shard == 'rest'
-        run: cargo test --locked --workspace --exclude rustpy-ui --exclude rustpy-ui-base --no-fail-fast
+        run: cargo test --locked --workspace --exclude rustpy-ui --exclude rustpy-ui-base --exclude rustpy-ui-panels --exclude rustpy-ui-db --no-fail-fast
   build:
     strategy:
       fail-fast: false

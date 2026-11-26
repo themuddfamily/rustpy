@@ -22,9 +22,10 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
   the release asset `rustpy-<version>-windows-<arch>-native-licenses.zip`.
 
 - **Build:** the UI foundation (theme, fonts, localization, accessibility, actions and
-  keymaps) moved out of the large `rustpy-ui` crate into `rustpy-ui-base`, which compiles in
-  parallel with the rest of the workspace and is not rebuilt by edits in `rustpy-ui`. The IDE
-  behaves exactly as before.
+  keymaps) and the tool window panels that need no application state (terminal, services,
+  deployment, coverage, profiler, previews, Database and diagrams, …) moved out of the large
+  `rustpy-ui` crate into `rustpy-ui-base`, `rustpy-ui-panels` and `rustpy-ui-db`, which compile
+  in parallel and are not rebuilt by edits in `rustpy-ui`. The IDE behaves exactly as before.
 
 ### Fixed
 

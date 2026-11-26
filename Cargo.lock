@@ -6318,7 +6318,6 @@ dependencies = [
  "egui",
  "flate2",
  "fontdb",
- "getrandom 0.3.4",
  "gtk",
  "ignore",
  "image",
@@ -6372,6 +6371,8 @@ dependencies = [
  "rustpy-text",
  "rustpy-textmate",
  "rustpy-ui-base",
+ "rustpy-ui-db",
+ "rustpy-ui-panels",
  "rustpy-updates",
  "rustpy-vcs",
  "serde",
@@ -6384,7 +6385,6 @@ dependencies = [
  "unicode-bidi-mirroring",
  "unicode-normalization",
  "unicode-segmentation",
- "ureq",
  "url",
  "which",
  "windows-sys 0.61.2",
@@ -6413,6 +6413,69 @@ dependencies = [
  "skrifa",
  "tempfile",
  "unicode-normalization",
+]
+
+[[package]]
+name = "rustpy-ui-db"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "dunce",
+ "egui",
+ "roxmltree 0.20.0",
+ "rustpy-core",
+ "rustpy-db",
+ "rustpy-format",
+ "rustpy-net",
+ "rustpy-run",
+ "rustpy-semantic",
+ "rustpy-syntax",
+ "rustpy-ui-base",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
+name = "rustpy-ui-panels"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "chrono",
+ "crossbeam-channel",
+ "dunce",
+ "egui",
+ "getrandom 0.3.4",
+ "image",
+ "libc",
+ "log",
+ "notify",
+ "parking_lot",
+ "pulldown-cmark",
+ "regex",
+ "rustpy-core",
+ "rustpy-deploy",
+ "rustpy-docker",
+ "rustpy-http",
+ "rustpy-index",
+ "rustpy-lsp",
+ "rustpy-net",
+ "rustpy-project",
+ "rustpy-run",
+ "rustpy-secrets",
+ "rustpy-semantic",
+ "rustpy-settings",
+ "rustpy-terminal",
+ "rustpy-ui-base",
+ "rustpy-vcs",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "ureq",
+ "url",
+ "which",
 ]
 
 [[package]]

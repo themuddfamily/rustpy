@@ -111,6 +111,7 @@ The workspace is split into crates under [crates/](crates):
 | `rustpy` | Binary entry point and logging |
 | `rustpy-ui` | The egui application: editor, tool windows, dialogs, settings |
 | `rustpy-ui-base` | UI foundation: theme, fonts, localization, accessibility, actions and keymaps |
+| `rustpy-ui-panels`, `rustpy-ui-db` | Tool window panels (terminal, services, deployment, coverage, profiler, previews, …); Database tool window and diagrams |
 | `rustpy-syntax` | Lossless Python lexer and parser (rowan CST) |
 | `rustpy-semantic` | Scopes, module resolution, type inference, inspections, refactorings, completion |
 | `rustpy-analysis`, `rustpy-refactor` | Inspections, quick fixes and intentions; extraction, inlining, move and signature refactorings |

@@ -209,7 +209,7 @@ if (( fast )); then
         --config "profile.$profile.package.'*'.codegen-units=16"
     )
     # The UI crates split out of rustpy-ui keep its optimization level.
-    for ui_crate in rustpy-ui rustpy-ui-base; do
+    for ui_crate in rustpy-ui rustpy-ui-base rustpy-ui-panels rustpy-ui-db; do
         cargo_args+=(--config "profile.$profile.package.$ui_crate.opt-level=$ui_opt_level")
     done
     if [[ $linker == lld ]]; then

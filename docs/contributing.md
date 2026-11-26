@@ -10,6 +10,7 @@ how to run the checks on a shared or small machine, and what a pull request shou
 | `crates/rustpy` | The binary: argument handling, logging, startup |
 | `crates/rustpy-ui` | The egui application: editor view, tool windows, dialogs, settings pages |
 | `crates/rustpy-ui-base` | UI foundation split out of `rustpy-ui`: theme, fonts, localization, accessibility, actions and keymaps; `rustpy-ui` re-exports its modules under their old paths |
+| `crates/rustpy-ui-panels`, `crates/rustpy-ui-db` | Tool window panels split out of `rustpy-ui` that need no application state (terminal, services, deployment, coverage, profiler, previews, …; the Database tool window and diagrams in their own crate so only it pulls in the database drivers), also re-exported under their old paths. Their tests run in CI's UI shard with `rustpy-ui`'s |
 | `crates/rustpy-*` | Engine and integration crates; see [architecture.md](architecture.md) |
 | `crates/rustpy-semantic/typeshed` | Bundled typeshed stubs (third-party, do not edit by hand) |
 | `vendor/` | Patched copies of `eframe` and `egui_glow`, excluded from the workspace |
