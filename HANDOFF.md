@@ -77,9 +77,12 @@ for subsequent releases.
 
 `.github/workflows/ci.yml` runs fmt, Clippy, tests, the desktop build and cargo-deny on
 Linux, Windows and macOS for every push to `main` and every pull request; all fourteen jobs
-passed for the published 1.0.0 revision on 2026-10-25. Tests that depend on Unix tools, Unix
-fixture paths or behaviour not yet understood on the hosted Windows and macOS runners are
-gated or ignored there, each with its reason in the source and an entry in the known-issues list.
+passed for the published 1.0.0 revision on 2026-10-25. Tests that depend on Unix tools or Unix
+fixture paths are gated to the platforms that have them. The tests that were ignored on
+Windows or macOS for behaviour not then understood were re-enabled in November 2026 with
+their causes fixed; what remains open is in the known-issues list. CI also provisions fish,
+a WSL distribution, pinned Pyramid and web2py installs and a trusted test CA so the
+terminal-profile, framework and certificate checks run against the real thing.
 `.github/workflows/release.yml` is dispatched by hand: its default builds and tests native
 Windows x64 and ARM64 packages. Linux/macOS builds, publication and Flatpak/Snap packaging
 are opt-in inputs. The Microsoft Store (MSIX) steps stay disabled until the package identity is real.
@@ -89,13 +92,8 @@ are opt-in inputs. The Microsoft Store (MSIX) steps stay disabled until the pack
 - **macOS** builds and automated tests passed on hosted Macs. Native app packaging, signing,
   notarisation, interactive Finder integration, interpreter discovery and the WKWebView
   preview remain unverified.
-- **Windows terminal**: stopping a ConPTY-backed terminal session was the last Windows terminal
-  issue found; the fix is integrated but has not been re-run on Windows. PowerShell, cmd and
-  WSL terminal profiles, and zsh, fish and pwsh shells, have not been checked end to end.
 - **Windows on Arm**: native CLI and installer checks passed on a hosted ARM64 runner;
   interactive GUI acceptance remains outstanding.
-- **Windows regression gaps**: backup-save retry and Alt+1 project-tree traversal tests
-  remain ignored on Windows; see the known-issues backlog for the observed failures.
 - **Snap**: the Snap package is defined but has not been built (needs snapd).
 - **Microsoft Store**: the MSIX package is sideload-tested; a Store submission needs a Partner
   Center identity.
