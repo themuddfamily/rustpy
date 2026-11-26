@@ -6,9 +6,12 @@
    target\windows\Native-Licenses.zip, the evidence bundle bound to that exact executable.
    -PackageOnly packages those two files (for example restored from an earlier build of the
    same commit) after checking that the bundle describes this executable, this checkout's
-   source revision and this target. #>
+   source revision and this target.
+   -Fast builds with the quick test settings (no LTO, 256 codegen units, opt-level 2): about
+   a third of the compile time for a binary about 11% larger. Not for published releases.
+   The build uses two processors and Cargo jobs unless CARGO_BUILD_JOBS asks for more. #>
 [CmdletBinding()]
-param([Parameter(Mandatory=$true)][string]$Target, [switch]$BuildOnly, [switch]$PackageOnly)
+param([Parameter(Mandatory=$true)][string]$Target, [switch]$BuildOnly, [switch]$PackageOnly, [switch]$Fast)
 $ErrorActionPreference = "Stop"
 # Starts a background process with its output in a log; Wait-Logged reports it and its exit code.
 function Start-Logged([string]$Name, [string]$Program, [string[]]$Arguments, [string]$Log) {
@@ -32,18 +35,31 @@ Set-Location -LiteralPath $Root
 $Arch = if ($Target -eq 'x86_64-pc-windows-msvc') { 'x64' } elseif ($Target -eq 'aarch64-pc-windows-msvc') { 'arm64' } else { throw 'Unsupported native Windows release target' }
 $Process = [Diagnostics.Process]::GetCurrentProcess()
 $Process.PriorityClass = 'BelowNormal'
+# Two jobs by default for shared developer machines; a dedicated build host such as a CI
+# runner opts into more through CARGO_BUILD_JOBS.
+$Jobs = if ($env:CARGO_BUILD_JOBS -match '^[1-9][0-9]*$') { [int]$env:CARGO_BUILD_JOBS } else { 2 }
 $Allowed = $Process.ProcessorAffinity.ToInt64()
 $Selected = [long]0
 $Count = 0
-for ($Bit = 0; $Bit -lt 63 -and $Count -lt 2; $Bit++) {
+for ($Bit = 0; $Bit -lt 63 -and $Count -lt $Jobs; $Bit++) {
     $Mask = [long]1 -shl $Bit
     if ($Allowed -band $Mask) { $Selected = $Selected -bor $Mask; $Count++ }
 }
 if (-not $Selected) { throw 'No CPUs available for release build' }
 $Process.ProcessorAffinity = [IntPtr]$Selected
-$env:CARGO_BUILD_JOBS = '2'
-$env:RAYON_NUM_THREADS = '2'
-$env:RUST_TEST_THREADS = '2'
+$Jobs = $Count
+$env:CARGO_BUILD_JOBS = "$Jobs"
+$env:RAYON_NUM_THREADS = "$Jobs"
+$env:RUST_TEST_THREADS = "$Jobs"
+# The release profile keeps line tables (debug = 1) for the Linux packages' symbols. On
+# Windows they only end up in rustpy.pdb, which is not shipped, and generating them nearly
+# doubles the thin-LTO step, so the Windows release omits them unless asked to keep them.
+if (-not $env:CARGO_PROFILE_RELEASE_DEBUG) { $env:CARGO_PROFILE_RELEASE_DEBUG = '0' }
+if ($Fast) {
+    $env:CARGO_PROFILE_RELEASE_LTO = 'off'
+    $env:CARGO_PROFILE_RELEASE_CODEGEN_UNITS = '256'
+    $env:CARGO_PROFILE_RELEASE_OPT_LEVEL = '2'
+}
 $TemporaryBase = if ($env:RUNNER_TEMP) { $env:RUNNER_TEMP } elseif ($env:TMPDIR) { $env:TMPDIR } else { [IO.Path]::GetTempPath() }
 $TaskRoot = Join-Path $TemporaryBase 'rustpy-native-release'
 New-Item -ItemType Directory -Force -Path $TaskRoot | Out-Null
@@ -147,8 +163,13 @@ $Map = Join-Path $Proof 'rustpy.map'
 $Recorder = Join-Path $Root 'scripts\record-native-link.py'
 $Launcher = Join-Path $Proof 'record-linker.cmd'
 @('@echo off', "`"$Python`" `"$Recorder`" --driver `"$Linker`" --directory `"$Proof`" --link-map `"$Map`" --rustc-commit $Commit -- %*") | Set-Content -LiteralPath $Launcher -Encoding ascii
-& cargo rustc --locked --release -j 2 -p rustpy --bin rustpy --target $Target --features native-web-preview -- -C "linker=$Launcher" -C "link-arg=/MAP:$Map" -C 'link-arg=/VERBOSE:LIB'
+& cargo rustc --locked --release -j $Jobs --timings -p rustpy --bin rustpy --target $Target --features native-web-preview -- -C "linker=$Launcher" -C "link-arg=/MAP:$Map" -C 'link-arg=/VERBOSE:LIB'
 if ($LASTEXITCODE) { throw 'Native Windows release build failed' }
+$LinkStarted = Get-Item -LiteralPath (Join-Path $Proof 'link-command.json') -ErrorAction SilentlyContinue
+$LinkFinished = Get-Item -LiteralPath (Join-Path $Proof 'link-trace.txt') -ErrorAction SilentlyContinue
+if ($LinkStarted -and $LinkFinished) {
+    Write-Host ("Final link: {0:N0} s (per-crate times: target/cargo-timings)" -f ($LinkFinished.LastWriteTimeUtc - $LinkStarted.LastWriteTimeUtc).TotalSeconds)
+}
 if (-not (Wait-Logged $Preflight)) { throw 'Native licence input preflight failed' }
 & $Python $NativeProducer --binary $Binary --link-map $Map --link-trace (Join-Path $Proof 'link-trace.txt') --link-record (Join-Path $Proof 'link-record.json') --toolchain-record (Join-Path $Proof 'toolchain.json') --output $Evidence
 if ($LASTEXITCODE) { throw 'Windows native licence evidence preparation failed' }
