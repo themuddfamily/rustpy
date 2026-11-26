@@ -97,5 +97,10 @@ tests inside `rustpy-ui`, which are preferable to screenshots because they asser
 - Document limitations and required external tools rather than hiding an unsupported path
   behind a setting.
 - Release preparation follows [release.md](release.md).
+- To try a commit on Windows by hand, run the *Test build* workflow (`gh workflow run
+  test-build.yml -f ref=<branch or commit>`). It hands out the portable test package that
+  CI's Windows build job made for that commit, waiting for that job if it is still running,
+  and builds the package itself with `scripts/build-windows-test.ps1` only when CI has none.
+  The package is an optimized build without link-time optimization, not a release.
 
 On macOS, run the UI tests with `RUSTPY_KEYMAP_PLATFORM=default` and a `TMPDIR` that is not a symlink (for example `$TMPDIR` set to a directory under your home): the keyboard tests are written against the Windows/Linux keymap and compare canonical paths.
