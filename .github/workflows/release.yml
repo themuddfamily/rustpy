@@ -147,17 +147,26 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      # Registry archives and release-profile dependency artifacts. The release prefix keeps these
+      # entries apart from ci.yml's. Only the default branch saves; other branches restore its
+      # entry, so branch runs do not add gigabytes to the repository's 10 GB cache budget.
+      # Workspace crates are not cached: a fresh checkout makes them stale for Cargo anyway.
+      # cache-all-crates keeps the qa/ and qa/fuzz archives that the next step needs.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: v1-release
+          shared-key: staticcrt-${{ matrix.target }}
+          cache-all-crates: true
+          cache-on-failure: true
+          save-if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+      # The licence evidence reads the .crate archives of all three lockfiles. Runs after the cache
+      # restore so that only archives missing from the cache are downloaded.
       - name: Fetch packaging source archives
         shell: bash
         run: |
           cargo fetch --locked
           cargo fetch --locked --manifest-path qa/Cargo.toml
           cargo fetch --locked --manifest-path qa/fuzz/Cargo.toml
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: release-staticcrt-${{ matrix.target }}
-          cache-on-failure: true
-          cache-workspace-crates: true
       - shell: pwsh
         run: scripts/build-windows-release.ps1 -Target '${{ matrix.target }}' -BuildOnly
       # The executable and the licence bundle bound to it, for this commit and target.
@@ -209,14 +218,45 @@ jobs:
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path -LiteralPath $iscc)) { throw "Inno Setup 6 is required" }
           "ISCC=$iscc" >> $env:GITHUB_ENV
-      # Provision the pinned WiX tool and matching UI extension explicitly.
+      - name: Restore WiX 5.0.2
+        id: wix-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.dotnet/tools/wix.exe
+            ~/.dotnet/tools/.store/wix
+            ~/.wix/extensions
+          key: wix-5.0.2-ui-5.0.2-${{ runner.os }}-${{ runner.arch }}
+      # Provision the pinned WiX tool and matching UI extension explicitly; a restored copy is
+      # used only when it reports exactly these versions.
       - name: WiX 5.0.2 and its UI extension (MSI feature selection)
         shell: pwsh
         run: |
+          function Test-WixTools {
+            $version = (& wix --version 2>$null) -join ''
+            if ($LASTEXITCODE -or $version -notlike '5.0.2*') { return $false }
+            $extensions = (& wix extension list -g 2>$null) -join "`n"
+            return -not $LASTEXITCODE -and $extensions -match 'WixToolset\.UI\.wixext' -and $extensions -match '5\.0\.2'
+          }
+          if (Get-Command wix -ErrorAction SilentlyContinue) {
+            if (Test-WixTools) { "Using cached WiX: $((& wix --version) -join '')"; exit 0 }
+            dotnet tool uninstall --global wix
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue (Join-Path $HOME '.wix/extensions')
+          }
           dotnet tool install --global wix --version 5.0.2
           if ($LASTEXITCODE) { throw "WiX installation failed" }
           wix extension add -g WixToolset.UI.wixext/5.0.2
           if ($LASTEXITCODE) { throw "WiX UI extension installation failed" }
+          if (-not (Test-WixTools)) { throw "WiX 5.0.2 with WixToolset.UI.wixext 5.0.2 is not usable" }
+      - name: Save WiX 5.0.2
+        if: steps.wix-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.dotnet/tools/wix.exe
+            ~/.dotnet/tools/.store/wix
+            ~/.wix/extensions
+          key: ${{ steps.wix-cache.outputs.cache-primary-key }}
       - name: Restore the release binary
         uses: actions/download-artifact@v8
         with:

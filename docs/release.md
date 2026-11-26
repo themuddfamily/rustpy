@@ -31,6 +31,10 @@ the separate `sandbox_packages` input; Microsoft Store jobs remain disabled.
    need `APPIMAGETOOL_RUNTIME_FILE` and the evidence for that runtime. Offline vendored builds
    need the original `.crate` archives in the Cargo cache or `RUSTPY_NATIVE_CRATE_CACHE`.
    Packaging stops when notices, covered sources or linkage declarations are missing.
+   The workflow compiles once per commit and target (`build-binary`) and packages in a
+   separate job (`package`). With `reuse_binary` (the default), a later dispatch on the same
+   commit packages the binary an earlier run built, together with the licence evidence
+   produced by that build, in about three minutes; set `reuse_binary=false` to compile again.
    The Windows workflow uses `scripts/build-windows-release.ps1` with the static CRT. It
    records the exact toolchain, final LINK invocation, map and library trace, then calls
    `scripts/prepare-windows-native-evidence.py` to verify the actual executable and produce
