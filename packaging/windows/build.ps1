@@ -20,6 +20,10 @@
     Outputs in <target dir>\windows (CARGO_TARGET_DIR is honoured):
         rustpy-<version>-windows-<arch>-portable.zip
         rustpy-<version>-windows-<arch>-setup.exe
+        rustpy-<version>-windows-<arch>-native-licenses.zip (unless -NativeLicenses is given)
+    The native-licenses file holds the corresponding source and licence evidence for this
+    exact executable. It is published once beside the packages, not inside them; the
+    packages carry LICENSE and THIRD-PARTY-NOTICES.txt, which say where to find it.
 
 .PARAMETER NoBuild
     Package the existing release binary instead of building it.
@@ -32,9 +36,10 @@
 .PARAMETER SkipInstaller
     Do not run Inno Setup.
 .PARAMETER NativeLicenses
-    Use this Native-Licenses.zip, staged earlier in the same build for the same executable
-    (scripts\build-windows-release.ps1 stages it once for all packages). It must describe the
-    exact rustpy.exe being packaged. By default the bundle is collected again.
+    The licence evidence bundle staged earlier in the same build for the same executable
+    (scripts\build-windows-release.ps1 stages it once for all packages). It is checked to
+    describe the exact rustpy.exe being packaged. By default the bundle is collected (and
+    its licence gate run) into the output directory.
 #>
 #Requires -Version 5.1
 [CmdletBinding()]
@@ -142,16 +147,15 @@ if (-not $SkipInstaller) {
 if ($NativeLicenses) {
     $NativeLicenses = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($CallerDir, $NativeLicenses))
     & python (Join-Path $Root "packaging/stage-native-licenses.py") --check-existing $NativeLicenses --binary $Exe
-    if ($LASTEXITCODE) { throw "The supplied Native-Licenses.zip does not belong to $Exe" }
+    if ($LASTEXITCODE) { throw "The supplied licence evidence bundle does not belong to $Exe" }
 } else {
-    $NativeLicenses = Join-Path $OutDir "Native-Licenses.zip"
+    $NativeLicenses = Join-Path $OutDir "rustpy-$Version-windows-$Arch-native-licenses.zip"
     & python (Join-Path $Root "packaging/stage-native-licenses.py") --runtime-file $Exe --output $NativeLicenses
     if ($LASTEXITCODE) { throw "Native license/source collection failed" }
 }
 
 # --- 3. portable zip ---------------------------------------------------------
-# Written straight from the sources (no staging copy). Native-Licenses.zip holds
-# already-compressed archives, so it is stored rather than deflated a second time.
+# Written straight from the sources, without a staging copy.
 if (-not $SkipZip) {
     Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
     $Zip = Join-Path $OutDir "rustpy-$Version-windows-$Arch-portable.zip"
@@ -173,22 +177,31 @@ if (-not $SkipZip) {
         "                      %APPDATA%\rustpy\data.)",
         "",
         "Python is not included: install it from https://www.python.org/ or the Microsoft",
-        "Store, then pick the interpreter in Settings > Project > Python Interpreter."
+        "Store, then pick the interpreter in Settings > Project > Python Interpreter.",
+        "",
+        "LICENSE and THIRD-PARTY-NOTICES.txt hold the licences. The corresponding source and",
+        "licence evidence for this exact build is the release asset",
+        "rustpy-$Version-windows-$Arch-native-licenses.zip on",
+        "https://github.com/themuddfamily/rustpy/releases/tag/v$Version"
     )
-    $Optimal = [System.IO.Compression.CompressionLevel]::Optimal
+    # SmallestSize (.NET 6+, PowerShell 7) saves about 4% for a few seconds; it runs beside the
+    # slower installer builds. Windows PowerShell 5.1 falls back to Optimal.
+    $Level = [System.IO.Compression.CompressionLevel]::Optimal
+    if ([Enum]::GetNames([System.IO.Compression.CompressionLevel]) -contains 'SmallestSize') {
+        $Level = [System.IO.Compression.CompressionLevel]'SmallestSize'
+    }
     $Archive = [System.IO.Compression.ZipFile]::Open($Zip, [System.IO.Compression.ZipArchiveMode]::Create)
     try {
         foreach ($Item in @(
-            @($Exe, "rustpy.exe", $Optimal),
-            @((Join-Path $Root "THIRD-PARTY-NOTICES.txt"), "THIRD-PARTY-NOTICES.txt", $Optimal),
-            @((Join-Path $Root "LICENSE"), "LICENSE", $Optimal),
-            @($NativeLicenses, "Native-Licenses.zip", [System.IO.Compression.CompressionLevel]::NoCompression)
+            @($Exe, "rustpy.exe", $Level),
+            @((Join-Path $Root "THIRD-PARTY-NOTICES.txt"), "THIRD-PARTY-NOTICES.txt", $Level),
+            @((Join-Path $Root "LICENSE"), "LICENSE", $Level)
         )) {
             $null = [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($Archive, $Item[0], $Item[1], $Item[2])
         }
         foreach ($Text in @(@("rustpy-portable.cmd", $Launcher), @("README.txt", $Readme))) {
             $Bytes = [System.Text.Encoding]::ASCII.GetBytes((($Text[1] -join "`r`n") + "`r`n"))
-            $Stream = $Archive.CreateEntry($Text[0], $Optimal).Open()
+            $Stream = $Archive.CreateEntry($Text[0], $Level).Open()
             try { $Stream.Write($Bytes, 0, $Bytes.Length) } finally { $Stream.Dispose() }
         }
     } finally {
@@ -217,7 +230,7 @@ if (-not $SkipInstaller) {
     if (-not $Iscc) {
         Write-Warning "Inno Setup 6 (ISCC.exe) not found; skipping the installer. Install it from https://jrsoftware.org/isdl.php or set `$env:ISCC."
     } else {
-        $IsccArgs = @("/DNativeLicenses=$NativeLicenses", "/DMyAppVersion=$Version", "/DBinDir=$ReleaseDir", "/DOutDir=$OutDir", "/DArch=$Arch")
+        $IsccArgs = @("/DMyAppVersion=$Version", "/DBinDir=$ReleaseDir", "/DOutDir=$OutDir", "/DArch=$Arch")
         if ($IconFile) { $IsccArgs += "/DIconFile=$IconFile" }
         $IsccArgs += (Join-Path $PSScriptRoot "rustpy.iss")
         Invoke-Tool $Iscc $IsccArgs

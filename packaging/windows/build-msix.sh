@@ -132,7 +132,8 @@ for arch in "${archs[@]}"; do
     if grep -q '@[A-Z_]*@' "$stage/AppxManifest.xml"; then echo "build-msix: unsubstituted placeholder" >&2; exit 1; fi
     package="$out/rustpy-$cargo_version-windows-$arch.msix"
     rm -f "$package"
-    python3 "$root/packaging/stage-native-licenses.py" --binary "$stage/rustpy.exe" --runtime-root "$stage" --output "$stage/Native-Licenses.zip"
+    # Corresponding source and licence evidence: published beside the package, not inside it.
+    python3 "$root/packaging/stage-native-licenses.py" --binary "$stage/rustpy.exe" --runtime-root "$stage" --output "$out/rustpy-$cargo_version-windows-$arch-msix-native-licenses.zip"
     "$makemsix" pack -d "$stage" -p "$package" >/dev/null
     echo "built $package ($msix_version, ${id[IDENTITY_NAME]}, ${id[PUBLISHER]})"
     packages+=("$package")

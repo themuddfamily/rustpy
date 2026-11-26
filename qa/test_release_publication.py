@@ -58,7 +58,7 @@ class ReleasePublicationTests(unittest.TestCase):
         self.names = [
             f'rustpy-{version}-windows-{arch}-{kind}'
             for arch in ('x86_64', 'arm64')
-            for kind in ('portable.zip', 'setup.exe')
+            for kind in ('portable.zip', 'setup.exe', 'native-licenses.zip')
         ] + [f'rustpy-{version}-windows-{arch}.msi' for arch in ('x64', 'arm64')]
         entries = []
         for name in self.names:

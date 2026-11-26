@@ -21,6 +21,9 @@ expected=()
 for arch in x86_64 arm64; do
   expected+=("rustpy-$version-windows-$arch-portable.zip")
   expected+=("rustpy-$version-windows-$arch-setup.exe")
+  # Corresponding source and licence evidence for that architecture's build,
+  # published once beside its packages instead of inside each of them.
+  expected+=("rustpy-$version-windows-$arch-native-licenses.zip")
 done
 expected+=("rustpy-$version-windows-x64.msi" "rustpy-$version-windows-arm64.msi")
 
@@ -40,7 +43,7 @@ for line in (root / 'SHA256SUMS').read_text().splitlines():
         raise SystemExit('Invalid, duplicate or unexpected release checksum entry')
     entries[match[2]] = match[1]
 if set(entries) != expected:
-    raise SystemExit('Release checksums must cover all six Windows packages')
+    raise SystemExit('Release checksums must cover all six Windows packages and both licence evidence assets')
 for name, digest in entries.items():
     path = root / name
     if not path.is_file() or path.stat().st_size == 0:

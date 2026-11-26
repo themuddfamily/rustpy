@@ -2,8 +2,10 @@
 # The feature-selection UI needs the matching UI extension, also installed explicitly:
 #   dotnet tool install --global wix --version 5.0.2
 #   wix extension add -g WixToolset.UI.wixext/5.0.2
-# -NativeLicenses reuses a Native-Licenses.zip staged earlier in the same build; it must describe
-# the exact rustpy.exe being packaged. By default the bundle is collected again.
+# The MSI carries LICENSE and THIRD-PARTY-NOTICES.txt; the licence evidence bundle (corresponding
+# source and native evidence) is published beside the packages. -NativeLicenses checks a bundle
+# staged earlier in the same build against this rustpy.exe; by default the bundle is collected
+# (running its licence gate) into the output directory.
 [CmdletBinding()]
 param([Parameter(Mandatory=$true)][string]$Target,[string]$OutDir="",[switch]$NoBuild,[string]$NativeLicenses="")
 $ErrorActionPreference="Stop"
@@ -24,9 +26,10 @@ try {
  if($NativeLicenses){
   $NativeLicenses=[IO.Path]::GetFullPath($NativeLicenses)
   & python (Join-Path $Root "packaging/stage-native-licenses.py") --check-existing $NativeLicenses --binary (Join-Path $BinDir "rustpy.exe")
-  if($LASTEXITCODE){throw "The supplied Native-Licenses.zip does not belong to this rustpy.exe"}
+  if($LASTEXITCODE){throw "The supplied licence evidence bundle does not belong to this rustpy.exe"}
  } else {
-  $NativeLicenses=Join-Path $OutDir "Native-Licenses.zip"
+  $EvidenceArch=if($Arch -eq "x64"){"x86_64"}else{"arm64"}
+  $NativeLicenses=Join-Path $OutDir "rustpy-$Version-windows-$EvidenceArch-native-licenses.zip"
   & python (Join-Path $Root "packaging/stage-native-licenses.py") --runtime-file (Join-Path $BinDir "rustpy.exe") --output $NativeLicenses
   if($LASTEXITCODE){throw "Native license/source collection failed"}
  }
@@ -34,6 +37,6 @@ try {
  Set-Content -LiteralPath $Marker -Value 'msi' -Encoding Ascii
  $Extensions=(& wix extension list -g) -join "`n"
  if($Extensions -notmatch 'WixToolset\.UI\.wixext'){throw "WixToolset.UI.wixext is not installed; run: wix extension add -g WixToolset.UI.wixext/5.0.2"}
- & wix build (Join-Path $PSScriptRoot "rustpy.wxs") -ext WixToolset.UI.wixext -arch $Arch -d "Version=$MsiVersion" -d "BinDir=$BinDir" -d "Marker=$Marker" -d "NativeLicenses=$NativeLicenses" -d "ProjectLicense=$(Join-Path $Root 'LICENSE')" -d "Notices=$(Join-Path $Root 'THIRD-PARTY-NOTICES.txt')" -o (Join-Path $OutDir "rustpy-$Version-windows-$Arch.msi")
+ & wix build (Join-Path $PSScriptRoot "rustpy.wxs") -ext WixToolset.UI.wixext -arch $Arch -d "Version=$MsiVersion" -d "BinDir=$BinDir" -d "Marker=$Marker" -d "ProjectLicense=$(Join-Path $Root 'LICENSE')" -d "Notices=$(Join-Path $Root 'THIRD-PARTY-NOTICES.txt')" -o (Join-Path $OutDir "rustpy-$Version-windows-$Arch.msi")
  if($LASTEXITCODE){throw "WiX failed"}
 } finally {Pop-Location}

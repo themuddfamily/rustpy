@@ -70,7 +70,9 @@ parts:
     override-prime: |
       craftctl default
       cd "$CRAFT_PART_SRC"
-      python3 packaging/stage-native-licenses.py --binary "$CRAFT_PRIME/bin/rustpy" --runtime-root "$CRAFT_PRIME" --output "$CRAFT_PRIME/usr/share/doc/rustpy/Native-Licenses.zip"
+      # Corresponding source and licence evidence for the primed binary: written to the project
+      # directory (build-snap.sh publishes it beside the .snap), not into the snap.
+      python3 packaging/stage-native-licenses.py --binary "$CRAFT_PRIME/bin/rustpy" --runtime-root "$CRAFT_PRIME" --output "$CRAFT_PROJECT_DIR/rustpy-snap-native-licenses.zip"
 
 lint:
   ignore:

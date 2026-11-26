@@ -4,8 +4,10 @@ RustPy dependency license assessment — remediation, 22 October 2026
 The repository findings from the initial audit have been addressed. RustPy's
 original code is Apache-2.0; dependencies retain their own licenses. A source
 release has the retained grants and provenance described below. Binary release
-recipes now require matching native license/source evidence and package it
-alongside the executable. They deliberately reject missing evidence rather
+recipes now require matching native license/source evidence and publish it
+beside the packages (since 26 November 2026 as a separate -native-licenses.zip
+per build instead of inside every package; the packages keep LICENSE and
+THIRD-PARTY-NOTICES.txt, which name that file). They deliberately reject missing evidence rather
 than treating a Cargo allowlist pass as distribution clearance.
 
 This is an engineering assessment. It cannot establish ownership of every
@@ -42,8 +44,9 @@ Resolved findings
    copyright claims. Notice checks detect changed locks, inputs and output text.
 3. MPL: all six packages (cssparser, cssparser-macros, dtoa-short, option-ext,
    selectors, version-ranges) have notices and exact covered source. Binary recipes
-   package them in Native-Licenses.zip under Native-Licenses/cargo-covered-sources.tar.gz, retaining MPL
-   terms and build instructions. This does not require relicensing separate RustPy
+   publish them beside each build, in its -native-licenses.zip under
+   Native-Licenses/cargo-covered-sources.tar.gz, retaining MPL terms and build
+   instructions; the shipped notices say where to obtain it. This does not require relicensing separate RustPy
    source files. See https://www.mozilla.org/en-US/MPL/2.0/FAQ/.
 4. AccessKit/vendored modifications: exact AccessKit license files restored;
    modified upstream GUI source files identify RustPy changes and patch notes
@@ -68,12 +71,14 @@ Resolved findings
    without exact component/version, notices, corresponding source archive hashes,
    build instructions and replacement instructions. This includes static system
    code such as OpenSSL, whose license cannot be inferred from openssl-sys.
-   Native-Licenses.zip carries all supplied evidence. Host libraries that are
+   The -native-licenses.zip bundle carries all supplied evidence; staging fails
+   when the shipped notices lack a licence text it retains. Host libraries that are
    required but not copied are distinguished from redistributed native code.
 11. AppImage: a supplied reviewed runtime is required, retained and explicitly
    injected; it cannot be silently downloaded outside the notice/source inventory.
 12. Artifacts: all authored tar/AppImage/Deb/RPM/Snap/Flatpak, Windows ZIP/Inno/
-   MSI/MSIX and macOS bundle recipes include the terms and covered-source archive.
+   MSI/MSIX and macOS bundle recipes include the terms and publish the
+   covered-source archive beside the package.
    Debian/RPM collect evidence after stripping. macOS explicitly records pre-sign
    executable provenance because the resource seal makes embedding its final signed
    hash self-referential; final signed container checksums remain a separate gate.

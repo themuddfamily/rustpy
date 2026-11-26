@@ -1,0 +1,18 @@
+Microsoft Visual C++ CRT and Microsoft Windows SDK (Windows builds only)
+
+RustPy for Windows is built with the Microsoft C/C++ toolchain and links the
+Microsoft Visual C++ CRT statically (the Rust target feature +crt-static), together
+with import libraries and static support code from the Microsoft Windows SDK.
+Those portions are Copyright (c) Microsoft Corporation and are redistributed as
+part of the executable under the Microsoft Visual Studio (Build Tools) and
+Windows SDK license terms, including the Visual C++ runtime redistribution terms.
+They are not open source and no source code is offered for them.
+
+The exact license documents retained for a release build, Microsoft's
+redistribution list and the linker inventory that identifies which Microsoft
+libraries were linked are part of that build's native license evidence, published
+next to the packages (see the start of this file). Microsoft publishes the
+Visual Studio terms at https://visualstudio.microsoft.com/license-terms/.
+
+The Microsoft WebView2 Loader linked into the Windows executable is covered by
+the Microsoft WebView2 SDK license reproduced in this file.

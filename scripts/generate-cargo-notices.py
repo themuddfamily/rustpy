@@ -208,10 +208,11 @@ def generate(sources):
                 "All discovered upstream license/notice texts are retained, including alternatives\n"
                 "and nested native-component terms. The resource/native supplements also apply.\n"
                 "A wrapper's selected terms do not override licenses of embedded native code.\n\n"
-                "Covered source: Native-Licenses.zip contains cargo-covered-sources.tar.gz\n"
-                "with the exact MPL package and selected native covered source. Extract the zip\n"
-                "and read its build/source instructions. Each package below also has an exact\n"
-                "public source archive URL. Covered MPL sources and modifications remain MPL.\n"
+                "Covered source: each release build's native-licenses asset (see the start of\n"
+                "THIRD-PARTY-NOTICES.txt) contains cargo-covered-sources.tar.gz with the exact\n"
+                "MPL package and selected native covered source, and its build/source\n"
+                "instructions. Each package below also has an exact public source archive\n"
+                "URL. Covered MPL sources and modifications remain MPL.\n"
                 "The application and its separate source files are licensed independently.\n"]
     for record in records:
         rendered.append("\n" + record["package"] + "\n" + "-" * 72 + "\n"

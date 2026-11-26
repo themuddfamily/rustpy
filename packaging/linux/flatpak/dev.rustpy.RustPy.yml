@@ -73,7 +73,6 @@ modules:
       - install -Dm755 target/release/rustpy /app/bin/rustpy
       - install -Dm644 THIRD-PARTY-NOTICES.txt /app/share/doc/rustpy/THIRD-PARTY-NOTICES.txt
       - install -Dm644 LICENSE /app/share/doc/rustpy/LICENSE
-      - python3 packaging/stage-native-licenses.py --binary /app/bin/rustpy --runtime-root /app --output /app/share/doc/rustpy/Native-Licenses.zip
       # Exported files must carry the application id in their names.
       - install -Dm644 packaging/linux/rustpy.desktop /app/share/applications/dev.rustpy.RustPy.desktop
       - desktop-file-edit --set-icon=dev.rustpy.RustPy /app/share/applications/dev.rustpy.RustPy.desktop

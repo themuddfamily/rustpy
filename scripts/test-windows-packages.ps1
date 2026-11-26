@@ -34,7 +34,10 @@ $ArtifactsDir = (Resolve-Path -LiteralPath $ArtifactsDir).Path
 $Portable = Join-Path $ArtifactsDir "rustpy-$Version-windows-$ZipArch-portable.zip"
 $Setup = Join-Path $ArtifactsDir "rustpy-$Version-windows-$ZipArch-setup.exe"
 $Msi = Join-Path $ArtifactsDir "rustpy-$Version-windows-$MsiArch.msi"
-foreach ($Path in @($Portable, $Setup, $Msi)) {
+# Published beside the packages: the corresponding source and licence evidence of this build.
+$EvidenceName = "rustpy-$Version-windows-$ZipArch-native-licenses.zip"
+$Evidence = Join-Path $ArtifactsDir $EvidenceName
+foreach ($Path in @($Portable, $Setup, $Msi, $Evidence)) {
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf) -or (Get-Item -LiteralPath $Path).Length -eq 0) { throw "Missing package: $Path" }
 }
 
@@ -218,7 +221,8 @@ function Assert-Archive([string]$Path, [string[]]$Required) {
 }
 
 function Assert-NativeEvidence([string]$Directory) {
-    $Zip = Join-Path $Directory 'Native-Licenses.zip'
+    # The evidence is no longer installed; the release asset must describe the installed executable.
+    $Zip = $Evidence
     Assert-Archive $Zip @('Native-Licenses/COMPLETE', 'Native-Licenses/runtime-manifest.json', 'Native-Licenses/native-crates.json', 'Native-Licenses/NOTICE-native-runtime-dependencies.txt', 'Native-Licenses/cargo-covered-sources.tar.gz')
     $Archive = [IO.Compression.ZipFile]::OpenRead($Zip)
     try {
@@ -234,10 +238,12 @@ function Assert-NativeEvidence([string]$Directory) {
 }
 
 function Assert-Installed([string]$Directory, [string]$Label) {
-    foreach ($Name in @('rustpy.exe', 'LICENSE', 'THIRD-PARTY-NOTICES.txt', 'Native-Licenses.zip')) {
+    foreach ($Name in @('rustpy.exe', 'LICENSE', 'THIRD-PARTY-NOTICES.txt')) {
         $Path = Join-Path $Directory $Name
         Assert-True ((Test-Path -LiteralPath $Path -PathType Leaf) -and (Get-Item -LiteralPath $Path).Length -gt 0) "Missing installed file $Name"
     }
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $Directory 'Native-Licenses.zip'))) 'The licence evidence bundle must not be installed'
+    Assert-True ((Get-Content -Raw -LiteralPath (Join-Path $Directory 'THIRD-PARTY-NOTICES.txt')).Contains('-native-licenses.zip')) 'The notices do not say where the corresponding source is published'
     Assert-NativeEvidence $Directory
     $Exe = Join-Path $Directory 'rustpy.exe'
     $Text = Invoke-Checked "$Label-version" $Exe @('--version') 60
@@ -274,7 +280,7 @@ try {
     $OldDefaults = @{}
     foreach ($Suffix in @('py', 'pyw', 'pyi', 'ipynb')) { $OldDefaults[$Suffix] = Get-DefaultRegistryValue "Registry::HKEY_CURRENT_USER\Software\Classes\.$Suffix" }
 
-    Assert-Archive $Portable @('rustpy.exe', 'rustpy-portable.cmd', 'LICENSE', 'THIRD-PARTY-NOTICES.txt', 'Native-Licenses.zip')
+    Assert-Archive $Portable @('rustpy.exe', 'rustpy-portable.cmd', 'LICENSE', 'THIRD-PARTY-NOTICES.txt', 'README.txt')
     [IO.Compression.ZipFile]::ExtractToDirectory($Portable, $PortableDir)
     Assert-Installed $PortableDir 'portable'
     $Steps.Add(@{ name='portable archive and isolated CLI'; passed=$true })

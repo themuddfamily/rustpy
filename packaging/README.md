@@ -416,28 +416,48 @@ The complete checklist is in [docs/release.md](../docs/release.md); the packagin
 
 ## Bundled resource notices
 
-Every artifact includes `Native-Licenses.zip`, containing exact covered Cargo
-sources and retained native component licence evidence. `packaging/stage-native-licenses.py`
-creates it offline from the Cargo cache (or vendored Cargo sources). Any bundled
-release executable requires a reviewed `RUSTPY_NATIVE_RUNTIME_MANIFEST` binding
-its SHA256 and explicitly declaring system/toolchain static native components
-(or an empty list when none are present). Bundled runtime libraries require exact
-source archives, license texts and replacement instructions. Microsoft runtime records use
-the vendor evidence schema with retained redistribution terms and actual linkage inventories;
-standalone vendor library archives are not included. Unknown runtimes stop packaging.
-Regenerate the binary hash after staging/stripping. Make that manifest and its referenced
-files available inside Flatpak/Snap build environments too. Host libraries are supplied by
-the system.
+Every package carries the project `LICENSE` and `THIRD-PARTY-NOTICES.txt`, the
+licence and notice texts that must accompany the binary. The corresponding source of
+the covered components (the MPL-2.0 packages and native crate sources, the Rust
+source archives) and the artifact-specific licence evidence are not inside the
+packages: each build publishes them once, beside its packages, as a separate
+licence evidence bundle whose name ends in `-native-licenses.zip`
+(`rustpy-<version>-windows-<arch>-native-licenses.zip` for the Windows release; the
+other recipes name it after their package). The notices say where to find it, and a
+release publishes it as a release asset covered by `SHA256SUMS`.
 
-Every artifact includes the project Apache-2.0 `LICENSE` beside the third-party
-notice bundle. Packaging recipes reject missing or stale retained notices before
-building or staging artifacts; Python 3 is required (the `python` command on Windows).
+`packaging/stage-native-licenses.py` creates the bundle offline from the Cargo cache
+(or vendored Cargo sources). Any release executable requires a reviewed
+`RUSTPY_NATIVE_RUNTIME_MANIFEST` binding its SHA256 and explicitly declaring
+system/toolchain static native components (or an empty list when none are present).
+Bundled runtime libraries require exact source archives, license texts and
+replacement instructions. Microsoft runtime records use the vendor evidence schema
+with retained redistribution terms and actual linkage inventories; standalone vendor
+library archives are not included. Unknown runtimes stop packaging. Regenerate the
+binary hash after staging/stripping. Make that manifest and its referenced files
+available inside the Snap build environment too (Flatpak stages its bundle on the
+host after the build). Host libraries are supplied by the system.
+
+Because the bundle no longer travels with the packages, staging also fails when a
+licence or notice text it retains is missing from `THIRD-PARTY-NOTICES.txt`: the
+crate and native-component texts, `packaging/NOTICE-native-runtime-dependencies.txt`
+(regenerate with `scripts/collect-native-licenses.py --notice-only`), the Rust
+standard library and compiler-rt texts in `packaging/NOTICE-rust-runtime.txt`
+(regenerate from the official archives with `packaging/stage-native-licenses.py
+--rust-runtime-notice packaging/NOTICE-rust-runtime.txt --rust-source
+rust-src-<version>.tar.xz --compiler-rt-source rustc-<version>-src.tar.xz`), the
+WebView2 SDK licence, and a statement naming each Microsoft runtime whose terms are
+kept as documents. Then run `python3 packaging/update-notices.py`. A Windows release
+build checks again, before packaging a restored binary, that the bundle describes
+that executable, commit and target.
+
+Packaging recipes reject missing or stale retained notices before building or staging
+artifacts; Python 3 is required (the `python` command on Windows).
 
 macOS records `binary_stage: pre-sign`: the linkage manifest hashes the staged
-executable before code signing. Signing changes its bytes and seals the source
-archive as a bundle resource, so embedding a hash of the final signed executable
-would create a circular resource seal. Verify the final signed artifact separately
-with the release checksums; the embedded manifest describes its pre-sign code.
+executable before code signing, so the evidence bundle published beside the DMG
+describes the pre-sign code. Verify the final signed artifact separately with the
+release checksums.
 
 `THIRD-PARTY-NOTICES.txt` preserves licenses and notices for every registry
 package in the application, QA and fuzz lockfiles, embedded resources and vendored
@@ -448,8 +468,9 @@ after dependency changes, then update the aggregate with
 texts fail rather than producing an incomplete bundle. This is separate from
 the Cargo dependency license/advisory gate.
 
-The archive/Windows installers ship the file beside the executable; macOS
-ships it in `RustPy.app/Contents/Resources`; Linux native packages, AppImage,
-Snap, Flatpak and user-prefix installs ship it in `share/doc/rustpy` under their
-respective install roots. Keep it when redistributing the binary. The source-only
+The archive and Windows installers ship `LICENSE` and `THIRD-PARTY-NOTICES.txt` beside
+the executable; macOS ships them in `RustPy.app/Contents/Resources`; Linux native
+packages, AppImage, Snap, Flatpak and user-prefix installs ship them in
+`share/doc/rustpy` under their respective install roots. Keep them, and the offer of
+the matching evidence bundle, when redistributing the binary. The source-only
 Black test corpus retains its own license/provenance beside the fixtures.

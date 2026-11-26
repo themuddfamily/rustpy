@@ -19,6 +19,9 @@ Default mode: optimized release build (thin LTO), the same settings as
 `cargo build --release`. Output (under CARGO_TARGET_DIR, or target/ by default):
   windows-portable/rustpy.exe
   rustpy-windows-x86_64.zip
+  rustpy-windows-x86_64-native-licenses.zip, the corresponding source and
+    licence evidence, only when RUSTPY_NATIVE_RUNTIME_MANIFEST names that
+    evidence for this executable; without it the build is for local use only
 
 --fast: a build for the edit-build-test loop. It uses a separate `wintest`
 profile, so it never overwrites the default output: no LTO, many codegen
@@ -272,13 +275,17 @@ cp THIRD-PARTY-NOTICES.txt "$package_dir/"
 cp LICENSE "$package_dir/"
 files+=("$package_dir/LICENSE" "$package_dir/THIRD-PARTY-NOTICES.txt")
 
-if (( fast )); then
-    # The native license bundle needs link evidence from the release build
-    # (RUSTPY_NATIVE_RUNTIME_MANIFEST); a local test build is not redistributed.
-    rm -f "$package_dir/Native-Licenses.zip"
-else
-    python3 packaging/stage-native-licenses.py --binary "$package_dir/rustpy.exe" --runtime-root "$package_dir" --output "$package_dir/Native-Licenses.zip"
-    files+=("$package_dir/Native-Licenses.zip")
+# Corresponding source and licence evidence for this exact executable: published beside the
+# archive (THIRD-PARTY-NOTICES.txt names it), not inside it. It needs the link evidence of a
+# release build (RUSTPY_NATIVE_RUNTIME_MANIFEST); without it this is a local test copy, which
+# must not be redistributed.
+rm -f "$package_dir/Native-Licenses.zip"
+evidence=""
+if (( !fast )) && [[ -n ${RUSTPY_NATIVE_RUNTIME_MANIFEST:-} ]]; then
+    evidence="${archive%.zip}-native-licenses.zip"
+    python3 packaging/stage-native-licenses.py --binary "$package_dir/rustpy.exe" --runtime-root "$package_dir" --output "$evidence"
+elif (( !fast )); then
+    echo "build-windows: RUSTPY_NATIVE_RUNTIME_MANIFEST is not set, so no licence evidence bundle was made: do not redistribute this build" >&2
 fi
 
 if (( make_zip )); then
@@ -306,6 +313,7 @@ if (( make_zip )); then
     win_path=$(windows_path "$archive")
     [[ -z $win_path ]] || echo "  from Windows: $win_path"
 fi
+[[ -z $evidence ]] || echo "Licence evidence: $evidence"
 if [[ -n $out_dir ]]; then
     mkdir -p "$out_dir"
     cp "$archive" "$out_dir/"

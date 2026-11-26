@@ -242,6 +242,38 @@ class WindowsProducerTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'differs from the locked archive'):
                 PRODUCER.native_package_notice(package, archive, changed, overrides, root)
 
+    def test_compiler_rt_licence_is_retained_under_a_recognisable_name(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            archives = {}
+            for name, members in (('rust-src-1.0.0.tar.xz', {'rust-src-1.0.0/LICENSE-MIT': b'mit'}),
+                                  ('rustc-1.0.0-src.tar.xz', {
+                                      'rustc-1.0.0-src/src/llvm-project/compiler-rt/LICENSE.TXT': b'compiler-rt',
+                                      'rustc-1.0.0-src/src/llvm-project/compiler-rt/lib/builtins/add.c': b'int x;',
+                                      'rustc-1.0.0-src/src/llvm-project/libunwind/LICENSE.TXT': b'libunwind'})):
+                buffer = BytesIO()
+                with tarfile.open(fileobj=buffer, mode='w:xz') as tar:
+                    for member, data in members.items():
+                        info = tarfile.TarInfo(member)
+                        info.size = len(data)
+                        tar.addfile(info, BytesIO(data))
+                archives[name] = buffer.getvalue()
+
+            def download(url, path, expected=None):
+                name = url.rsplit('/', 1)[1]
+                if name.endswith('.sha256'):
+                    path.write_text(hashlib.sha256(archives[name[:-7]]).hexdigest() + '  ' + name[:-7] + '\n')
+                else:
+                    path.write_bytes(archives[name])
+                return path
+
+            with patch.object(PRODUCER, 'download', side_effect=download):
+                _, terms = PRODUCER.official_rust_source('1.0.0', output, True)
+            compiler_rt = [name for name in terms if name.endswith('-compiler-rt-LICENSE.TXT')]
+            self.assertEqual(len(compiler_rt), 1)
+            self.assertEqual((output / compiler_rt[0]).read_bytes(), b'compiler-rt')
+            self.assertEqual(len(terms), 3)
+
     def test_sanitise_skips_absent_paths_without_changing_the_result(self):
         import ntpath
         import re

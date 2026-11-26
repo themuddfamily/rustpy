@@ -43,7 +43,6 @@ depends = "$auto, libgtk-3-0 | libxkbcommon0, libodbc2"
 recommends = "python3, libxkbcommon-x11-0, libegl1 | libgl1"
 assets = [
     ["target/release/rustpy", "usr/bin/", "755"],
-    ["../../packaging/generated/Native-Licenses.zip", "usr/share/doc/rustpy/", "644"],
     ["../../LICENSE", "usr/share/doc/rustpy/", "644"],
     ["../../THIRD-PARTY-NOTICES.txt", "usr/share/doc/rustpy/", "644"],
     ["../../packaging/linux/rustpy.desktop", "usr/share/applications/", "644"],
@@ -62,7 +61,6 @@ url = "https://github.com/themuddfamily/rustpy"
 release = "1"
 assets = [
     { source = "target/release/rustpy", dest = "/usr/bin/rustpy", mode = "755" },
-    { source = "../../packaging/generated/Native-Licenses.zip", dest = "/usr/share/doc/rustpy/Native-Licenses.zip", mode = "644" },
     { source = "../../LICENSE", dest = "/usr/share/doc/rustpy/LICENSE", mode = "644" },
     { source = "../../THIRD-PARTY-NOTICES.txt", dest = "/usr/share/doc/rustpy/THIRD-PARTY-NOTICES.txt", mode = "644" },
     { source = "../../packaging/linux/rustpy.desktop", dest = "/usr/share/applications/rustpy.desktop", mode = "644" },

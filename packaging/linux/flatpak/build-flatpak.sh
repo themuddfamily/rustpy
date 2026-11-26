@@ -99,6 +99,10 @@ if ((INSTALL)); then
   ARGS+=(--install)
 fi
 flatpak-builder "${ARGS[@]}" ${EXTRA[@]+"${EXTRA[@]}"} "$WORK/build-dir" "$MANIFEST"
+# Corresponding source and licence evidence for the finished (stripped) /app tree: published
+# beside the Flatpak, not inside it. Needs the locked crates in the host Cargo cache.
+python3 packaging/stage-native-licenses.py --binary "$WORK/build-dir/files/bin/rustpy" --runtime-root "$WORK/build-dir/files" --output "$WORK/RustPy-$VERSION-$ARCH-flatpak-native-licenses.zip"
+echo "Licence evidence: $WORK/RustPy-$VERSION-$ARCH-flatpak-native-licenses.zip"
 if ((BUNDLE)); then
   BUNDLE_FILE="$WORK/RustPy-$VERSION-$ARCH.flatpak"
   flatpak build-bundle --arch="$ARCH" "$WORK/repo" "$BUNDLE_FILE" "$APP_ID"

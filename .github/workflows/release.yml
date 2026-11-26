@@ -68,9 +68,10 @@ jobs:
       - name: Checksums
         run: python3 scripts/release-checksums.py target/dist target/appimage target/debian target/generate-rpm --output target/SHA256SUMS
   # Windows releases are built in two halves. build-binary compiles and links rustpy.exe,
-  # records and verifies its link-time licence evidence and stages Native-Licenses.zip bound
-  # to that exact executable; package turns those two files into the portable zip, Inno Setup
-  # installer and MSI, then runs installation acceptance. With reuse_binary, a binary that this
+  # records and verifies its link-time licence evidence and stages the licence evidence bundle
+  # (corresponding source and native evidence) bound to that exact executable; package turns
+  # those two files into the portable zip, Inno Setup installer and MSI, runs installation
+  # acceptance and publishes the bundle once, beside the packages rather than inside them. With reuse_binary, a binary that this
   # workflow already built for the same commit and target is packaged without compiling again.
   binary-lookup:
     runs-on: ubuntu-24.04
@@ -179,7 +180,7 @@ jobs:
           name: rustpy-binary-${{ matrix.target }}-${{ github.sha }}
           path: |
             target/${{ matrix.target }}/release/rustpy.exe
-            target/windows/Native-Licenses.zip
+            target/windows/*-native-licenses.zip
           if-no-files-found: error
           compression-level: 1
           retention-days: 30
@@ -273,7 +274,7 @@ jobs:
           $version = (Select-String -Path Cargo.toml -Pattern '^version = "([^"]+)"' | Select-Object -First 1).Matches.Groups[1].Value
           $arch = if ('${{ matrix.target }}' -like 'aarch64-*') { 'arm64' } else { 'x86_64' }
           $msiArch = if ($arch -eq 'arm64') { 'arm64' } else { 'x64' }
-          foreach ($name in @("rustpy-$version-windows-$arch-portable.zip", "rustpy-$version-windows-$arch-setup.exe", "rustpy-$version-windows-$msiArch.msi")) {
+          foreach ($name in @("rustpy-$version-windows-$arch-portable.zip", "rustpy-$version-windows-$arch-setup.exe", "rustpy-$version-windows-$msiArch.msi", "rustpy-$version-windows-$arch-native-licenses.zip")) {
             if (-not (Test-Path -LiteralPath "target/windows/$name")) { throw "Missing release asset: $name" }
           }
           Get-ChildItem target/windows -File | Where-Object Extension -in '.exe','.msi','.zip' | ForEach-Object { $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); "$h  $($_.Name)" } | Set-Content target/windows/SHA256SUMS
@@ -300,7 +301,7 @@ jobs:
           "RUSTPY_ACCEPTANCE_PID=$($process.Id)" >> $env:GITHUB_ENV
           "RUSTPY_ACCEPTANCE_LOG=$log" >> $env:GITHUB_ENV
           "RUSTPY_PACKAGE_ACCEPTANCE_DIR=$report" >> $env:GITHUB_ENV
-      # The packages are already compressed (and mostly the stored source bundle): do not deflate them again.
+      # The packages are already compressed: do not deflate them again.
       - name: Retain candidate Windows packages
         uses: actions/upload-artifact@v7
         with:
@@ -309,6 +310,15 @@ jobs:
             target/windows/*-portable.zip
             target/windows/*-setup.exe
             target/windows/*.msi
+          if-no-files-found: error
+          compression-level: 0
+      # Corresponding source and licence evidence for this build: one file beside the packages
+      # (a release asset when publishing), so testers need not download it with every package.
+      - name: Retain the licence evidence for these packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-native-licenses-${{ matrix.target }}
+          path: target/windows/*-native-licenses.zip
           if-no-files-found: error
           compression-level: 0
       - name: Native installation acceptance
@@ -342,7 +352,9 @@ jobs:
         if: ${{ false }}
         with:
           name: msix-${{ matrix.target }}
-          path: target/msix/*.msix
+          path: |
+            target/msix/*.msix
+            target/msix/*-native-licenses.zip
           if-no-files-found: error
   msix-bundle:
     if: ${{ false }}
@@ -436,7 +448,7 @@ jobs:
           bash scripts/release-notes.sh "$RELEASE_TAG" > target/release-notes.md
           cat >> target/release-notes.md <<'NOTES'
 
-          Windows x64 and ARM64 packages include portable ZIPs, setup executables and MSI installers. SHA256SUMS contains the download checksums.
+          Windows x64 and ARM64 packages include portable ZIPs, setup executables and MSI installers; each carries LICENSE and THIRD-PARTY-NOTICES.txt. The corresponding source and licence evidence for each architecture's build is the matching rustpy-<version>-windows-<arch>-native-licenses.zip asset. SHA256SUMS contains the download checksums.
 
           Automated Windows checks cover portable CLI startup, silent installation, reinstall, MSI repair and uninstallation on both architectures. These packages are unsigned. Interactive GUI and upgrades from an older release have not been validated. Linux, macOS and Microsoft Store packages are not included.
           NOTES

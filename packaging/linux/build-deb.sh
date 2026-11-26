@@ -83,14 +83,18 @@ if ((STRIP)); then
   "$STRIP_TOOL" --strip-unneeded "$STAGE_BIN_DIR/rustpy"
 fi
 mkdir -p packaging/generated/runtime-empty
-python3 packaging/stage-native-licenses.py --binary "$STAGE_BIN_DIR/rustpy" --runtime-root packaging/generated/runtime-empty --output packaging/generated/Native-Licenses.zip
+# Corresponding source and licence evidence for this exact binary, published beside the
+# package (THIRD-PARTY-NOTICES.txt names it) rather than installed with it.
+EVIDENCE="$STAGE/native-licenses.zip"
+python3 packaging/stage-native-licenses.py --binary "$STAGE_BIN_DIR/rustpy" --runtime-root packaging/generated/runtime-empty --output "$EVIDENCE"
 # CARGO_TARGET_DIR redirects cargo-deb's target/release asset into the reviewed stage.
 DEB="$(CARGO_TARGET_DIR="$STAGE" cargo deb "${ARGS[@]}" "${FORWARD[@]}" | tail -n 1)"
 if [[ ! -f $DEB ]]; then
   echo "build-deb: cargo-deb did not report a package path (got: '$DEB')" >&2
   exit 1
 fi
-echo "Debian package: $DEB"
+mv -f -- "$EVIDENCE" "${DEB%.deb}-native-licenses.zip"
+echo "Debian package: $DEB (licence evidence: ${DEB%.deb}-native-licenses.zip)"
 # A cross build (e.g. --target aarch64-unknown-linux-gnu on an x86_64 host) without the
 # target architecture's libraries installed (dpkg --add-architecture arm64 plus the
 # libgtk-3-dev:arm64 ... packages) leaves dpkg-shlibdeps unable to resolve $auto. cargo-deb
@@ -102,7 +106,7 @@ if command -v dpkg-deb >/dev/null 2>&1 && [[ ${RUSTPY_DEB_ALLOW_INCOMPLETE_DEPEN
     echo "  Depends: $(dpkg-deb --field "$DEB" Depends)" >&2
     echo "build-deb: install the target architecture's libraries or build on a native host" >&2
     echo "build-deb: (RUSTPY_DEB_ALLOW_INCOMPLETE_DEPENDS=1 keeps the package anyway)" >&2
-    rm -f -- "$DEB"
+    rm -f -- "$DEB" "${DEB%.deb}-native-licenses.zip"
     exit 1
   fi
 fi
