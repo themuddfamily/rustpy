@@ -28,8 +28,9 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 env:
-  CARGO_BUILD_JOBS: '2'
-  RAYON_NUM_THREADS: '2'
+  # Hosted runners have 4 vCPUs and run one job each: build on all of them.
+  CARGO_BUILD_JOBS: '4'
+  RAYON_NUM_THREADS: '4'
   RUST_TEST_THREADS: '2'
 jobs:
   linux:
