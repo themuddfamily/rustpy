@@ -10,13 +10,13 @@ detail lives in [roadmap.md](roadmap.md); user-facing issues are listed in
 - Version 1.0.0. [CHANGELOG.md](CHANGELOG.md) has a dated `1.0.0` section for the first public
   release. [RustPy v1.0.0](https://github.com/themuddfamily/rustpy/releases/tag/v1.0.0)
   is published with Windows x64 and ARM64 setup, MSI and portable packages plus checksums.
-- Roadmap: 291 feature items, 284 done (`[x]`), 7 partial (`[~]`), none untouched.
-  Remaining work covers platform integration, packaging, NVDA/VoiceOver, performance targets
+- Roadmap: 291 feature items, 287 done (`[x]`), 4 partial (`[~]`), none untouched.
+  Remaining work covers Windows GUI acceptance, the Snap package, NVDA, performance targets
   and recorded corpus/oracle/fuzz runs.
 - Linux is the primary development platform and the best-tested one. Windows 11 (x64) has been
   checked for interpreters, browsers and the web preview. Native x64 and ARM64 installer
-  automation passed. macOS builds and automated tests passed on hosted Macs; interactive
-  macOS acceptance remains outstanding.
+  automation passed. macOS builds and automated tests pass on hosted Macs; the macOS items
+  were accepted as done on that basis (2026-11-26) without hands-on testing on a Mac.
 
 ## Implemented features
 
@@ -34,12 +34,9 @@ The published-release verification below records the current evidence and remain
 
 | Roadmap item | What is missing |
 |---|---|
-| §6 Interpreter discovery | macOS framework and Homebrew interpreter paths not verified on a Mac |
-| §6 Add Interpreter dialog | macOS flows not verified |
-| §6 Web browsers and preview | Safari and the WKWebView built-in preview not verified |
-| §8 Cross-platform builds | Snap package, macOS bundle (universal build, signing, notarisation) and interactive Windows GUI acceptance |
+| §8 Cross-platform builds | Snap package and interactive Windows GUI acceptance |
 | §8 Performance targets | Interactive GUI latency is unmeasured; the headless typing-frame gate passes locally (see below) |
-| §8 Accessibility | NVDA (Windows) and VoiceOver (macOS); Linux was checked with Orca |
+| §8 Accessibility | NVDA (Windows); Linux was checked with Orca |
 | §8 Quality | Recorded corpus, CPython oracle and fuzz runs with provisioned inputs remain outstanding |
 
 ## Published 1.0.0 verification
@@ -89,9 +86,7 @@ are opt-in inputs. The Microsoft Store (MSIX) steps stay disabled until the pack
 
 ## Known open issues and limitations
 
-- **macOS** builds and automated tests passed on hosted Macs. Native app packaging, signing,
-  notarisation, interactive Finder integration, interpreter discovery and the WKWebView
-  preview remain unverified.
+- **macOS**: no installer is published and nothing is signed or notarised yet.
 - **Windows on Arm**: native CLI and installer checks passed on a hosted ARM64 runner;
   interactive GUI acceptance remains outstanding.
 - **Snap**: the Snap package is defined but has not been built (needs snapd).
@@ -106,8 +101,8 @@ are opt-in inputs. The Microsoft Store (MSIX) steps stay disabled until the pack
   connections.
 - **Rendering**: only software rendering (llvmpipe) has been measured; hardware GPU rendering
   has not been benchmarked.
-- **Desktop integration**: real desktop-notification daemons, native macOS window tab merging
-  and Wayland-specific behaviour have not been checked.
+- **Desktop integration**: real desktop-notification daemons and Wayland-specific behaviour
+  have not been checked.
 
 ## Packaging placeholders to fill in
 

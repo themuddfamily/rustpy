@@ -95,9 +95,8 @@ Useful options: `--open-file <file>` opens a file, `--verbose` enables debug log
 - **Windows** x64 and ARM64 packages passed native CLI, installation, reinstall, MSI repair
   and uninstall checks. Packages are unsigned; interactive GUI acceptance remains outstanding.
   See [WINDOWS.md](WINDOWS.md) for build instructions and the packaging guide for recipes.
-- **macOS** builds and automated tests passed on hosted Macs. The universal app bundle/DMG,
-  signing, notarisation and interactive desktop integration remain unverified; no macOS
-  installer is included in 1.0.0.
+- **macOS** builds and automated tests pass on hosted Macs. No macOS installer is included
+  in 1.0.0; build from source or use the app bundle recipe in the packaging guide.
 - **Language:** the UI follows the locale environment variables (`LANGUAGE`, `LC_ALL`,
   `LC_MESSAGES`, `LANG`); Windows and macOS apps usually have none of them and start in
   English. Settings › Appearance › Language picks another of the nine languages. Chinese,
