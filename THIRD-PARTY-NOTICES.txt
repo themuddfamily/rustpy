@@ -8186,17 +8186,6 @@ Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
 Notice: license-mit
 Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
 
-windows-sys@0.59.0
-------------------------------------------------------------------------
-Declared: MIT OR Apache-2.0
-Selected: MIT
-Source: https://crates.io/api/v1/crates/windows-sys/0.59.0/download
-Source SHA-256: 1e38bc4d79ed67fd075bcc251a1c39b32a1776bbe92e5bef1f0bf1f8c531853b
-Notice: license-apache-2.0
-Text SHA-256: c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b
-Notice: license-mit
-Text SHA-256: c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383
-
 windows-sys@0.61.2
 ------------------------------------------------------------------------
 Declared: MIT OR Apache-2.0
