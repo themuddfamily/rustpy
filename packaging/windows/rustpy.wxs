@@ -13,7 +13,11 @@
        which disable (Level 0) the matching feature whatever ADDLOCAL says. -->
   <Package Name="RustPy" Manufacturer="RustPy" Version="$(var.Version)" UpgradeCode="418E653B-A5FC-4AA9-82F3-25A3AADF7EA4" Scope="perUser">
     <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer RustPy is installed." />
-    <MediaTemplate EmbedCab="yes" />
+    <!-- Native-Licenses.zip holds already-compressed source archives: its own uncompressed
+         cabinet saves compressing it again. MSZIP for the rest builds in about half the time
+         of the default LZX level, for a package about 2% larger. -->
+    <Media Id="1" Cabinet="rustpy.cab" EmbedCab="yes" CompressionLevel="mszip" />
+    <Media Id="2" Cabinet="licenses.cab" EmbedCab="yes" CompressionLevel="none" />
     <Property Id="ASSOCIATE_FILES" Value="1" Secure="yes" />
     <Property Id="CONTEXT_MENU" Value="1" Secure="yes" />
     <Property Id="ADD_TO_PATH" Value="1" Secure="yes" />
@@ -33,7 +37,7 @@
         <Component Id="Executable" Guid="5D0C3E61-7F0B-4C1E-9A3C-0B8E2C6B9F21">
           <File Id="RustPyExe" Source="$(var.BinDir)\rustpy.exe" />
           <File Id="ThirdPartyNotices" Source="$(var.Notices)" Name="THIRD-PARTY-NOTICES.txt" />
-          <File Id="NativeLicenses" Source="$(var.NativeLicenses)" Name="Native-Licenses.zip" />
+          <File Id="NativeLicenses" Source="$(var.NativeLicenses)" Name="Native-Licenses.zip" DiskId="2" />
           <File Id="ProjectLicense" Source="$(var.ProjectLicense)" Name="LICENSE" />
           <File Id="InstallKind" Source="$(var.Marker)" Name="rustpy-install.kind" />
           <RegistryValue Root="HKCU" Key="Software\RustPy" Name="InstallKind" Value="msi" Type="string" KeyPath="yes" />

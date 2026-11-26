@@ -75,8 +75,12 @@ ArchitecturesInstallIn64BitMode=x64compatible
 #error Arch must be x86_64 or arm64
 #endif
 MinVersion=10.0
-Compression=lzma2
+Compression=lzma2/max
 SolidCompression=yes
+; Two compression blocks in a separate process: about a quarter faster than one block, at
+; practically the same size (+0.05%).
+LZMAUseSeparateProcess=yes
+LZMANumBlockThreads=2
 WizardStyle=modern
 ChangesAssociations=yes
 ; Tells Explorer and new terminals about a changed PATH (task "addtopath").
@@ -109,7 +113,8 @@ Name: "contextmenu\file"; Description: """Edit with {#MyAppName}"" on files"; Fl
 [Files]
 Source: "{#BinDir}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\THIRD-PARTY-NOTICES.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#NativeLicenses}"; DestDir: "{app}"; DestName: "Native-Licenses.zip"; Flags: ignoreversion
+; Already-compressed source archives: storing them saves a long, useless LZMA pass.
+Source: "{#NativeLicenses}"; DestDir: "{app}"; DestName: "Native-Licenses.zip"; Flags: ignoreversion nocompression
 Source: "..\..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 #ifdef IconFile
 Source: "{#IconFile}"; DestDir: "{app}"; DestName: "rustpy.ico"; Flags: ignoreversion

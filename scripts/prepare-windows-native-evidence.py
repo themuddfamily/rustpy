@@ -368,9 +368,16 @@ def relative(path, root):
 
 
 def sanitise(text, roots):
+    # The link map is ~200 MB and usually contains none of these paths: a plain substring test
+    # on lowered ASCII text skips each case-insensitive regex pass that could not match.
+    folded = text.lower() if text.isascii() else None
     for label, path in sorted(roots.items(), key=lambda item: len(str(item[1])), reverse=True):
         for spelling in (str(path), str(path).replace('\\', '/'), str(path).replace('/', '\\')):
-            text = re.sub(re.escape(spelling), lambda _: '$' + label, text, flags=re.I)
+            if folded is not None and spelling.isascii() and spelling.lower() not in folded:
+                continue
+            text, count = re.subn(re.escape(spelling), lambda _: '$' + label, text, flags=re.I)
+            if count:
+                folded = text.lower() if text.isascii() else None
     # Vendor object members can retain the vendor's private build-machine paths.
     return re.sub(r'[A-Za-z]:[\\/][^\s"()<>]+', lambda match: '$VENDOR_BUILD/' + ntpath.basename(match[0]), text)
 

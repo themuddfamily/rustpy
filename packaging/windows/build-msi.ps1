@@ -2,8 +2,10 @@
 # The feature-selection UI needs the matching UI extension, also installed explicitly:
 #   dotnet tool install --global wix --version 5.0.2
 #   wix extension add -g WixToolset.UI.wixext/5.0.2
+# -NativeLicenses reuses a Native-Licenses.zip staged earlier in the same build; it must describe
+# the exact rustpy.exe being packaged. By default the bundle is collected again.
 [CmdletBinding()]
-param([Parameter(Mandatory=$true)][string]$Target,[string]$OutDir="",[switch]$NoBuild)
+param([Parameter(Mandatory=$true)][string]$Target,[string]$OutDir="",[switch]$NoBuild,[string]$NativeLicenses="")
 $ErrorActionPreference="Stop"
 $Root=(Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 & python (Join-Path $Root "packaging/update-notices.py") --check
@@ -19,9 +21,15 @@ Push-Location $Root
 try {
  if(-not $NoBuild){ & cargo build --locked --release -p rustpy --target $Target --features native-web-preview; if($LASTEXITCODE){throw "Cargo failed"} }
  $BinDir=Join-Path $TargetDir "$Target\release"
- $NativeLicenses=Join-Path $OutDir "Native-Licenses.zip"
- & python (Join-Path $Root "packaging/stage-native-licenses.py") --runtime-file (Join-Path $BinDir "rustpy.exe") --output $NativeLicenses
- if($LASTEXITCODE){throw "Native license/source collection failed"}
+ if($NativeLicenses){
+  $NativeLicenses=[IO.Path]::GetFullPath($NativeLicenses)
+  & python (Join-Path $Root "packaging/stage-native-licenses.py") --check-existing $NativeLicenses --binary (Join-Path $BinDir "rustpy.exe")
+  if($LASTEXITCODE){throw "The supplied Native-Licenses.zip does not belong to this rustpy.exe"}
+ } else {
+  $NativeLicenses=Join-Path $OutDir "Native-Licenses.zip"
+  & python (Join-Path $Root "packaging/stage-native-licenses.py") --runtime-file (Join-Path $BinDir "rustpy.exe") --output $NativeLicenses
+  if($LASTEXITCODE){throw "Native license/source collection failed"}
+ }
  $Marker=Join-Path $OutDir "rustpy-install.kind"
  Set-Content -LiteralPath $Marker -Value 'msi' -Encoding Ascii
  $Extensions=(& wix extension list -g) -join "`n"

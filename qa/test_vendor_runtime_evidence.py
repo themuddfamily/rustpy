@@ -242,6 +242,27 @@ class WindowsProducerTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'differs from the locked archive'):
                 PRODUCER.native_package_notice(package, archive, changed, overrides, root)
 
+    def test_sanitise_skips_absent_paths_without_changing_the_result(self):
+        import ntpath
+        import re
+        from pathlib import PureWindowsPath
+
+        def reference(text, roots):
+            for label, path in sorted(roots.items(), key=lambda item: len(str(item[1])), reverse=True):
+                for spelling in (str(path), str(path).replace('\\', '/'), str(path).replace('/', '\\')):
+                    text = re.sub(re.escape(spelling), lambda _: '$' + label, text, flags=re.I)
+            return re.sub(r'[A-Za-z]:[\\/][^\s"()<>]+', lambda match: '$VENDOR_BUILD/' + ntpath.basename(match[0]), text)
+
+        roots = {'WORKSPACE': PureWindowsPath(r'D:\a\rustpy\rustpy'), 'TARGET_DIR': PureWindowsPath(r'D:\a\rustpy\rustpy\target'),
+                 'RUNNER_HOME': PureWindowsPath(r'C:\Users\runneradmin'), 'CARGO_HOME': PureWindowsPath(r'C:\Users\runneradmin\.cargo')}
+        samples = ['0001:00000000 0549e7e0H .text CODE\n' * 50,
+                   'Searching d:/A/RustPy/rustpy/target/x.rlib and C:\\USERS\\runneradmin\\.cargo\\registry\\y.lib\n',
+                   'Loaded E:\\vendor\\build\\libcmt.lib(obj) from D:\\a\\rustpy\\rustpy\\src\n',
+                   'non-ASCII \u017f path C:\\Users\\runneradmin\\.cargo\\z and D:\\A\\RUSTPY\\RUSTPY\n']
+        for text in samples:
+            with self.subTest(text=text[:40]):
+                self.assertEqual(PRODUCER.sanitise(text, roots), reference(text, roots))
+
     def test_vendor_terms_profile_matches_the_actual_visual_studio_major(self):
         legacy = PRODUCER.visual_studio_profile('17.14.39222.1')
         current = PRODUCER.visual_studio_profile('18.0.10517.64')

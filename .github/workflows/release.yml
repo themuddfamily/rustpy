@@ -18,10 +18,14 @@ on:
         description: Build Linux and macOS packages (requires platform-specific native evidence)
         type: boolean
         default: false
+      reuse_binary:
+        description: Package a binary this workflow already built for this commit instead of compiling it again
+        type: boolean
+        default: true
 permissions:
   contents: read
 concurrency:
-  group: release
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 env:
   CARGO_BUILD_JOBS: '2'
@@ -62,18 +66,63 @@ jobs:
           packaging/linux/build-rpm.sh --no-build --target '${{ matrix.target }}'
       - name: Checksums
         run: python3 scripts/release-checksums.py target/dist target/appimage target/debian target/generate-rpm --output target/SHA256SUMS
-  windows:
+  # Windows releases are built in two halves. build-binary compiles and links rustpy.exe,
+  # records and verifies its link-time licence evidence and stages Native-Licenses.zip bound
+  # to that exact executable; package turns those two files into the portable zip, Inno Setup
+  # installer and MSI, then runs installation acceptance. With reuse_binary, a binary that this
+  # workflow already built for the same commit and target is packaged without compiling again.
+  binary-lookup:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+    outputs:
+      build: ${{ steps.find.outputs.build }}
+      runs: ${{ steps.find.outputs.runs }}
+    steps:
+      - id: find
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REUSE: ${{ inputs.reuse_binary }}
+        run: |
+          set -euo pipefail
+          build='[]'
+          runs='{}'
+          for pair in windows-2025=x86_64-pc-windows-msvc windows-11-arm=aarch64-pc-windows-msvc; do
+            runner=${pair%%=*}
+            target=${pair#*=}
+            run=''
+            if [ "$REUSE" = true ]; then
+              # Newest unexpired binary artifact of this commit that this workflow made.
+              for candidate in $(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=rustpy-binary-$target-$GITHUB_SHA&per_page=30" \
+                  --jq '[.artifacts[] | select(.expired | not) | select(.workflow_run.head_sha == env.GITHUB_SHA)] | sort_by(.created_at) | reverse | .[].workflow_run.id'); do
+                if [ "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$candidate" --jq .path)" = .github/workflows/release.yml ]; then
+                  run=$candidate
+                  break
+                fi
+              done
+            fi
+            if [ -n "$run" ]; then
+              echo "$target: packaging the binary built by run $run"
+            else
+              echo "$target: building the binary in this run"
+              run=$GITHUB_RUN_ID
+              build=$(jq -c --arg runner "$runner" --arg target "$target" '. + [{runner: $runner, target: $target}]' <<<"$build")
+            fi
+            runs=$(jq -c --arg target "$target" --arg run "$run" '. + {($target): $run}' <<<"$runs")
+          done
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+          echo "runs=$runs" >> "$GITHUB_OUTPUT"
+  build-binary:
+    needs: binary-lookup
+    if: ${{ needs.binary-lookup.outputs.build != '[]' }}
     timeout-minutes: 180
     env:
       RUSTFLAGS: -C target-feature=+crt-static
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - runner: windows-2025
-            target: x86_64-pc-windows-msvc
-          - runner: windows-11-arm
-            target: aarch64-pc-windows-msvc
+        include: ${{ fromJSON(needs.binary-lookup.outputs.build) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
@@ -109,42 +158,19 @@ jobs:
           key: release-staticcrt-${{ matrix.target }}
           cache-on-failure: true
           cache-workspace-crates: true
-      - name: Check Inno Setup 6
-        shell: pwsh
-        run: |
-          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          if (-not (Test-Path -LiteralPath $iscc)) { throw "Inno Setup 6 is required" }
-          "ISCC=$iscc" >> $env:GITHUB_ENV
-      # Provision the pinned WiX tool and matching UI extension explicitly.
-      - name: WiX 5.0.2 and its UI extension (MSI feature selection)
-        shell: pwsh
-        run: |
-          dotnet tool install --global wix --version 5.0.2
-          if ($LASTEXITCODE) { throw "WiX installation failed" }
-          wix extension add -g WixToolset.UI.wixext/5.0.2
-          if ($LASTEXITCODE) { throw "WiX UI extension installation failed" }
       - shell: pwsh
-        run: |
-          scripts/build-windows-release.ps1 -Target '${{ matrix.target }}'
-          $version = (Select-String -Path Cargo.toml -Pattern '^version = "([^"]+)"' | Select-Object -First 1).Matches.Groups[1].Value
-          $arch = if ('${{ matrix.target }}' -like 'aarch64-*') { 'arm64' } else { 'x86_64' }
-          $msiArch = if ($arch -eq 'arm64') { 'arm64' } else { 'x64' }
-          foreach ($name in @("rustpy-$version-windows-$arch-portable.zip", "rustpy-$version-windows-$arch-setup.exe", "rustpy-$version-windows-$msiArch.msi")) {
-            if (-not (Test-Path -LiteralPath "target/windows/$name")) { throw "Missing release asset: $name" }
-          }
-          Get-ChildItem target/windows -File | Where-Object Extension -in '.exe','.msi','.zip' | ForEach-Object { $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); "$h  $($_.Name)" } | Set-Content target/windows/SHA256SUMS
-      - name: Retain candidate Windows packages
+        run: scripts/build-windows-release.ps1 -Target '${{ matrix.target }}' -BuildOnly
+      # The executable and the licence bundle bound to it, for this commit and target.
+      - name: Retain the release binary
         uses: actions/upload-artifact@v7
         with:
-          name: windows-${{ matrix.target }}
+          name: rustpy-binary-${{ matrix.target }}-${{ github.sha }}
           path: |
-            target/windows/*-portable.zip
-            target/windows/*-setup.exe
-            target/windows/*.msi
+            target/${{ matrix.target }}/release/rustpy.exe
+            target/windows/Native-Licenses.zip
           if-no-files-found: error
-      - name: Native installation acceptance
-        shell: pwsh
-        run: scripts/test-windows-packages.ps1 -Target '${{ matrix.target }}'
+          compression-level: 1
+          retention-days: 30
       - name: Retain native linkage evidence
         if: ${{ always() && env.RUSTPY_NATIVE_EVIDENCE_DIR != '' }}
         uses: actions/upload-artifact@v7
@@ -159,6 +185,101 @@ jobs:
             ${{ env.RUSTPY_NATIVE_EVIDENCE_DIR }}/runtime/*.json
           retention-days: 7
           if-no-files-found: warn
+  package:
+    needs: [binary-lookup, build-binary]
+    if: ${{ !cancelled() && needs.binary-lookup.result == 'success' && (needs.build-binary.result == 'success' || needs.build-binary.result == 'skipped') }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            target: x86_64-pc-windows-msvc
+          - runner: windows-11-arm
+            target: aarch64-pc-windows-msvc
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check Inno Setup 6
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path -LiteralPath $iscc)) { throw "Inno Setup 6 is required" }
+          "ISCC=$iscc" >> $env:GITHUB_ENV
+      # Provision the pinned WiX tool and matching UI extension explicitly.
+      - name: WiX 5.0.2 and its UI extension (MSI feature selection)
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          if ($LASTEXITCODE) { throw "WiX installation failed" }
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          if ($LASTEXITCODE) { throw "WiX UI extension installation failed" }
+      - name: Restore the release binary
+        uses: actions/download-artifact@v8
+        with:
+          name: rustpy-binary-${{ matrix.target }}-${{ github.sha }}
+          path: target
+          run-id: ${{ fromJSON(needs.binary-lookup.outputs.runs)[matrix.target] }}
+          github-token: ${{ github.token }}
+      - shell: pwsh
+        run: |
+          scripts/build-windows-release.ps1 -Target '${{ matrix.target }}' -PackageOnly
+          $version = (Select-String -Path Cargo.toml -Pattern '^version = "([^"]+)"' | Select-Object -First 1).Matches.Groups[1].Value
+          $arch = if ('${{ matrix.target }}' -like 'aarch64-*') { 'arm64' } else { 'x86_64' }
+          $msiArch = if ($arch -eq 'arm64') { 'arm64' } else { 'x64' }
+          foreach ($name in @("rustpy-$version-windows-$arch-portable.zip", "rustpy-$version-windows-$arch-setup.exe", "rustpy-$version-windows-$msiArch.msi")) {
+            if (-not (Test-Path -LiteralPath "target/windows/$name")) { throw "Missing release asset: $name" }
+          }
+          Get-ChildItem target/windows -File | Where-Object Extension -in '.exe','.msi','.zip' | ForEach-Object { $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); "$h  $($_.Name)" } | Set-Content target/windows/SHA256SUMS
+      # Acceptance only reads the packages, so it installs and removes them while they upload.
+      # A hidden window keeps the background process off this step's output pipes.
+      - name: Start native installation acceptance
+        shell: pwsh
+        run: |
+          $report = Join-Path $env:RUNNER_TEMP 'rustpy-package-acceptance'
+          $log = Join-Path $env:RUNNER_TEMP 'rustpy-package-acceptance.log'
+          $acceptance = Join-Path $PWD 'scripts/test-windows-packages.ps1'
+          $script = @"
+          `$env:GITHUB_ENV = `$null
+          try {
+              & '$acceptance' -Target '${{ matrix.target }}' -ReportDir '$report' *>&1 | Out-File -LiteralPath '$log' -Encoding utf8
+              Set-Content -LiteralPath '$log.status' -Value passed
+          } catch {
+              `$_ | Out-String | Out-File -LiteralPath '$log' -Append -Encoding utf8
+              Set-Content -LiteralPath '$log.status' -Value failed
+          }
+          "@
+          $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($script))
+          $process = Start-Process pwsh -ArgumentList "-NoProfile -NonInteractive -EncodedCommand $encoded" -WindowStyle Hidden -PassThru
+          "RUSTPY_ACCEPTANCE_PID=$($process.Id)" >> $env:GITHUB_ENV
+          "RUSTPY_ACCEPTANCE_LOG=$log" >> $env:GITHUB_ENV
+          "RUSTPY_PACKAGE_ACCEPTANCE_DIR=$report" >> $env:GITHUB_ENV
+      # The packages are already compressed (and mostly the stored source bundle): do not deflate them again.
+      - name: Retain candidate Windows packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-${{ matrix.target }}
+          path: |
+            target/windows/*-portable.zip
+            target/windows/*-setup.exe
+            target/windows/*.msi
+          if-no-files-found: error
+          compression-level: 0
+      - name: Native installation acceptance
+        shell: pwsh
+        timeout-minutes: 30
+        run: |
+          $status = "$env:RUSTPY_ACCEPTANCE_LOG.status"
+          while (-not (Test-Path -LiteralPath $status) -and (Get-Process -Id $env:RUSTPY_ACCEPTANCE_PID -ErrorAction SilentlyContinue)) {
+            Start-Sleep -Seconds 1
+          }
+          if (Test-Path -LiteralPath $env:RUSTPY_ACCEPTANCE_LOG) { Get-Content -LiteralPath $env:RUSTPY_ACCEPTANCE_LOG }
+          if (-not (Test-Path -LiteralPath $status) -or (Get-Content -LiteralPath $status) -ne 'passed') {
+            throw 'Native installation acceptance failed'
+          }
       - name: Retain native installation acceptance
         if: ${{ always() && env.RUSTPY_PACKAGE_ACCEPTANCE_DIR != '' }}
         uses: actions/upload-artifact@v7
@@ -182,7 +303,7 @@ jobs:
           if-no-files-found: error
   msix-bundle:
     if: ${{ false }}
-    needs: windows
+    needs: package
     runs-on: windows-2025
     steps:
       - uses: actions/checkout@v7
@@ -234,7 +355,7 @@ jobs:
       - run: packaging/linux/build-snap.sh
   publish:
     if: ${{ inputs.publish }}
-    needs: windows
+    needs: package
     runs-on: ubuntu-24.04
     permissions:
       contents: write
