@@ -166,7 +166,7 @@ impl IdeApp {
                 self.open_settings_page("todo");
             }
         });
-        let context = self.capture_scope_context();
+        let mut context = self.capture_scope_context();
         let compiled = match self.settings.scopes.compile(&self.settings.scopes.todo) {
             Ok(scope) => scope,
             Err(error) => {
@@ -180,6 +180,25 @@ impl IdeApp {
             .as_ref()
             .map(|(_, items, colors)| (items, colors))
             .unwrap_or((&self.todo_items, &self.todo_colors));
+        let project_scope = self.project_scope();
+        // Until the file index has its first list (just after a project opens)
+        // the context knows no project files, and a project-based scope would
+        // hide every row. The scan walked the project itself, so its rows inside
+        // the project scope are project files.
+        if let Some(scope) = project_scope
+            .as_ref()
+            .filter(|_| context.project_files.is_empty())
+        {
+            let mut files: Vec<PathBuf> = items
+                .iter()
+                .map(|(path, _, _)| path)
+                .filter(|path| scope.contains(path))
+                .cloned()
+                .collect();
+            files.sort();
+            files.dedup();
+            context.project_files = Arc::new(files);
+        }
         // The default list also owns changed paths not explicitly assigned to any list.
         let repository = self
             .project
@@ -208,7 +227,6 @@ impl IdeApp {
                     .build()
                     .ok()
             });
-        let project_scope = self.project_scope();
         let rows = items
             .iter()
             .enumerate()
@@ -639,5 +657,51 @@ mod connected_fixtures {
         assert!(labels(&mut app, &ctx)
             .iter()
             .any(|label| label.contains("FIXME project")));
+    }
+
+    /// Just after a project opens, a TODO scan can finish before the file
+    /// index has its first list. The scan's rows must still show in the
+    /// default (project) scope instead of an empty list.
+    #[test]
+    fn scan_results_show_in_the_project_scope_before_the_file_index_is_built() {
+        let directory = tempfile::tempdir().unwrap();
+        let file = directory.path().join("early.py");
+        std::fs::write(&file, "# TODO early λ\n").unwrap();
+        let mut settings = Settings::default();
+        settings.trust_project(directory.path());
+        let mut app = IdeApp::new(settings, Some(directory.path().into()));
+        let ctx = egui::Context::default();
+        crate::theme::install_fonts(&ctx);
+        let index_unbuilt = |app: &IdeApp| {
+            assert!(app
+                .project_index
+                .files
+                .wait_idle(std::time::Duration::from_secs(30)));
+            // The state of the index while its first build is still running.
+            app.project_index.files.clear();
+        };
+        index_unbuilt(&app);
+        app.request_todo_scan(0.0);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+        while app.todo_scan_running() {
+            app.poll_project_index(&ctx);
+            assert!(
+                std::time::Instant::now() < deadline,
+                "TODO scan never published"
+            );
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        assert_eq!(app.todo_items.len(), 1, "{:?}", app.todo_items);
+        index_unbuilt(&app);
+        assert!(app.tool_lists.tab == TodoTab::Scope);
+        let shown = labels(&mut app, &ctx);
+        assert!(
+            shown.iter().any(|label| label.contains("TODO early λ")),
+            "{shown:?}"
+        );
+        assert!(
+            shown.iter().any(|label| label == "1 TODO item(s)"),
+            "{shown:?}"
+        );
     }
 }
