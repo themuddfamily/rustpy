@@ -121,6 +121,11 @@ Visual Studio toolchain of the release runners. Use it to try a change, not to
 distribute it, and check release-only behaviour (installers, signing, startup
 performance) with a release build.
 
+The target directory persists between fast builds, so each fast build ends by pruning what
+earlier configurations left behind (old incremental sessions and superseded artifacts of the
+workspace crates) and prints the directory's size. A warm directory for one toolchain is about
+8 GB; building with both `--toolchain` values keeps two sets.
+
 ## Run the program on Windows
 
 Copy the ZIP to a Windows folder, extract it, and double-click `rustpy.exe`.

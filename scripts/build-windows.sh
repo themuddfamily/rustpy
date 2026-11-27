@@ -233,6 +233,31 @@ fi
 build_start=$SECONDS
 cargo build --locked "${cargo_args[@]}" -p rustpy --target "$target"
 build_seconds=$((SECONDS - build_start))
+if (( fast )); then
+    # A persistent target directory collects one incremental session and one set of
+    # artifacts per past configuration of each workspace crate (other optimisation levels,
+    # another checkout path). Keep the newest of each and drop the rest.
+    before_kb=$(du -sk "$CARGO_TARGET_DIR" | cut -f1)
+    stale=()
+    profile_dir="$CARGO_TARGET_DIR/$target/$build_dir"
+    if [[ -d $profile_dir/incremental ]]; then
+        while IFS= read -r crate; do
+            mapfile -t sessions < <(ls -1dt "$profile_dir/incremental/$crate"-* 2>/dev/null)
+            stale+=("${sessions[@]:1}")
+        done < <(ls -1 "$profile_dir/incremental" | sed -E 's/-[0-9a-z]+$//' | sort -u)
+    fi
+    for extension in rlib rmeta; do
+        while IFS= read -r crate; do
+            mapfile -t artifacts < <(ls -1t "$profile_dir/deps/$crate"-*."$extension" 2>/dev/null)
+            stale+=("${artifacts[@]:1}")
+        done < <(ls -1 "$profile_dir/deps" | sed -nE "s/^(librustpy[a-z_]*)-[0-9a-f]{16}\\.$extension\$/\\1/p" | sort -u)
+    done
+    if (( ${#stale[@]} )); then
+        rm -rf -- "${stale[@]}"
+        after_kb=$(du -sk "$CARGO_TARGET_DIR" | cut -f1)
+        echo "Pruned ${#stale[@]} stale build entries, $(( (before_kb - after_kb) / 1024 )) MB"
+    fi
+fi
 package_start=$SECONDS
 
 mkdir -p "$package_dir"
@@ -317,6 +342,7 @@ if (( make_zip )); then
     [[ -z $win_path ]] || echo "  from Windows: $win_path"
 fi
 [[ -z $evidence ]] || echo "Licence evidence: $evidence"
+echo "Target directory: $(du -sh "$CARGO_TARGET_DIR" | cut -f1) ($CARGO_TARGET_DIR)"
 if [[ -n $out_dir ]]; then
     mkdir -p "$out_dir"
     cp "$archive" "$out_dir/"
