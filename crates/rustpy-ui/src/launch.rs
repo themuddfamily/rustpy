@@ -109,13 +109,14 @@ impl IdeShell {
         }
     }
     fn sync_project_registration(&mut self) {
+        // A frame waits only briefly for the admission lease; it retries next frame.
+        self.sync_project_registration_within(Duration::from_millis(5));
+    }
+    fn sync_project_registration_within(&mut self, budget: Duration) {
         if self.quit.active() || self.app.coordinated_quit_active() {
             return;
         }
-        let Ok(lease) = self
-            .admission
-            .acquire_shared(Instant::now() + Duration::from_millis(5))
-        else {
+        let Ok(lease) = self.admission.acquire_shared(Instant::now() + budget) else {
             return;
         };
         self.sync_project_registration_with_lease(&lease);
@@ -629,6 +630,12 @@ pub fn is_ide_project(path: &Path) -> bool {
 mod tests {
     use super::*;
 
+    /// What a frame grants (5 ms) is too short on a loaded machine: opening the
+    /// admission lock and reading the session store can take longer, and the
+    /// frame then silently leaves registration to the next one, which these
+    /// tests do not draw.
+    const REGISTRATION_BUDGET: Duration = Duration::from_secs(10);
+
     fn registered_shell(config: &Path, project: &Path) -> IdeShell {
         let mut settings = rustpy_settings::Settings {
             reopen_last_project: false,
@@ -776,7 +783,7 @@ mod tests {
         shell
             .app
             .open_cli_targets(&[OpenTarget::new(second.clone())], false);
-        shell.sync_project_registration();
+        shell.sync_project_registration_within(REGISTRATION_BUDGET);
         assert_eq!(
             shell.app.actual_current_project_root(),
             Some(dunce::canonicalize(&first).unwrap().as_path())
@@ -792,7 +799,7 @@ mod tests {
             .unwrap()
             .is_none());
         shell.app.open_project(&second);
-        shell.sync_project_registration();
+        shell.sync_project_registration_within(REGISTRATION_BUDGET);
         assert!(rustpy_cli::window_registry::find_project(&config, &first)
             .unwrap()
             .is_none());
@@ -824,7 +831,7 @@ mod tests {
         std::fs::remove_file(&record).unwrap();
         std::fs::create_dir(&record).unwrap();
         shell.app.open_project(&second);
-        shell.sync_project_registration();
+        shell.sync_project_registration_within(REGISTRATION_BUDGET);
         assert!(
             shell.registry_failure.is_some(),
             "publication errors remain visible and pending"
@@ -835,7 +842,7 @@ mod tests {
         );
         assert!(matches!(rustpy_cli::ipc::forward_window(&original, &[], false, None), Err(rustpy_cli::ipc::ForwardError::Rejected(_))), "endpoint proof must retain the accepted new project even when metadata publication fails");
         std::fs::remove_dir(&record).unwrap();
-        shell.sync_project_registration();
+        shell.sync_project_registration_within(REGISTRATION_BUDGET);
         assert!(shell.registry_failure.is_none());
         assert_eq!(
             shell.registered_project,
@@ -869,11 +876,11 @@ mod tests {
         std::fs::remove_file(&record).unwrap();
         std::fs::create_dir(&record).unwrap();
         shell.app.open_project(&second);
-        shell.sync_project_registration();
+        shell.sync_project_registration_within(REGISTRATION_BUDGET);
         assert!(shell.registry_failure.is_some());
         std::fs::remove_dir(&record).unwrap();
         shell.app.open_project(&first);
-        shell.sync_project_registration();
+        shell.sync_project_registration_within(REGISTRATION_BUDGET);
         assert!(
             shell.registry_failure.is_none(),
             "returning to the earlier project must retry the failed publication"
