@@ -128,7 +128,9 @@ pub fn in_own_process(selector: &str) -> bool {
     command.args(["--exact", selector, "--nocapture"]);
     for (key, _) in std::env::vars_os() {
         let name = key.to_string_lossy();
-        if name.starts_with("RUSTPY_")
+        // The keymap choice is how the test run was configured (CI selects the
+        // Windows/Linux semantics on macOS), not state of this process.
+        if (name.starts_with("RUSTPY_") && name != "RUSTPY_KEYMAP_PLATFORM")
             || name.starts_with("XDG_")
             || matches!(
                 name.as_ref(),
