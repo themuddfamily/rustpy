@@ -181,8 +181,7 @@ fn actual_project_catalog_tracks_successful_save_and_queued_external_template_ev
     };
     let path = ft::project_store_path(root.path());
     std::fs::write(&path, serde_json::to_vec(&external).unwrap()).unwrap();
-    let (tx, rx) = crossbeam_channel::bounded(4);
-    app.fs_events = Some(rx);
+    let tx = app.testing_synthetic_fs_events(4);
     tx.send(Ok(notify::Event::new(notify::EventKind::Modify(
         notify::event::ModifyKind::Data(notify::event::DataChange::Content),
     ))

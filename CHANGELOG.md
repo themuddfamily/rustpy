@@ -86,6 +86,9 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 - **Freeze notice:** the "UI Freeze" notice no longer takes the keyboard from the editor or
   tool window you are working in: the caret keeps blinking and Tab keeps moving through the
   IDE while it is shown.
+- **Terminal sessions:** opening a project without terminals no longer rewrites
+  `settings.json` two seconds later to record an empty session, which also pushed the saved
+  terminal sessions of other projects out of the list.
 - **Git log:** keyboard focus in the log toolbar is no longer lost when a log search or
   indexing run finishes in the background.
 - **Directory comparison (macOS, Windows):** comparing two folders now works on macOS and

@@ -13,7 +13,7 @@
 //! are unaffected.
 //!
 //! It also holds the helpers that unit tests of several UI crates share:
-//! [`TestDir`] and [`isolated_unlock_test`].
+//! [`TestDir`], [`in_own_process`] and [`isolated_unlock_test`].
 
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -101,9 +101,25 @@ macro_rules! unit_test_isolation {
     };
 }
 
-/// Runs global unlock-state writers in their own current test executable.
+/// Runs global unlock-state writers in their own current test executable
+/// (see [`in_own_process`]).
 pub fn isolated_unlock_test(selector: &str) -> bool {
-    const CHILD: &str = "RUSTPY_UNLOCK_FIXTURE_CHILD";
+    in_own_process(selector)
+}
+
+/// Runs the test `selector` (its full path, as `--exact` takes it) alone in a
+/// new process of the current test executable, with private configuration,
+/// cache and runtime directories, and fails if it does not pass there.
+/// Returns `true` in the calling process, which then returns at once, and
+/// `false` in the child, which runs the test body.
+///
+/// Use it for tests that leave process-wide state behind for a while, which
+/// tests running in parallel in the same process would observe: unlock state,
+/// and the owners that outlive their window until they retire (dropped
+/// terminal sessions, debugger transports and cancelled-clone cleanup, which
+/// Quit, exit and close preparation count in every window of the process).
+pub fn in_own_process(selector: &str) -> bool {
+    const CHILD: &str = "RUSTPY_OWN_PROCESS_TEST";
     if std::env::var(CHILD).as_deref() == Ok(selector) {
         return false;
     }
@@ -112,7 +128,9 @@ pub fn isolated_unlock_test(selector: &str) -> bool {
     command.args(["--exact", selector, "--nocapture"]);
     for (key, _) in std::env::vars_os() {
         let name = key.to_string_lossy();
-        if name.starts_with("RUSTPY_")
+        // The keymap choice is how the test run was configured (CI selects the
+        // Windows/Linux semantics on macOS), not state of this process.
+        if (name.starts_with("RUSTPY_") && name != "RUSTPY_KEYMAP_PLATFORM")
             || name.starts_with("XDG_")
             || matches!(
                 name.as_ref(),
@@ -152,13 +170,13 @@ pub fn isolated_unlock_test(selector: &str) -> bool {
             Err(error) => {
                 let _ = child.kill();
                 let _ = child.wait();
-                panic!("owned unlock fixture wait failed: {selector}: {error}");
+                panic!("test in its own process: wait failed: {selector}: {error}");
             }
         }
         if std::time::Instant::now() >= deadline {
             let _ = child.kill();
             let _ = child.wait();
-            panic!("owned unlock fixture exceeded watchdog: {selector}");
+            panic!("test in its own process exceeded the watchdog: {selector}");
         }
         std::thread::sleep(std::time::Duration::from_millis(10));
     };
@@ -166,7 +184,7 @@ pub fn isolated_unlock_test(selector: &str) -> bool {
     let err = std::fs::read_to_string(stderr).unwrap();
     assert!(
         status.success() && out.contains("1 passed; 0 failed"),
-        "owned exact fixture {selector}: {status}\n{out}\n{err}"
+        "test in its own process {selector}: {status}\n{out}\n{err}"
     );
     true
 }

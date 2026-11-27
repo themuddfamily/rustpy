@@ -75,6 +75,12 @@ fn stopped(app: &mut IdeApp) {
 }
 #[test]
 fn actual_debugger_tab_focus_expands_unicode_value_and_retires_old_suspension_focus() {
+    // The retirement of its debugger transport is process-wide (see `in_own_process`).
+    if rustpy_ui_base::test_support::in_own_process(
+        "app::debug_tree_accessibility_tests::actual_debugger_tab_focus_expands_unicode_value_and_retires_old_suspension_focus",
+    ) {
+        return;
+    }
     let Some(python) = ["python3", "python"]
         .into_iter()
         .find_map(|name| which::which(name).ok())
