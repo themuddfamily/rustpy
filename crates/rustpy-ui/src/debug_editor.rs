@@ -1007,6 +1007,12 @@ mod tests {
     /// (`q.get().x` on an empty queue never answered, and stepping hung after it).
     #[test]
     fn hovering_suspended_lines_runs_no_program_code() {
+        // The retirement of its debugger transport is process-wide (see `in_own_process`).
+        if rustpy_ui_base::test_support::in_own_process(
+            "debug_editor::tests::hovering_suspended_lines_runs_no_program_code",
+        ) {
+            return;
+        }
         let Some(py) = python_with_debugpy() else {
             return;
         };
@@ -1234,6 +1240,12 @@ mod tests {
     /// loaded, so this guards only extra work caused by resting the pointer.
     #[test]
     fn passive_hover_reuses_values_without_running_python() {
+        // The retirement of its debugger transport is process-wide (see `in_own_process`).
+        if rustpy_ui_base::test_support::in_own_process(
+            "debug_editor::tests::passive_hover_reuses_values_without_running_python",
+        ) {
+            return;
+        }
         let Some(py) = python_with_debugpy() else {
             return;
         };

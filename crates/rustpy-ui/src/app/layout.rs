@@ -1554,6 +1554,12 @@ mod tests {
     #[test]
     #[cfg(unix)] // runs /bin/sh in a terminal session
     fn exiting_asks_about_every_unsaved_editor_before_stopping_anything() {
+        // The retirement of its terminal session is process-wide (see `in_own_process`).
+        if rustpy_ui_base::test_support::in_own_process(
+            "app::layout::tests::exiting_asks_about_every_unsaved_editor_before_stopping_anything",
+        ) {
+            return;
+        }
         let dir = Scratch::new();
         let mut app = test_app();
         app.settings.confirm_exit = false;

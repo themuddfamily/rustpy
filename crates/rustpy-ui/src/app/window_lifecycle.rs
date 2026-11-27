@@ -1161,11 +1161,14 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn committed_close_waits_for_live_and_dropped_terminal_reader_retirement() {
-        if isolated_terminal_retirement_fixture(
-            "committed_close_waits_for_live_and_dropped_terminal_reader_retirement",
+        // Its terminal retirement is process-wide (see `in_own_process`), and the
+        // test observes that registry, which must start empty.
+        if rustpy_ui_base::test_support::in_own_process(
+            "app::window_lifecycle::tests::committed_close_waits_for_live_and_dropped_terminal_reader_retirement",
         ) {
             return;
         }
+        assert!(rustpy_terminal::poll_retiring_terminals().is_empty());
         let (root, mut app) = fixture();
         app.terminal_panel
             .open_command(
@@ -1399,46 +1402,6 @@ mod tests {
         assert!(app.exit_requested);
         app.commit_coordinated_quit("sealed", &guard, |_, _| panic!("duplicate verification"))
             .unwrap();
-    }
-    // The PTY EOF-barrier fixture deliberately publishes process-global terminal
-    // retirement. Isolate that publisher so unrelated document/notebook Quit
-    // contracts cannot inherit its pending process-consent prompt. The child
-    // still exercises the original real PTY, reader drain and retirement checks.
-    #[cfg(unix)]
-    fn isolated_terminal_retirement_fixture(name: &str) -> bool {
-        const MARKER: &str = "RUSTPY_TERMINAL_RETIREMENT_FIXTURE";
-        let selector = format!("app::window_lifecycle::tests::{name}");
-        if std::env::var(MARKER).as_deref() == Ok(selector.as_str()) {
-            assert!(rustpy_terminal::poll_retiring_terminals().is_empty());
-            return false;
-        }
-        let mut child = std::process::Command::new(std::env::current_exe().unwrap())
-            .args(["--exact", &selector, "--nocapture", "--test-threads=1"])
-            .env(MARKER, &selector)
-            .env_remove("DISPLAY")
-            .env_remove("WAYLAND_DISPLAY")
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::piped())
-            .spawn()
-            .unwrap();
-        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
-        while child.try_wait().unwrap().is_none() {
-            if std::time::Instant::now() >= deadline {
-                child.kill().unwrap();
-                let _ = child.wait();
-                panic!("isolated terminal retirement fixture timed out: {selector}");
-            }
-            std::thread::sleep(std::time::Duration::from_millis(10));
-        }
-        let output = child.wait_with_output().unwrap();
-        assert!(
-            output.status.success(),
-            "{}\n{}",
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr)
-        );
-        true
     }
 
     #[test]
@@ -2101,6 +2064,12 @@ mod tests {
     }
     #[test]
     fn prepared_guard_rechecks_current_debug_watch_expressions() {
+        // The retirement of its debugger transport is process-wide (see `in_own_process`).
+        if rustpy_ui_base::test_support::in_own_process(
+            "app::window_lifecycle::tests::prepared_guard_rechecks_current_debug_watch_expressions",
+        ) {
+            return;
+        }
         let Some(python) = ["python3", "python"]
             .into_iter()
             .find_map(|name| which::which(name).ok())

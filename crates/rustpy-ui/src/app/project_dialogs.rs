@@ -1761,6 +1761,12 @@ mod clone_tests {
     /// cloning again failed with "destination path already exists".
     #[test]
     fn a_cancelled_clone_leaves_no_directory_behind() {
+        // The retirement of its cancelled-clone cleanup task is process-wide (see `in_own_process`).
+        if rustpy_ui_base::test_support::in_own_process(
+            "app::project_dialogs::clone_tests::a_cancelled_clone_leaves_no_directory_behind",
+        ) {
+            return;
+        }
         if std::process::Command::new("git")
             .arg("--version")
             .output()

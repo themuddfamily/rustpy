@@ -7,9 +7,11 @@ struct Fixture {
     ctx: egui::Context,
     _root: tempfile::TempDir,
 }
-// Dropped PTYs publish process-global retirement, which parallel Quit tests
-// observe as pending "Terminal cleanup" consent. Retire them before dropping so
-// only already-complete owners reach the registry, then reap those.
+// A dropped PTY stays in the process-wide retirement registry until its waiter
+// thread has exited, and Quit/exit preparation in every window of the process
+// counts it ("Terminal cleanup"): a parallel Quit test would see a foreign owner
+// and fail. Each test therefore runs in its own process (see `fixture`); this
+// still retires the PTYs before dropping them, then reaps them.
 impl Drop for Fixture {
     fn drop(&mut self) {
         let deadline = Instant::now() + Duration::from_secs(10);
@@ -41,7 +43,14 @@ impl Drop for Fixture {
         }
     }
 }
-fn fixture() -> Option<Fixture> {
+/// `None` when the test should return: in the parent process, after `test`
+/// passed in its own process, or where no Python is available.
+fn fixture(test: &str) -> Option<Fixture> {
+    if rustpy_ui_base::test_support::in_own_process(&format!(
+        "app::terminal_accessibility_tests::{test}"
+    )) {
+        return None;
+    }
     let python = ["python3", "python"]
         .into_iter()
         .find_map(|name| which::which(name).ok())?;
@@ -137,7 +146,9 @@ fn focus_controls() -> Vec<egui::Event> {
 #[test]
 #[cfg(unix)] // ConPTY echo and output timing differ from a Unix PTY
 fn actual_terminal_group_announces_unicode_and_keyboard_returns_to_tool_controls() {
-    let Some(mut fixture) = fixture() else {
+    let Some(mut fixture) =
+        fixture("actual_terminal_group_announces_unicode_and_keyboard_returns_to_tool_controls")
+    else {
         return;
     };
     let ctx = fixture.ctx.clone();
@@ -176,7 +187,9 @@ fn actual_terminal_group_announces_unicode_and_keyboard_returns_to_tool_controls
 }
 #[test]
 fn actual_settings_owner_suppresses_terminal_status_before_settings_paints() {
-    let Some(mut fixture) = fixture() else {
+    let Some(mut fixture) =
+        fixture("actual_settings_owner_suppresses_terminal_status_before_settings_paints")
+    else {
         return;
     };
     let ctx = fixture.ctx.clone();
@@ -219,7 +232,11 @@ fn menu_key(key: egui::Key, modifiers: egui::Modifiers) -> Vec<egui::Event> {
 }
 #[test]
 fn actual_terminal_keyboard_menu_exposes_select_all_and_preserves_source() {
-    let Some(mut fixture) = fixture() else { return };
+    let Some(mut fixture) =
+        fixture("actual_terminal_keyboard_menu_exposes_select_all_and_preserves_source")
+    else {
+        return;
+    };
     let ctx = fixture.ctx.clone();
     let app = &mut fixture.app;
     frame(app, &ctx, 0.0, vec![]);
@@ -264,8 +281,8 @@ fn shell_echo(app: &mut IdeApp) -> String {
     app.terminal_panel.poll();
     app.terminal_panel.tabs[0].terminal.contents()
 }
-fn focused_terminal() -> Option<Fixture> {
-    let mut fixture = fixture()?;
+fn focused_terminal(test: &str) -> Option<Fixture> {
+    let mut fixture = fixture(test)?;
     let ctx = fixture.ctx.clone();
     frame(&mut fixture.app, &ctx, 0.0, vec![]);
     frame(&mut fixture.app, &ctx, 0.1, vec![]);
@@ -274,7 +291,9 @@ fn focused_terminal() -> Option<Fixture> {
 }
 #[test]
 fn ide_shortcuts_not_overridden_by_terminal_reach_actions() {
-    let Some(mut fixture) = focused_terminal() else {
+    let Some(mut fixture) =
+        focused_terminal("ide_shortcuts_not_overridden_by_terminal_reach_actions")
+    else {
         return;
     };
     let ctx = fixture.ctx.clone();
@@ -313,7 +332,7 @@ fn ide_shortcuts_not_overridden_by_terminal_reach_actions() {
 }
 #[test]
 fn overridden_shortcuts_stay_in_the_terminal() {
-    let Some(mut fixture) = focused_terminal() else {
+    let Some(mut fixture) = focused_terminal("overridden_shortcuts_stay_in_the_terminal") else {
         return;
     };
     let ctx = fixture.ctx.clone();
@@ -332,7 +351,8 @@ fn overridden_shortcuts_stay_in_the_terminal() {
 }
 #[test]
 fn double_shift_and_alt_f12_work_from_the_terminal() {
-    let Some(mut fixture) = focused_terminal() else {
+    let Some(mut fixture) = focused_terminal("double_shift_and_alt_f12_work_from_the_terminal")
+    else {
         return;
     };
     let ctx = fixture.ctx.clone();
@@ -381,7 +401,7 @@ fn double_shift_and_alt_f12_work_from_the_terminal() {
 #[test]
 #[cfg(unix)] // ConPTY echo and output timing differ from a Unix PTY
 fn escape_returns_focus_to_editor_when_enabled() {
-    let Some(mut fixture) = focused_terminal() else {
+    let Some(mut fixture) = focused_terminal("escape_returns_focus_to_editor_when_enabled") else {
         return;
     };
     let ctx = fixture.ctx.clone();
