@@ -93,7 +93,9 @@ fn canonicalize_existing_prefix(
     let mut suffix = Vec::new();
     let mut result = loop {
         if let Ok(canonical) = canonicalize(prefix) {
-            break canonical;
+            if !is_deleted_file_placeholder(&canonical) {
+                break canonical;
+            }
         }
         let (Some(name), Some(parent)) = (prefix.file_name(), prefix.parent()) else {
             break prefix.to_path_buf();
@@ -105,6 +107,21 @@ fn canonicalize_existing_prefix(
         result.push(name);
     }
     clean_components(&result)
+}
+/// Whether `canonical` is where NTFS parks a file that was deleted or replaced
+/// while a handle to it was still open (`<volume>\$Extend\$Deleted\<id>`).
+/// Canonicalizing a file in the instant another process renames over it (every
+/// settings save does this) resolves to that placeholder rather than to the
+/// file's own path, so it is treated like a file that no longer exists.
+fn is_deleted_file_placeholder(canonical: &Path) -> bool {
+    let mut names = canonical
+        .components()
+        .filter_map(|component| match component {
+            Component::Normal(name) => Some(name),
+            _ => None,
+        });
+    names.next().is_some_and(|name| name == "$Extend")
+        && names.next().is_some_and(|name| name == "$Deleted")
 }
 fn clean_components(path: &Path) -> PathBuf {
     let mut clean = PathBuf::new();
@@ -403,6 +420,40 @@ mod tests {
         std::fs::write(&path, b"new").unwrap();
         assert_eq!(real, vfs.read(&path, ReadLimits::default()).unwrap().id);
     }
+    /// A file replaced while its path is normalized canonicalizes to the
+    /// volume's deleted-file placeholder; it must stay inside its directory.
+    #[test]
+    fn a_file_replaced_during_normalization_does_not_resolve_to_the_deleted_placeholder() {
+        let root = if cfg!(windows) {
+            Path::new("D:\\")
+        } else {
+            Path::new("/")
+        };
+        let config = root.join("cfg");
+        let file = config.join("settings.json");
+        let placeholder = root
+            .join("$Extend")
+            .join("$Deleted")
+            .join("0A4E0000000026142F46FAAD");
+        assert!(is_deleted_file_placeholder(&placeholder));
+        assert!(!is_deleted_file_placeholder(&file));
+        assert!(!is_deleted_file_placeholder(&root.join("$Extend")));
+        assert!(!is_deleted_file_placeholder(
+            &root.join("project").join("$Extend").join("$Deleted")
+        ));
+        let normalized = canonicalize_existing_prefix(&file, |path| {
+            if path == file {
+                Ok(placeholder.clone())
+            } else if path == config {
+                Ok(config.clone())
+            } else {
+                Err(std::io::ErrorKind::NotFound.into())
+            }
+        });
+        assert_eq!(normalized, file);
+        assert!(normalized.starts_with(&config));
+    }
+
     /// A file renamed away while its path is normalized (a settings save's
     /// `.tmp` file) still gets the canonical spelling of its directory, so it
     /// stays inside that directory when the two are compared.
