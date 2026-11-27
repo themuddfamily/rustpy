@@ -106,6 +106,26 @@ impl IdeApp {
             }
         }
     }
+    /// Replaces the project watcher with a channel the test feeds by hand.
+    /// The real watcher is dropped (and joined) first and the lost-event flag
+    /// replaced: a running watcher would find the replaced receiver
+    /// disconnected, count the event as lost and request a rescan, so any file
+    /// another test writes in the shared configuration directory would dirty
+    /// this project.
+    #[cfg(test)]
+    pub(crate) fn testing_synthetic_fs_events(
+        &mut self,
+        capacity: usize,
+    ) -> crossbeam_channel::Sender<notify::Result<notify::Event>> {
+        self.fs_watcher.take();
+        self.fs_events.take();
+        self.fs_overflow = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        self.fs_dirty_since = None;
+        self.external_changes.clear();
+        let (tx, rx) = crossbeam_channel::bounded(capacity);
+        self.fs_events = Some(rx);
+        tx
+    }
     pub(super) fn start_fs_watcher(&mut self, root: &Path) {
         use notify::Watcher;
         self.file_session = self.file_session.wrapping_add(1);
@@ -526,8 +546,7 @@ mod tests {
         // Opening a project pauses background uploads until the deployment
         // view adopts the new root on the next frame.
         app.deploy.resume_background();
-        let (tx, rx) = crossbeam_channel::bounded(16);
-        app.fs_events = Some(rx);
+        let tx = synthetic_events(&mut app, 16);
         let modified = |path: PathBuf| {
             Ok(
                 notify::Event::new(notify::EventKind::Modify(ModifyKind::Data(
@@ -553,6 +572,37 @@ mod tests {
         let pending = app.deploy.pending_transfers();
         assert_eq!(pending.len(), 1, "{pending:?}");
         assert!(pending[0].2.contains("main.py"), "{pending:?}");
+    }
+
+    /// Writes by parallel tests into the shared configuration directory (or
+    /// late writes in the project) must not reach a test that feeds synthetic
+    /// events: the real watcher is gone, so nothing reports a lost event.
+    #[test]
+    fn synthetic_events_retire_the_real_watcher_so_foreign_writes_cannot_force_a_rescan() {
+        let dir = tempfile::tempdir().unwrap();
+        let project = dir.path().join("project");
+        std::fs::create_dir_all(&project).unwrap();
+        let config = Settings::config_dir();
+        std::fs::create_dir_all(&config).unwrap();
+        let mut settings = Settings::default();
+        settings.trust_project(&project);
+        let mut app = IdeApp::new(settings, Some(project.clone()));
+        assert!(
+            app.fs_watcher.is_some(),
+            "the fixture starts a real watcher"
+        );
+        let tx = synthetic_events(&mut app, 4);
+        std::fs::write(config.join("synthetic-events-probe.json"), "{}").unwrap();
+        std::fs::write(project.join("late.py"), "x = 1\n").unwrap();
+        // Long enough for a live watcher to deliver both writes.
+        std::thread::sleep(std::time::Duration::from_millis(500));
+        app.poll_fs_events(1.0);
+        let _ = std::fs::remove_file(config.join("synthetic-events-probe.json"));
+        assert_eq!(
+            app.fs_dirty_since, None,
+            "a retired watcher reported events"
+        );
+        drop(tx);
     }
 
     #[test]
@@ -651,16 +701,7 @@ mod tests {
         app: &mut IdeApp,
         capacity: usize,
     ) -> crossbeam_channel::Sender<notify::Result<notify::Event>> {
-        // Drop/join the real watcher before disconnecting its receiver; its callback
-        // treats disconnected channels as lost events and legitimately requests a rescan.
-        app.fs_watcher.take();
-        app.fs_events.take();
-        app.fs_overflow = Arc::new(std::sync::atomic::AtomicBool::new(false));
-        app.fs_dirty_since = None;
-        app.external_changes.clear();
-        let (tx, rx) = crossbeam_channel::bounded(capacity);
-        app.fs_events = Some(rx);
-        tx
+        app.testing_synthetic_fs_events(capacity)
     }
     fn changed(app: &mut IdeApp) {
         app.queue_open_file_reconciliation();
