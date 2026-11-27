@@ -114,7 +114,9 @@ class QualityRecipes(unittest.TestCase):
                 jobs[current] = []
             elif current is not None:
                 jobs[current].append(line)
-        self.assertIn('    if: ${{ inputs.publish }}', jobs['publish'])
+        self.assertIn(
+            "    if: ${{ !cancelled() && inputs.publish && needs.package.result == 'success' }}",
+            jobs['publish'])
         self.assertIn('    permissions:\n      contents: write', '\n'.join(jobs['publish']))
         self.assertIn('    if: ${{ inputs.sandbox_packages }}', jobs['sandbox-packages'])
         for name, lines in jobs.items():
