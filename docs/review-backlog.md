@@ -10,10 +10,11 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 | Area | Symptom | State |
 |---|---|---|
 | Test process abort on Windows | One run of the `rustpy-ui` test binary in a four-thread stress loop on the Windows CI runner (at the notify 9 commit) ended with exit code 0xC0000409 (process abort) about 3 s before the run would have finished, with empty standard error and no test named. Not reproduced since: 1,924 full-suite four-thread runs on Windows at the current code (exit codes checked) and 2,065 more with procdump attached to every run to capture a crash dump (shown to capture Rust's abort), plus 850 at the commit of the original sighting, gave no abort; 90 Linux runs at four and eight threads, some with a 1.5 MB test-thread stack, gave none either. Ruled out: a test-thread stack overflow (on Windows it names the thread and exits 0xC00000FD; the deepest UI tests need between 1.5 and 1.75 MB of the 2 MB test-thread stack at `opt-level = 0`), a double panic or a panic in a no-unwind context (both write to the uncaptured standard error), and the corrupt-workspace stage watchdog (its 90 s limit could not elapse in a 56 s run). That watchdog did report through captured output, so a firing watchdog would have looked exactly like this; it now writes to the real standard streams. | Unexplained; seen once in about 4,900 Windows runs. A native fast-fail (C runtime invalid-parameter or stack-cookie check in a bundled C library) remains possible. |
-| Previous-project registration test on Windows | `launch::tests::returning_to_previous_project_after_failed_publication_retries_registration` fails "returning to the earlier project must retry the failed publication" in about 1 in 250 four-thread runs of the `rustpy-ui` tests on Windows, and once in 90 loaded Linux runs. | Open; timing-dependent. |
 
 ## Recently fixed
 
+- Command-line launcher: on a loaded machine `rustpy <file>` could be refused as "Busy", and a
+  window that had just switched projects could stay unregistered until its next repaint.
 - HTML editing: completion could insert Python suggestions in HTML files and commit stale
   items while typing quickly, corrupting the saved text.
 - Jupyter: viewing a DataFrame or array from a managed kernel failed with
