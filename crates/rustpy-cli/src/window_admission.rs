@@ -96,12 +96,14 @@ impl WindowAdmission {
         if !file.metadata()?.is_file() {
             return Err(AdmissionError::IdentityChanged);
         }
+        // The deadline bounds waiting for a contended lock (a Quit holds it
+        // exclusively), never the time already spent opening the lock or
+        // reading the store: the lock is always tried at least once, and a
+        // lease obtained is not discarded because that work was slow.
         loop {
-            if Instant::now() >= deadline {
-                return Err(AdmissionError::Deadline);
-            }
             match os::lock(&file, exclusive) {
                 Ok(true) => break,
+                Ok(false) if Instant::now() >= deadline => return Err(AdmissionError::Deadline),
                 Ok(false) => std::thread::sleep(
                     deadline
                         .saturating_duration_since(Instant::now())
@@ -135,9 +137,6 @@ impl WindowAdmission {
             {
                 return Err(AdmissionError::PreviousQuitPending);
             }
-        }
-        if Instant::now() >= deadline {
-            return Err(AdmissionError::Deadline);
         }
         lease.validate()?;
         Ok(lease)
@@ -378,6 +377,29 @@ mod tests {
         ));
         drop(quit);
         gate.acquire_shared(deadline()).unwrap();
+    }
+    /// The deadline bounds waiting for a contended lock, not the time taken to
+    /// open the lock and read the session store: a slow but uncontended
+    /// acquisition (a loaded machine, a virus scanner) must still be admitted.
+    #[test]
+    fn uncontended_admission_succeeds_after_its_wait_budget_expired() {
+        let config = tempfile::tempdir().unwrap();
+        let gate = WindowAdmission::new(config.path()).unwrap();
+        let expired = Instant::now();
+        std::thread::sleep(Duration::from_millis(2));
+        let shared = gate.acquire_shared(expired).unwrap();
+        let second = gate.acquire_shared(expired).unwrap();
+        assert!(matches!(
+            gate.acquire_quit(expired),
+            Err(AdmissionError::Deadline)
+        ));
+        drop((shared, second));
+        let quit = gate.acquire_quit(expired).unwrap();
+        assert!(matches!(
+            gate.acquire_shared(expired),
+            Err(AdmissionError::Deadline)
+        ));
+        drop(quit);
     }
     #[test]
     fn crashed_quit_live_certificate_blocks_and_preserves_checkpoint() {

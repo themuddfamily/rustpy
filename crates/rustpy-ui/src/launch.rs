@@ -173,6 +173,14 @@ impl IdeShell {
         }
     }
     fn accept_request(&mut self, request: rustpy_cli::ipc::Incoming) -> bool {
+        self.accept_request_within(request, Duration::from_millis(5))
+    }
+    /// `budget` bounds only the wait for a lease that a Quit holds exclusively.
+    fn accept_request_within(
+        &mut self,
+        request: rustpy_cli::ipc::Incoming,
+        budget: Duration,
+    ) -> bool {
         if request.native_window.is_some() {
             request.reject("Native NEW must target the process host");
             return false;
@@ -181,12 +189,14 @@ impl IdeShell {
             request.reject("Busy: this window is preparing a coordinated Quit or startup");
             return false;
         }
-        let Ok(lease) = self
-            .admission
-            .acquire_shared(Instant::now() + Duration::from_millis(5))
-        else {
-            request.reject("Busy: another window holds application admission");
-            return false;
+        let lease = match self.admission.acquire_shared(Instant::now() + budget) {
+            Ok(lease) => lease,
+            Err(error) => {
+                request.reject(format!(
+                    "Busy: application admission is unavailable ({error})"
+                ));
+                return false;
+            }
         };
         if request
             .expected_project
@@ -214,6 +224,14 @@ impl IdeShell {
         // Prepare/Commit while it holds the exclusive configuration-wide lease.
         self.drive_quit();
         self.sync_project_registration();
+        // A failed or deferred publication is retried by a later frame; make
+        // sure one comes even when the window is otherwise idle.
+        if self.server.is_some()
+            && self.registered_project.as_ref().map(Option::as_deref)
+                != Some(self.app.actual_current_project_root())
+        {
+            ctx.request_repaint_after(Duration::from_millis(500));
+        }
         let mut raise = false;
         while let Some(request) = self.server.as_ref().and_then(Server::try_recv) {
             raise |= self.accept_request(request);
@@ -630,12 +648,6 @@ pub fn is_ide_project(path: &Path) -> bool {
 mod tests {
     use super::*;
 
-    /// What a frame grants (5 ms) is too short on a loaded machine: opening the
-    /// admission lock and reading the session store can take longer, and the
-    /// frame then silently leaves registration to the next one, which these
-    /// tests do not draw.
-    const REGISTRATION_BUDGET: Duration = Duration::from_secs(10);
-
     fn registered_shell(config: &Path, project: &Path) -> IdeShell {
         let mut settings = rustpy_settings::Settings {
             reopen_last_project: false,
@@ -783,7 +795,7 @@ mod tests {
         shell
             .app
             .open_cli_targets(&[OpenTarget::new(second.clone())], false);
-        shell.sync_project_registration_within(REGISTRATION_BUDGET);
+        shell.sync_project_registration();
         assert_eq!(
             shell.app.actual_current_project_root(),
             Some(dunce::canonicalize(&first).unwrap().as_path())
@@ -799,7 +811,7 @@ mod tests {
             .unwrap()
             .is_none());
         shell.app.open_project(&second);
-        shell.sync_project_registration_within(REGISTRATION_BUDGET);
+        shell.sync_project_registration();
         assert!(rustpy_cli::window_registry::find_project(&config, &first)
             .unwrap()
             .is_none());
@@ -810,6 +822,21 @@ mod tests {
                 .id,
             original.id
         );
+    }
+
+    /// A context with no repaint outstanding, so a test sees what `serve` requests.
+    fn settled_context() -> egui::Context {
+        let ctx = egui::Context::default();
+        for _ in 0..5 {
+            if !ctx.has_requested_repaint() {
+                break;
+            }
+            ctx.run_ui(egui::RawInput::default(), |_| {})
+                .textures_delta
+                .clear();
+        }
+        assert!(!ctx.has_requested_repaint());
+        ctx
     }
 
     #[test]
@@ -828,13 +855,25 @@ mod tests {
             .join("windows")
             .join(&original.id)
             .join("window.json");
+        let idle = settled_context();
+        shell.serve(&idle);
+        assert!(
+            !idle.has_requested_repaint(),
+            "a registered window stays idle"
+        );
         std::fs::remove_file(&record).unwrap();
         std::fs::create_dir(&record).unwrap();
         shell.app.open_project(&second);
-        shell.sync_project_registration_within(REGISTRATION_BUDGET);
+        shell.sync_project_registration();
         assert!(
             shell.registry_failure.is_some(),
             "publication errors remain visible and pending"
+        );
+        let idle = settled_context();
+        shell.serve(&idle);
+        assert!(
+            idle.has_requested_repaint(),
+            "a pending publication schedules its retry even in an idle window"
         );
         assert_eq!(
             shell.app.actual_current_project_root(),
@@ -842,7 +881,7 @@ mod tests {
         );
         assert!(matches!(rustpy_cli::ipc::forward_window(&original, &[], false, None), Err(rustpy_cli::ipc::ForwardError::Rejected(_))), "endpoint proof must retain the accepted new project even when metadata publication fails");
         std::fs::remove_dir(&record).unwrap();
-        shell.sync_project_registration_within(REGISTRATION_BUDGET);
+        shell.sync_project_registration();
         assert!(shell.registry_failure.is_none());
         assert_eq!(
             shell.registered_project,
@@ -876,14 +915,16 @@ mod tests {
         std::fs::remove_file(&record).unwrap();
         std::fs::create_dir(&record).unwrap();
         shell.app.open_project(&second);
-        shell.sync_project_registration_within(REGISTRATION_BUDGET);
+        shell.sync_project_registration();
         assert!(shell.registry_failure.is_some());
         std::fs::remove_dir(&record).unwrap();
         shell.app.open_project(&first);
-        shell.sync_project_registration_within(REGISTRATION_BUDGET);
+        shell.sync_project_registration();
         assert!(
-            shell.registry_failure.is_none(),
-            "returning to the earlier project must retry the failed publication"
+            shell.registry_failure.is_none()
+                && shell.registered_project == Some(Some(dunce::canonicalize(&first).unwrap())),
+            "returning to the earlier project must retry the failed publication: {:?}",
+            shell.registry_failure
         );
         let restored = rustpy_cli::window_registry::find_project(&config, &first)
             .unwrap()
@@ -892,6 +933,48 @@ mod tests {
         assert!(rustpy_cli::window_registry::find_project(&config, &second)
             .unwrap()
             .is_none());
+    }
+
+    /// A frame whose admission budget runs out before the lock is even tried
+    /// (opening the lock and reading the session store took longer) must still
+    /// register an uncontended project switch rather than skip it silently.
+    #[test]
+    fn frame_registers_a_project_switch_after_its_admission_budget_expired() {
+        let dir = tempfile::tempdir().unwrap();
+        let config = dir.path().join("config");
+        let first = dir.path().join("first");
+        let second = dir.path().join("second");
+        std::fs::create_dir_all(first.join(".rustpy")).unwrap();
+        std::fs::create_dir_all(second.join(".rustpy")).unwrap();
+        let mut shell = registered_shell(&config, &first);
+        shell.app.open_project(&second);
+        shell.sync_project_registration_within(Duration::ZERO);
+        assert_eq!(
+            shell.registered_project,
+            Some(Some(dunce::canonicalize(&second).unwrap())),
+            "{:?}",
+            shell.registry_failure
+        );
+        assert!(rustpy_cli::window_registry::find_project(&config, &second)
+            .unwrap()
+            .is_some());
+        // A Quit holding the exclusive lease still defers registration.
+        let quit = shell
+            .admission
+            .acquire_quit(Instant::now() + Duration::from_secs(10))
+            .unwrap();
+        shell.app.open_project(&first);
+        shell.sync_project_registration_within(Duration::ZERO);
+        assert_eq!(
+            shell.registered_project,
+            Some(Some(dunce::canonicalize(&second).unwrap()))
+        );
+        drop(quit);
+        shell.sync_project_registration_within(Duration::ZERO);
+        assert_eq!(
+            shell.registered_project,
+            Some(Some(dunce::canonicalize(&first).unwrap()))
+        );
     }
 
     #[test]
@@ -922,7 +1005,8 @@ mod tests {
             .unwrap()
             .recv_timeout(std::time::Duration::from_secs(5))
             .unwrap();
-        assert!(shell.accept_request(request));
+        // Even when its admission budget has already run out (a loaded machine).
+        assert!(shell.accept_request_within(request, Duration::ZERO));
         assert_eq!(
             accepted_rx
                 .recv_timeout(std::time::Duration::from_secs(5))

@@ -37,6 +37,12 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
   through its installed program. Interpreter checks that cannot even start now give up at
   their time limit without holding up other programs.
 
+- **Command-line launcher:** on a loaded machine `rustpy <file>` could be refused with
+  "Busy: another window holds application admission" although no other window was busy,
+  and a window that had just switched projects could stay unregistered (so `rustpy <file>`
+  did not reach it) until the next repaint. A window now waits only for a lock that a Quit
+  of all windows actually holds, not for the time it takes to read the window state, and a
+  window whose registration is still pending keeps retrying even while it is idle.
 - **Command-line inspection:** `rustpy inspect` could run for hours on ordinary code. Type
   inference was exponential in a row of `if` statements that test and rebind one variable
   and in a method chain on an unresolved name (`query.filter(a).filter(b)…`), rescanned
