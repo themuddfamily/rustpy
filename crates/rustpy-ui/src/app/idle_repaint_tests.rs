@@ -148,24 +148,65 @@ fn idle_app_waits_for_the_caret_blink() {
         last <= Duration::from_millis(600),
         "blink not scheduled: {last:?}"
     );
-    // An idle app does not rewrite its settings.
+    // An idle app does not rewrite its settings. Directory-change
+    // notifications arrive asynchronously (on Windows, after the write has
+    // returned, later still on a loaded machine), so a barrier separates the
+    // writes before the window from those in it: the watcher reports one
+    // directory's changes in order, and once it has reported a marker file
+    // written there, it has reported every earlier write too.
+    let config = Settings::config_dir();
+    let barrier = |app: &mut IdeApp, name: &str| {
+        let marker = config.join(name);
+        std::fs::write(&marker, name).unwrap();
+        let mut seen = Vec::new();
+        let deadline = Instant::now() + Duration::from_secs(30);
+        loop {
+            frame(app, &ctx, now(), vec![]);
+            let events = crate::performance_trace::take_recorded();
+            let reached = events.iter().any(|(kind, data)| {
+                kind == "watcher_event"
+                    && data["paths"].as_array().is_some_and(|paths| {
+                        paths.iter().any(|path| {
+                            path.as_str().is_some_and(|path| {
+                                Path::new(path).file_name() == marker.file_name()
+                            })
+                        })
+                    })
+            });
+            seen.extend(events);
+            if reached {
+                break;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "the watcher did not report {}",
+                marker.display()
+            );
+            std::thread::sleep(Duration::from_millis(20));
+        }
+        let _ = std::fs::remove_file(&marker);
+        seen
+    };
     let settings = Settings::settings_path();
     let stamp = || {
         std::fs::metadata(&settings)
             .ok()
             .map(|m| (m.len(), m.modified().ok()))
     };
+    barrier(&mut app, "idle-barrier-start");
     let before = stamp();
-    let _ = crate::performance_trace::take_recorded();
-    for _ in 0..6 {
+    // Longer than the periodic layout check (two seconds), whatever its phase.
+    let window = Instant::now();
+    while window.elapsed() < Duration::from_millis(2500) {
         let delay = frame(&mut app, &ctx, now(), vec![]);
         std::thread::sleep(delay.min(Duration::from_millis(600)));
     }
+    let recorded = barrier(&mut app, "idle-barrier-end");
     // Settings are saved through a temporary file and a rename: neither may
     // change. (Caches elsewhere in the directory may still be written by
     // background work that finishes late.)
     let temporary = settings.with_extension("json.tmp");
-    let settings_events: Vec<_> = crate::performance_trace::take_recorded()
+    let settings_events: Vec<_> = recorded
         .into_iter()
         .filter(|(kind, data)| {
             kind == "watcher_event"

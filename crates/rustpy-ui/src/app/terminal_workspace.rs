@@ -199,6 +199,12 @@ if ui.button("Remove").clicked(){remove=Some(index);}});
                 return;
             }
             entry.tabs = tabs;
+        } else if tabs.is_empty() {
+            // A project without an entry already restores no tabs. Recording
+            // an empty one rewrote settings.json two seconds after every
+            // project opened without a terminal (an idle IDE writing its
+            // configuration) and pushed real sessions out of the list.
+            return;
         } else {
             sessions.push(rustpy_settings::terminal::ProjectSessions { root, tabs });
         }
@@ -423,5 +429,77 @@ if ui.button("Remove").clicked(){remove=Some(index);}});
         }
         self.bottom = Some(BottomTool::Terminal);
         self.terminal_panel.request_focus();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// One frame of the terminal host at `time` (seconds since start).
+    fn poll(app: &mut IdeApp, ctx: &egui::Context, time: f64) {
+        ctx.run_ui(
+            egui::RawInput {
+                time: Some(time),
+                ..Default::default()
+            },
+            |ui| app.poll_terminal_workspace(ui.ctx()),
+        )
+        .drop_without_applying_deltas();
+    }
+
+    /// The layout check runs two seconds after a project opens. A project
+    /// without terminals and without a saved session used to gain an empty
+    /// entry, so every idle IDE rewrote settings.json then (and, on Windows,
+    /// a test that waited for the startup writes to settle saw that write's
+    /// watcher events arrive during its idle frames). Closing every terminal
+    /// of a project that had some is still remembered.
+    #[test]
+    fn a_project_without_terminals_does_not_save_an_empty_session() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut settings = Settings::default();
+        settings.trust_project(dir.path());
+        let mut app = IdeApp::new(settings, Some(dir.path().to_path_buf()));
+        let root = app.project.as_ref().unwrap().root.clone();
+        let ctx = egui::Context::default();
+        poll(&mut app, &ctx, 0.0);
+        assert_eq!(app.terminal_workspace.root.as_ref(), Some(&root));
+        assert_eq!(app.terminal_panel.tab_count(), 0);
+        let has_entry = |app: &IdeApp| {
+            app.settings
+                .terminal
+                .preferences
+                .sessions
+                .iter()
+                .any(|entry| entry.root == root)
+        };
+        poll(&mut app, &ctx, 2.5);
+        assert!(
+            !has_entry(&app),
+            "an empty session was recorded (and settings.json rewritten)"
+        );
+        app.settings.terminal.preferences.sessions.push(
+            rustpy_settings::terminal::ProjectSessions {
+                root: root.clone(),
+                tabs: vec![rustpy_settings::terminal::SavedTab {
+                    title: "Local".into(),
+                    cwd: root.clone(),
+                    ..Default::default()
+                }],
+            },
+        );
+        poll(&mut app, &ctx, 5.0);
+        let entry = app
+            .settings
+            .terminal
+            .preferences
+            .sessions
+            .iter()
+            .find(|entry| entry.root == root)
+            .expect("the saved session is kept");
+        assert!(
+            entry.tabs.is_empty(),
+            "closing every terminal is remembered: {entry:?}"
+        );
     }
 }
