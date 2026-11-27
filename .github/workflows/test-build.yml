@@ -1,192 +1,138 @@
 name: Test build
-# TEMPORARY (issues/abort only, restored before merge): stress the rustpy-ui library test
-# binary on Windows with Windows Error Reporting crash dumps, to find a silent 0xC0000409.
+# A Windows x64 package for trying a commit by hand. Not a release: nothing is tagged or published.
+# CI's `build (windows-2025)` job builds this package for every push to main (and every
+# dispatched CI run); this workflow re-publishes that artifact (or one an earlier run of this
+# workflow built) for the requested commit, waits for a CI build of the commit that is still
+# running, and builds it with the same script (scripts/build-windows-test.ps1) only when
+# neither exists.
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: unused
+        description: Branch, tag or commit to package (empty = the branch this runs from)
         default: ''
-      minutes:
-        description: Stress minutes per leg
-        default: '200'
 permissions:
   contents: read
-env:
-  CARGO_TERM_COLOR: never
-  CI: 'true'
+  actions: read
+concurrency:
+  group: test-build-${{ github.ref }}-${{ inputs.ref }}
+  cancel-in-progress: true
 jobs:
-  stress:
-    strategy:
-      fail-fast: false
-      matrix:
-        leg: [c1, c2, c3, c4, c5, n1]
-    runs-on: windows-2025
-    timeout-minutes: 340
+  # Finding and re-publishing the CI artifact share one job, so the common case waits for
+  # one runner only.
+  prebuilt:
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.find.outputs.sha }}
+      name: ${{ steps.find.outputs.name }}
+      run: ${{ steps.find.outputs.run }}
     steps:
-      - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: test-ui
-          save-if: false
-      - name: Windows long-name temporary directory
-        shell: pwsh
-        run: |
-          "TMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
-          "TEMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
-      - name: Build test binary
-        shell: pwsh
-        run: |
-          $pkgs = @('-p', 'rustpy-ui')
-          foreach ($c in 'rustpy-ui-base', 'rustpy-ui-panels', 'rustpy-ui-db') { if (Test-Path "crates\$c") { $pkgs += @('-p', $c) } }
-          $exe = cargo test --locked @pkgs --lib --no-run --message-format=json | ForEach-Object { try { $_ | ConvertFrom-Json } catch { } } | Where-Object { $_.reason -eq 'compiler-artifact' -and $_.executable -and $_.target.name -eq 'rustpy_ui' } | Select-Object -Last 1 -ExpandProperty executable
-          if (-not $exe) { throw 'no test executable' }
-          Write-Host "test executable: $exe"
-          "TEST_EXE=$exe" >> $env:GITHUB_ENV
-      - name: Enable crash dumps and probe them
-        shell: pwsh
-        run: |
-          $dumps = Join-Path $env:RUNNER_TEMP 'dumps'
-          New-Item -ItemType Directory -Force $dumps | Out-Null
-          "DUMPS=$dumps" >> $env:GITHUB_ENV
-          Write-Host '--- WER policy and settings'
-          foreach ($k in 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting', 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting', 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug') {
-            Write-Host $k; if (Test-Path $k) { Get-ItemProperty $k | Format-List | Out-String | Write-Host }
-          }
-          Set-Service WerSvc -StartupType Manual -ErrorAction Continue
-          Start-Service WerSvc -ErrorAction Continue
-          Get-Service WerSvc | Format-List Name, Status, StartType | Out-String | Write-Host
-          $wer = 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting'
-          New-ItemProperty -Path $wer -Name Disabled -Value 0 -PropertyType DWord -Force | Out-Null
-          New-ItemProperty -Path $wer -Name DontShowUI -Value 1 -PropertyType DWord -Force | Out-Null
-          foreach ($name in @('', (Split-Path $env:TEST_EXE -Leaf), 'abortprobe.exe')) {
-            $key = if ($name) { "$wer\LocalDumps\$name" } else { "$wer\LocalDumps" }
-            New-Item -Path $key -Force | Out-Null
-            New-ItemProperty -Path $key -Name DumpFolder -Value $dumps -PropertyType ExpandString -Force | Out-Null
-            New-ItemProperty -Path $key -Name DumpType -Value 2 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $key -Name DumpCount -Value 50 -PropertyType DWord -Force | Out-Null
-          }
-          # procdump attaches to each test process and writes a full dump on an unhandled
-          # exception, including the __fastfail behind Rust's abort.
-          $pdDir = Join-Path $env:RUNNER_TEMP 'procdump'
-          Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/Procdump.zip' -OutFile "$env:RUNNER_TEMP\procdump.zip"
-          Expand-Archive "$env:RUNNER_TEMP\procdump.zip" -DestinationPath $pdDir -Force
-          $procdump = Join-Path $pdDir 'procdump64.exe'
-          "PROCDUMP=$procdump" >> $env:GITHUB_ENV
-          # A process that aborts the way Rust does (__fastfail), to show dumps are written.
-          Set-Content "$env:RUNNER_TEMP\abortprobe.rs" 'fn main() { std::thread::sleep(std::time::Duration::from_secs(8)); std::process::abort() }'
-          rustc -o "$env:RUNNER_TEMP\abortprobe.exe" "$env:RUNNER_TEMP\abortprobe.rs"
-          $p = Start-Process -FilePath "$env:RUNNER_TEMP\abortprobe.exe" -NoNewWindow -PassThru
-          $null = $p.Handle
-          $pd = Start-Process -FilePath $procdump -ArgumentList @('-accepteula', '-e', '-ma', "$($p.Id)", $dumps) -NoNewWindow -PassThru -RedirectStandardOutput "$env:RUNNER_TEMP\procdump-probe.txt"
-          $p.WaitForExit(); $null = $pd.WaitForExit(60000)
-          Write-Host ("probe exit code 0x{0:X8}" -f $p.ExitCode)
-          Get-Content "$env:RUNNER_TEMP\procdump-probe.txt"
-          Start-Sleep -Seconds 20
-          Get-ChildItem $dumps | Format-Table Name, Length | Out-String | Write-Host
-          if (-not (Get-ChildItem $dumps -Filter 'abortprobe*')) { Write-Host '::warning::no crash dump for the probe' }
-          Get-ChildItem $dumps -Filter 'abortprobe*' | Remove-Item
-      - name: Windows stack margin
-        if: matrix.leg == 'c1'
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          $skip = 'app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly'
-          Push-Location crates\rustpy-ui
-          $env:CARGO_MANIFEST_DIR = (Get-Location).Path
-          foreach ($stack in 1048576, 1310720, 1572864, 1835008) {
-            $env:RUST_MIN_STACK = "$stack"
-            $p = Start-Process -FilePath $env:TEST_EXE -ArgumentList @('--test-threads=4', '--skip', $skip) -NoNewWindow -PassThru -RedirectStandardOutput "$env:RUNNER_TEMP\stack-out.txt" -RedirectStandardError "$env:RUNNER_TEMP\stack-err.txt"
-            $null = $p.Handle; $p.WaitForExit()
-            Write-Host ("RUST_MIN_STACK={0}: exit 0x{1:X8}" -f $stack, $p.ExitCode)
-            Select-String -Path "$env:RUNNER_TEMP\stack-out.txt" -Pattern 'test result' | ForEach-Object Line
-            Get-Content "$env:RUNNER_TEMP\stack-err.txt" -Tail 10
-          }
-          Remove-Item Env:\RUST_MIN_STACK
-          Pop-Location
-      - name: Stress
-        shell: pwsh
+      - name: Find the CI test package of the commit
+        id: find
         env:
-          LEG: ${{ matrix.leg }}
-          MINUTES: ${{ inputs.minutes }}
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ inputs.ref }}
         run: |
-          $ErrorActionPreference = 'Stop'
-          $exe = $env:TEST_EXE
-          $deps = Split-Path $exe
-          $cdb = "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe"
-          $sym = "$deps;srv*$($env:RUNNER_TEMP)\symcache*https://msdl.microsoft.com/download/symbols"
-          $keep = Join-Path $env:RUNNER_TEMP 'keep'
-          New-Item -ItemType Directory -Force $keep | Out-Null
-          $env:CARGO_MANIFEST_DIR = (Resolve-Path crates\rustpy-ui).Path
-          $env:RUST_TEST_THREADS = '4'
-          $skip = 'app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly'
-          $argv = @('--test-threads=4', '--skip', $skip)
-          if ($env:LEG -like 'n*') { $env:RUST_BACKTRACE = '1'; $argv += '--nocapture' }
-          Push-Location $env:CARGO_MANIFEST_DIR
-          $all = @(& $exe --list --format terse --skip $skip 2>$null | Where-Object { $_ -match ': test$' } | ForEach-Object { $_ -replace ': test$', '' })
-          Pop-Location
-          Write-Host "$($all.Count) tests"
-          $deadline = (Get-Date).AddMinutes([int]$env:MINUTES)
-          $failures = 0; $passes = 0; $aborts = 0; $hangs = 0; $i = 0
-          while ((Get-Date) -lt $deadline) {
-            $i++
-            $out = Join-Path $env:RUNNER_TEMP "out-$i.txt"; $err = Join-Path $env:RUNNER_TEMP "err-$i.txt"
-            $started = Get-Date
-            $p = Start-Process -FilePath $exe -ArgumentList $argv -WorkingDirectory $env:CARGO_MANIFEST_DIR -NoNewWindow -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
-            $null = $p.Handle
-            $pdOut = Join-Path $env:RUNNER_TEMP "procdump-$i.txt"
-            $pd = Start-Process -FilePath $env:PROCDUMP -ArgumentList @('-accepteula', '-e', '-ma', "$($p.Id)", $env:DUMPS) -NoNewWindow -PassThru -RedirectStandardOutput $pdOut
-            if (-not $p.WaitForExit(900 * 1000)) {
-              $hangs++
-              Write-Host "::error::HANG in iteration $i (leg $($env:LEG))"
-              if (Test-Path $cdb) { & $cdb -pv -p $p.Id -y $sym -c ".lines -e; ~; ~*kn 80; qd" | Out-File (Join-Path $keep "hang-$i-stacks.txt") }
-              Stop-Process -Id $p.Id -Force
-              Copy-Item $out, $err $keep
-              Get-Content $out -Tail 300
-              continue
-            }
-            $p.WaitForExit()
-            $null = $pd.WaitForExit(120000)
-            $secs = [int]((Get-Date) - $started).TotalSeconds
-            $code = $p.ExitCode
-            if ($code -ne 0) {
-              $failures++
-              $hex = '0x{0:X8}' -f $code
-              Write-Host "::warning::iteration $i exited $hex after $secs s (leg $($env:LEG))"
-              Copy-Item $out, $err $keep
-              Write-Host '--- stdout tail'; Get-Content $out -Tail 300
-              Write-Host '--- stderr tail'; Get-Content $err -Tail 300
-              if ($env:LEG -notlike 'n*') {
-                $done = @{}
-                foreach ($line in (Get-Content $out)) { if ($line -match '^test (\S+) \.\.\. ') { $done[$Matches[1]] = $true } }
-                $last = -1
-                for ($k = 0; $k -lt $all.Count; $k++) { if ($done.ContainsKey($all[$k])) { $last = $k } }
-                Write-Host "--- unreported tests up to the last reported one (+8), in start order (last reported index $last of $($all.Count))"
-                for ($k = 0; $k -lt [Math]::Min($all.Count, $last + 9); $k++) { if (-not $done.ContainsKey($all[$k])) { Write-Host "  in flight: $($all[$k])" } }
-              }
-              if ($code -eq -1073740791 -or $code -eq -1073741571 -or $code -eq -1073741819) {
-                $aborts++
-                Start-Sleep -Seconds 15
-                Get-ChildItem $env:DUMPS | Format-Table Name, Length
-                Write-Host '--- procdump'; Get-Content $pdOut
-                $dump = Get-ChildItem $env:DUMPS -Filter '*.dmp' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-                if ($dump) {
-                  Write-Host "--- cdb analysis of $($dump.Name)"
-                  & $cdb -z $dump.FullName -y $sym -c ".lines -e; .lastevent; .exr -1; !analyze -v; ~; ~*kn 100; q" | Tee-Object (Join-Path $keep "abort-$i-analysis.txt")
-                  Move-Item $dump.FullName (Join-Path $keep $dump.Name)
-                } else { Write-Host '::warning::no dump for the aborted process' }
-              }
-            } else { $passes++ }
-            Write-Host "iteration $i exit $code in $secs s (passes $passes, failures $failures, aborts $aborts, hangs $hangs)"
-            Remove-Item $out, $err, $pdOut -ErrorAction SilentlyContinue
+          set -euo pipefail
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/${REF:-$GITHUB_SHA}" -q .sha)
+          [[ $sha =~ ^[0-9a-f]{40}$ ]] || { echo "cannot resolve '${REF:-$GITHUB_SHA}'"; exit 1; }
+          name="rustpy-test-windows-x86_64-${sha:0:12}"
+          artifact_run() {
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=$name&per_page=50" \
+              -q "[.artifacts[] | select(.expired == false and .workflow_run.head_sha == \"$sha\")] | sort_by(.created_at) | last | .workflow_run.id // empty"
           }
-          "STRESS leg $($env:LEG) on $($env:GITHUB_SHA): $i iterations, $passes passing, $failures failing, $aborts aborts, $hangs hangs" | Tee-Object -Append $env:GITHUB_STEP_SUMMARY
-      - if: always()
+          # A CI run of this commit whose Windows build job has not finished (or, while the run
+          # is queued, not been created) yet: waiting for it is no slower than building here.
+          pending_build() {
+            local runs run status
+            runs=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$sha&per_page=20" \
+              -q '.workflow_runs[] | select(.status != "completed" and (.event == "push" or .event == "workflow_dispatch")) | .id')
+            for run in $runs; do
+              status=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?per_page=100" \
+                -q '.jobs[] | select(.name == "build (windows-2025)") | .status')
+              if [[ $status != completed ]]; then echo "$run"; return; fi
+            done
+          }
+          run=$(artifact_run)
+          deadline=$((SECONDS + 45 * 60))
+          while [[ -z $run ]] && (( SECONDS < deadline )); do
+            waiting=$(pending_build)
+            [[ -n $waiting ]] || break
+            echo "Waiting for the Windows build job of CI run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$waiting"
+            sleep 30
+            run=$(artifact_run)
+          done
+          [[ -n $run ]] || run=$(artifact_run)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          if [[ -n $run ]]; then
+            echo "Commit $sha: already built by run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run"
+          else
+            echo "Commit $sha: CI has no test package for it, building one (slow path)"
+          fi
+      - if: steps.find.outputs.run != ''
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ steps.find.outputs.name }}
+          run-id: ${{ steps.find.outputs.run }}
+          github-token: ${{ github.token }}
+          path: rustpy-test
+      - if: steps.find.outputs.run != ''
         uses: actions/upload-artifact@v7
         with:
-          name: stress-${{ matrix.leg }}
-          path: ${{ runner.temp }}/keep
-          retention-days: 7
-          if-no-files-found: ignore
+          name: ${{ steps.find.outputs.name }}
+          path: rustpy-test
+          retention-days: 14
+          if-no-files-found: error
+      - name: Summary
+        if: steps.find.outputs.run != ''
+        run: |
+          {
+            echo "### RustPy test build (prebuilt)"
+            echo
+            echo "Commit \`${{ steps.find.outputs.sha }}\`, built by run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/${{ steps.find.outputs.run }}."
+            echo "Download the artifact \`${{ steps.find.outputs.name }}\` below; it is the portable layout (see README.txt in it)."
+          } >> "$GITHUB_STEP_SUMMARY"
+  build:
+    needs: prebuilt
+    if: needs.prebuilt.outputs.run == ''
+    runs-on: windows-2025
+    timeout-minutes: 60
+    # The same environment as CI's build job, so the shared Rust cache key matches.
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_BUILD_JOBS: '4'
+      RUST_TEST_THREADS: '2'
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prebuilt.outputs.sha }}
+      - uses: dtolnay/rust-toolchain@stable
+      # The dependency cache CI saves from main, and CI's sccache namespace for the rest.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: v0-test-package
+          shared-key: windows-test-package
+          key: build
+          save-if: false
+      - uses: mozilla-actions/sccache-action@v0.0.11
+        with:
+          version: v0.20.1
+      - shell: bash
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> "$GITHUB_ENV"
+          echo "SCCACHE_GHA_VERSION=test-package-x64" >> "$GITHUB_ENV"
+          echo "RUSTC_WRAPPER=sccache" >> "$GITHUB_ENV"
+      - name: Build and smoke-check the test package (slow path)
+        shell: pwsh
+        run: |
+          "### RustPy test build (built here: CI had no test package for this commit)" >> $env:GITHUB_STEP_SUMMARY
+          scripts/build-windows-test.ps1 -OutDir "$env:RUNNER_TEMP\rustpy-test" -Label '${{ needs.prebuilt.outputs.sha }}'
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ needs.prebuilt.outputs.name }}
+          path: ${{ runner.temp }}/rustpy-test
+          retention-days: 14
+          if-no-files-found: error
