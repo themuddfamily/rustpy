@@ -409,7 +409,9 @@ jobs:
       - run: packaging/linux/flatpak/build-flatpak.sh --no-install --bundle
       - run: packaging/linux/build-snap.sh
   publish:
-    if: ${{ inputs.publish }}
+    # `package` runs after a skipped `build-binary` when the binary is reused; without an
+    # explicit status check a skipped ancestor would skip this job too.
+    if: ${{ !cancelled() && inputs.publish && needs.package.result == 'success' }}
     needs: package
     runs-on: ubuntu-24.04
     permissions:
