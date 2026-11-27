@@ -1,5 +1,6 @@
 //! Python interpreter discovery and introspection (roadmap §2.12).
 
+use crate::app_execution_alias::StoreAlias;
 use std::path::{Path, PathBuf};
 
 pub use rustpy_core::interpreter_launch::{
@@ -166,8 +167,53 @@ pub fn is_foreign_app_execution_alias(path: &Path) -> bool {
             .any(|c| c.as_os_str().eq_ignore_ascii_case("WindowsApps"))
 }
 
+/// True for an app-execution alias that discovery must not list: one seen from
+/// a Unix host, or on Windows one that does not lead to an installed Store
+/// Python (App Installer's redirector, which opens the Store). Detected from
+/// the reparse point, without running the alias.
+pub fn is_unusable_app_execution_alias(path: &Path) -> bool {
+    is_foreign_app_execution_alias(path)
+        || matches!(
+            crate::app_execution_alias::store_alias(path),
+            Some(StoreAlias::NotInstalled { .. })
+        )
+}
+
 pub fn probe_detailed(path: &Path, kind: &str) -> Result<InterpreterMetadata, InvalidInterpreter> {
     probe_detailed_with_timeout(path, kind, PROBE_TIMEOUT)
+}
+
+/// Runs the introspection script with the interpreter at `path`.
+fn run_probe(path: &Path, timeout: Duration) -> Result<Vec<u8>, String> {
+    let mut command = try_interpreter_command(path).map_err(|e| e.to_string())?;
+    command.args(["-I", "-c", PROBE]);
+    crate::probe::command_output(command, timeout).map_err(|e| format!("{e:?}"))
+}
+
+/// Probes `path`, never starting a Microsoft Store app-execution alias that
+/// would only open the Store. For a Store Python the packaged executable named
+/// by the alias is probed; only if Windows refuses to start it directly is the
+/// alias itself run, through the same bounded process start. The interpreter
+/// keeps the alias path as its identity, as the `py` launcher and uv do.
+fn probe_output_for(path: &Path, timeout: Duration) -> Result<Vec<u8>, String> {
+    match crate::app_execution_alias::store_alias(path) {
+        None => run_probe(path, timeout),
+        Some(StoreAlias::NotInstalled { package }) => Err(format!(
+            "{} is a Microsoft Store app-execution alias ({package}), and Python is not \
+             installed from the Microsoft Store; it was not run because it would only open \
+             the Store",
+            path.display()
+        )),
+        Some(StoreAlias::Installed { target }) => {
+            let started = std::time::Instant::now();
+            match run_probe(&target, timeout) {
+                Err(reason) if reason.starts_with("Spawn(") => {
+                    run_probe(path, timeout.saturating_sub(started.elapsed()))
+                }
+                other => other,
+            }
+        }
+    }
 }
 
 pub(crate) fn probe_detailed_with_timeout(
@@ -175,12 +221,7 @@ pub(crate) fn probe_detailed_with_timeout(
     kind: &str,
     timeout: Duration,
 ) -> Result<InterpreterMetadata, InvalidInterpreter> {
-    let result = try_interpreter_command(path)
-        .map_err(|e| e.to_string())
-        .and_then(|mut command| {
-            command.args(["-I", "-c", PROBE]);
-            crate::probe::command_output(command, timeout).map_err(|e| format!("{e:?}"))
-        })
+    let result = probe_output_for(path, timeout)
         .and_then(|out| decode_metadata(path, kind, &out))
         .map_err(|reason| InvalidInterpreter {
             path: path.into(),
@@ -261,7 +302,7 @@ fn all_candidates(project_root: Option<&Path>, allow_tools: bool) -> Vec<(PathBu
             out.push(c);
         }
     }
-    out.retain(|(p, _)| !is_foreign_app_execution_alias(p));
+    out.retain(|(p, _)| !is_unusable_app_execution_alias(p));
     dedup_candidates(out)
 }
 
@@ -356,7 +397,8 @@ pub fn candidate_paths_in(
 ) -> Vec<(PathBuf, String)> {
     let mut out: Vec<(PathBuf, String)> = Vec::new();
     let mut push = |p: PathBuf, kind: &str| {
-        if p.is_file() && !is_foreign_app_execution_alias(&p) && !out.iter().any(|(q, _)| q == &p) {
+        if p.is_file() && !is_unusable_app_execution_alias(&p) && !out.iter().any(|(q, _)| q == &p)
+        {
             out.push((p, kind.to_string()));
         }
     };
@@ -627,6 +669,12 @@ fn dedup_candidates(mut out: Vec<(PathBuf, String)>) -> Vec<(PathBuf, String)> {
             .is_some_and(|env| env.join("pyvenv.cfg").is_file());
         let key = if in_venv || managed_env {
             p.clone()
+        } else if let Some(StoreAlias::Installed { target }) =
+            crate::app_execution_alias::store_alias(p)
+        {
+            // `python.exe`, `python3.exe` and `python3.12.exe` aliases of one
+            // Store package start the same executable.
+            target
         } else {
             dunce::canonicalize(p).unwrap_or_else(|_| p.clone())
         };
@@ -1375,5 +1423,118 @@ mod probe_timeout_tests {
         assert!(!found.iter().any(|(p, _)| p == &alias), "{found:?}");
         assert!(is_foreign_app_execution_alias(&alias));
         assert!(!is_foreign_app_execution_alias(&real));
+    }
+}
+
+#[cfg(all(test, windows))]
+mod store_alias_tests {
+    use super::*;
+    use crate::app_execution_alias::{create_link_fixture, AppExecLink};
+    use crate::probe_windows::recorded_spawns;
+
+    fn link(package: &str, target: &Path) -> AppExecLink {
+        AppExecLink {
+            package: package.into(),
+            app_user_model_id: format!("{package}!Python"),
+            target: target.into(),
+        }
+    }
+
+    fn same(a: &Path, b: &Path) -> bool {
+        a.as_os_str().eq_ignore_ascii_case(b.as_os_str())
+    }
+
+    #[test]
+    fn store_aliases_are_resolved_or_refused_without_being_run() {
+        let dir = tempfile::tempdir().unwrap();
+        let redirector = dir.path().join("python.exe");
+        let missing = dir.path().join("missing-package").join("python3.99.exe");
+        if let Err(error) = create_link_fixture(
+            &redirector,
+            &link("Microsoft.DesktopAppInstaller_8wekyb3d8bbwe", &missing),
+        ) {
+            eprintln!("skipped: cannot create an app-execution link here: {error}");
+            return;
+        }
+        // A Store Python whose packaged executable exists (cmd.exe stands in
+        // for it: it starts, but prints no introspection JSON).
+        let target = PathBuf::from(std::env::var("ComSpec").unwrap());
+        let installed = dir.path().join("python3.99.exe");
+        create_link_fixture(
+            &installed,
+            &link(
+                "PythonSoftwareFoundation.Python.3.99_qbz5n2kfra8p0",
+                &target,
+            ),
+        )
+        .unwrap();
+
+        let started = std::time::Instant::now();
+        let error = probe_detailed(&redirector, "system").unwrap_err();
+        assert!(error.reason.contains("not installed"), "{error:?}");
+        assert!(started.elapsed() < Duration::from_secs(2));
+
+        let error = probe_detailed(&installed, "system").unwrap_err();
+        assert!(!error.reason.contains("Spawn"), "{error:?}");
+        let spawned = recorded_spawns();
+        assert!(spawned.iter().any(|p| same(p, &target)), "{spawned:?}");
+        assert!(
+            !spawned
+                .iter()
+                .any(|p| same(p, &redirector) || same(p, &installed)),
+            "{spawned:?}"
+        );
+
+        let path = dir.path().to_string_lossy().into_owned();
+        let found = candidate_paths_in(None, dir.path(), &|key| {
+            (key == "PATH").then(|| path.clone())
+        });
+        assert!(
+            !found.iter().any(|(p, _)| same(p, &redirector)),
+            "{found:?}"
+        );
+        assert!(is_unusable_app_execution_alias(&redirector));
+        assert!(!is_unusable_app_execution_alias(&installed));
+    }
+
+    /// The hosted runner has the real App Installer aliases. Discovery must
+    /// finish within its budget and never start a redirector alias.
+    #[test]
+    fn discovery_never_starts_the_real_windows_apps_redirector() {
+        let Some(apps) = std::env::var_os("LOCALAPPDATA")
+            .map(|local| PathBuf::from(local).join("Microsoft").join("WindowsApps"))
+            .filter(|apps| apps.is_dir())
+        else {
+            eprintln!("skipped: no WindowsApps directory");
+            return;
+        };
+        for entry in std::fs::read_dir(&apps).unwrap().flatten() {
+            let name = entry.file_name().to_string_lossy().to_lowercase();
+            if name.starts_with("python") {
+                eprintln!(
+                    "{}: {:?}",
+                    entry.path().display(),
+                    crate::app_execution_alias::read_link(&entry.path())
+                );
+            }
+        }
+        let started = std::time::Instant::now();
+        let found = discover_interpreters_with(None, true);
+        let elapsed = started.elapsed();
+        eprintln!("discovered {} interpreters in {elapsed:?}", found.len());
+        assert!(elapsed < Duration::from_secs(90), "{elapsed:?}");
+        let apps = apps.to_string_lossy().to_lowercase();
+        for program in recorded_spawns() {
+            if program.to_string_lossy().to_lowercase().starts_with(&apps) {
+                assert!(
+                    matches!(
+                        crate::app_execution_alias::store_alias(&program),
+                        Some(StoreAlias::Installed { .. })
+                    ),
+                    "discovery started {}",
+                    program.display()
+                );
+            }
+        }
     }
 }
