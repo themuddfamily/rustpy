@@ -29,6 +29,9 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
+- **TODO:** the Scope-based tab now shows results that finish scanning before the project file list is ready.
+- **File watching:** paths keep their canonical spelling if a temporary file is renamed while the watcher is classifying it. This prevents settings saves via a directory alias from being mistaken for project changes.
+
 - **Interpreters (Windows):** process launching in the IDE (Git, terminals, scripts,
   interpreter checks) could freeze for good while interpreter discovery started the
   Microsoft Store `python.exe` alias. Discovery now reads Store aliases without running

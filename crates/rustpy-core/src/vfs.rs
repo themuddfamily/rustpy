@@ -77,17 +77,30 @@ fn normalize_path_inner(path: &Path, depth: usize) -> PathBuf {
             return normalize_path_inner(&target, depth + 1);
         }
     }
-    let mut prefix = absolute.as_path();
+    canonicalize_existing_prefix(&absolute, |path| dunce::canonicalize(path))
+}
+/// Canonicalizes the longest existing prefix of `absolute` and appends the
+/// missing rest. Each prefix is canonicalized once and that result is kept: a
+/// file that disappears in between (a settings save renaming its `.tmp` file
+/// away) must not leave the whole path in its uncanonicalized spelling (8.3
+/// short names, a symlinked directory), which would no longer lie inside the
+/// canonical form of its own directory.
+fn canonicalize_existing_prefix(
+    absolute: &Path,
+    mut canonicalize: impl FnMut(&Path) -> std::io::Result<PathBuf>,
+) -> PathBuf {
+    let mut prefix = absolute;
     let mut suffix = Vec::new();
-    while dunce::canonicalize(prefix).is_err() {
-        let Some(name) = prefix.file_name() else {
-            break;
+    let mut result = loop {
+        if let Ok(canonical) = canonicalize(prefix) {
+            break canonical;
+        }
+        let (Some(name), Some(parent)) = (prefix.file_name(), prefix.parent()) else {
+            break prefix.to_path_buf();
         };
         suffix.push(name.to_os_string());
-        let Some(parent) = prefix.parent() else { break };
         prefix = parent;
-    }
-    let mut result = dunce::canonicalize(prefix).unwrap_or_else(|_| prefix.to_path_buf());
+    };
     for name in suffix.into_iter().rev() {
         result.push(name);
     }
@@ -389,6 +402,40 @@ mod tests {
         std::fs::remove_file(&path).unwrap();
         std::fs::write(&path, b"new").unwrap();
         assert_eq!(real, vfs.read(&path, ReadLimits::default()).unwrap().id);
+    }
+    /// A file renamed away while its path is normalized (a settings save's
+    /// `.tmp` file) still gets the canonical spelling of its directory, so it
+    /// stays inside that directory when the two are compared.
+    #[test]
+    fn a_file_vanishing_during_normalization_keeps_the_canonical_directory() {
+        let alias = Path::new("/short/cfg");
+        let canonical = Path::new("/long/config");
+        let file = alias.join("settings.json.tmp");
+        let mut file_lookups = 0;
+        let normalized = canonicalize_existing_prefix(&file, |path| {
+            if path == file {
+                file_lookups += 1;
+                // Present when first looked at, renamed away right after.
+                if file_lookups == 1 {
+                    return Ok(canonical.join("settings.json.tmp"));
+                }
+                return Err(std::io::ErrorKind::NotFound.into());
+            }
+            match path.strip_prefix(alias) {
+                Ok(rest) => Ok(canonical.join(rest)),
+                Err(_) => Err(std::io::ErrorKind::NotFound.into()),
+            }
+        });
+        assert_eq!(normalized, canonical.join("settings.json.tmp"));
+        assert!(normalized.starts_with(canonical));
+        // A missing file still keeps its name under the canonical directory.
+        let missing = canonicalize_existing_prefix(&alias.join("gone.json"), |path| {
+            match path.strip_prefix(alias) {
+                Ok(rest) if rest.as_os_str().is_empty() => Ok(canonical.to_path_buf()),
+                _ => Err(std::io::ErrorKind::NotFound.into()),
+            }
+        });
+        assert_eq!(missing, canonical.join("gone.json"));
     }
     #[cfg(unix)]
     #[test]
