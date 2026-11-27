@@ -29,6 +29,14 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ### Fixed
 
+- **Interpreters (Windows):** process launching in the IDE (Git, terminals, scripts,
+  interpreter checks) could freeze for good while interpreter discovery started the
+  Microsoft Store `python.exe` alias. Discovery now reads Store aliases without running
+  them: when Python is not installed from the Store the alias (which would only open the
+  Store) is not listed, and choosing it reports "not installed"; a Store Python is checked
+  through its installed program. Interpreter checks that cannot even start now give up at
+  their time limit without holding up other programs.
+
 - **Command-line inspection:** `rustpy inspect` could run for hours on ordinary code. Type
   inference was exponential in a row of `if` statements that test and rebind one variable
   and in a method chain on an unresolved name (`query.filter(a).filter(b)…`), rescanned

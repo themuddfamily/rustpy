@@ -312,6 +312,11 @@ mod tests {
         python.target = target.clone();
         let alias = dir.path().join("python.exe");
         if let Err(error) = create_link_fixture(&alias, &python) {
+            // The CI runners can create them; elsewhere this may need NTFS.
+            assert!(
+                std::env::var_os("CI").is_none(),
+                "cannot create an app-execution link: {error}"
+            );
             eprintln!("skipped: cannot create an app-execution link here: {error}");
             return;
         }

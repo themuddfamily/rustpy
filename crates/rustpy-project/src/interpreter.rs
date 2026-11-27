@@ -1453,6 +1453,11 @@ mod store_alias_tests {
             &redirector,
             &link("Microsoft.DesktopAppInstaller_8wekyb3d8bbwe", &missing),
         ) {
+            // The CI runners can create them; elsewhere this may need NTFS.
+            assert!(
+                std::env::var_os("CI").is_none(),
+                "cannot create an app-execution link: {error}"
+            );
             eprintln!("skipped: cannot create an app-execution link here: {error}");
             return;
         }
