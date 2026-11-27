@@ -362,6 +362,12 @@ mod workspace_persistence_tests {
     /// On Windows it first writes every thread's stack with the console
     /// debugger when one is installed (`RUSTPY_TEST_CDB` or the Windows SDK
     /// location). `RUSTPY_TEST_WATCHDOG_SECS` shortens the limit for stress runs.
+    ///
+    /// Everything it reports goes through [`watchdog_report`], never `eprintln!`:
+    /// a thread spawned by a test inherits that test's output capture, and the
+    /// harness never prints captured output when the process aborts, so the
+    /// report would vanish and leave an unexplained abort (0xC0000409 on
+    /// Windows, SIGABRT elsewhere) that names no test.
     struct StageWatchdog {
         stage: std::sync::Arc<std::sync::Mutex<&'static str>>,
         done: Option<std::sync::mpsc::Sender<()>>,
@@ -380,7 +386,9 @@ mod workspace_persistence_tests {
                     finished.recv_timeout(limit)
                 {
                     let stage = *observed.lock().unwrap_or_else(|e| e.into_inner());
-                    eprintln!("{test} exceeded {limit:?} in stage `{stage}`; aborting");
+                    watchdog_report(&format!(
+                        "test {test} exceeded {limit:?} in stage `{stage}`; aborting the test process"
+                    ));
                     dump_thread_stacks();
                     std::process::abort();
                 }
@@ -401,6 +409,20 @@ mod workspace_persistence_tests {
             }
         }
     }
+    /// Writes `message` to the process's real standard error and standard
+    /// output. Only the `print!` family honours the harness's output capture;
+    /// writing to the stream handles directly bypasses it, so the message
+    /// survives the abort that follows.
+    fn watchdog_report(message: &str) {
+        use std::io::Write;
+        let text = format!("\n{message}\n");
+        let mut stderr = std::io::stderr().lock();
+        let _ = stderr.write_all(text.as_bytes());
+        let _ = stderr.flush();
+        let mut stdout = std::io::stdout().lock();
+        let _ = stdout.write_all(text.as_bytes());
+        let _ = stdout.flush();
+    }
     /// Prints the stack of every thread in this process by attaching the
     /// console debugger non-invasively. Its output goes to a file rather than
     /// a pipe: the debugger suspends this process, including the reader.
@@ -412,7 +434,10 @@ mod workspace_persistence_tests {
                 PathBuf::from(r"C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe")
             });
         if !cdb.is_file() {
-            eprintln!("no console debugger at {}; no thread stacks", cdb.display());
+            watchdog_report(&format!(
+                "no console debugger at {}; no thread stacks",
+                cdb.display()
+            ));
             return;
         }
         let log = std::env::temp_dir().join(format!("rustpy-stacks-{}.txt", std::process::id()));
@@ -435,12 +460,63 @@ mod workspace_persistence_tests {
             .stderr(std::process::Stdio::null())
             .status();
         match (status, std::fs::read_to_string(&log)) {
-            (Ok(_), Ok(text)) => eprintln!("thread stacks:\n{text}"),
-            (status, text) => eprintln!("thread stack dump failed: {status:?} {text:?}"),
+            (Ok(_), Ok(text)) => watchdog_report(&format!("thread stacks:\n{text}")),
+            (status, text) => {
+                watchdog_report(&format!("thread stack dump failed: {status:?} {text:?}"))
+            }
         }
     }
     #[cfg(not(windows))]
     fn dump_thread_stacks() {}
+    /// A watchdog that fires in a test whose output the harness captures still
+    /// names the test and its stage on the real standard error and standard
+    /// output before the process aborts. Runs itself as a child test process.
+    #[test]
+    fn watchdog_names_the_stuck_test_on_the_real_streams_before_aborting() {
+        const CHILD: &str = "RUSTPY_TEST_WATCHDOG_ABORT_CHILD";
+        const SELF: &str = "app::session_ui::workspace_persistence_tests::watchdog_names_the_stuck_test_on_the_real_streams_before_aborting";
+        if std::env::var_os(CHILD).is_some() {
+            #[cfg(windows)]
+            {
+                // No Windows Error Reporting dialog for the deliberate abort.
+                #[link(name = "kernel32")]
+                unsafe extern "system" {
+                    fn SetErrorMode(mode: u32) -> u32;
+                }
+                // SAFETY: changes only this process's error-mode flags.
+                unsafe { SetErrorMode(0x0001 | 0x0002) };
+            }
+            let watchdog =
+                StageWatchdog::start("watchdog_child", std::time::Duration::from_millis(500));
+            watchdog.enter("stuck stage");
+            std::thread::sleep(std::time::Duration::from_secs(60));
+            panic!("the watchdog did not abort the stuck test");
+        }
+        let dir = tempfile::tempdir().unwrap();
+        let output = std::process::Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", SELF, "--test-threads=1"])
+            .env(CHILD, "1")
+            .env_remove("RUSTPY_TEST_WATCHDOG_SECS")
+            .env("RUSTPY_TEST_CDB", dir.path().join("no-debugger.exe"))
+            .stdin(std::process::Stdio::null())
+            .output()
+            .unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(
+            !output.status.success(),
+            "the child must abort: {stdout}\n{stderr}"
+        );
+        let report = "test watchdog_child exceeded 500ms in stage `stuck stage`";
+        assert!(
+            stderr.contains(report),
+            "standard error must name the test: {stderr}"
+        );
+        assert!(
+            stdout.contains(report),
+            "standard output must name the test: {stdout}"
+        );
+    }
     /// Closing and dropping a project, then deleting its directory, while other
     /// projects do the same on other threads. notify 8 closed the directory handle
     /// of a stopped watch before a queued read completion ran; that completion
