@@ -1,138 +1,119 @@
 name: Test build
-# A Windows x64 package for trying a commit by hand. Not a release: nothing is tagged or published.
-# CI's `build (windows-2025)` job builds this package for every push to main (and every
-# dispatched CI run); this workflow re-publishes that artifact (or one an earlier run of this
-# workflow built) for the requested commit, waits for a CI build of the commit that is still
-# running, and builds it with the same script (scripts/build-windows-test.ps1) only when
-# neither exists.
+# TEMPORARY stress harness for the idle-repaint investigation (branch only; never merged).
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Branch, tag or commit to package (empty = the branch this runs from)
+        description: unused
+        default: ''
+      full:
+        description: Full rustpy-ui lib suite iterations per leg (4 threads)
+        default: '19'
+      module:
+        description: Idle-check iterations per leg
+        default: '260'
+      bin_run:
+        description: Reuse the stress-bin artifact of this run instead of building
         default: ''
 permissions:
   contents: read
   actions: read
 concurrency:
-  group: test-build-${{ github.ref }}-${{ inputs.ref }}
+  group: stress-${{ github.run_id }}
   cancel-in-progress: true
+env:
+  CARGO_TERM_COLOR: never
+  CARGO_BUILD_JOBS: '4'
+  CI: 'true'
 jobs:
-  # Finding and re-publishing the CI artifact share one job, so the common case waits for
-  # one runner only.
-  prebuilt:
-    runs-on: ubuntu-24.04
-    outputs:
-      sha: ${{ steps.find.outputs.sha }}
-      name: ${{ steps.find.outputs.name }}
-      run: ${{ steps.find.outputs.run }}
-    steps:
-      - name: Find the CI test package of the commit
-        id: find
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REF: ${{ inputs.ref }}
-        run: |
-          set -euo pipefail
-          sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/${REF:-$GITHUB_SHA}" -q .sha)
-          [[ $sha =~ ^[0-9a-f]{40}$ ]] || { echo "cannot resolve '${REF:-$GITHUB_SHA}'"; exit 1; }
-          name="rustpy-test-windows-x86_64-${sha:0:12}"
-          artifact_run() {
-            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=$name&per_page=50" \
-              -q "[.artifacts[] | select(.expired == false and .workflow_run.head_sha == \"$sha\")] | sort_by(.created_at) | last | .workflow_run.id // empty"
-          }
-          # A CI run of this commit whose Windows build job has not finished (or, while the run
-          # is queued, not been created) yet: waiting for it is no slower than building here.
-          pending_build() {
-            local runs run status
-            runs=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$sha&per_page=20" \
-              -q '.workflow_runs[] | select(.status != "completed" and (.event == "push" or .event == "workflow_dispatch")) | .id')
-            for run in $runs; do
-              status=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?per_page=100" \
-                -q '.jobs[] | select(.name == "build (windows-2025)") | .status')
-              if [[ $status != completed ]]; then echo "$run"; return; fi
-            done
-          }
-          run=$(artifact_run)
-          deadline=$((SECONDS + 45 * 60))
-          while [[ -z $run ]] && (( SECONDS < deadline )); do
-            waiting=$(pending_build)
-            [[ -n $waiting ]] || break
-            echo "Waiting for the Windows build job of CI run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$waiting"
-            sleep 30
-            run=$(artifact_run)
-          done
-          [[ -n $run ]] || run=$(artifact_run)
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          echo "name=$name" >> "$GITHUB_OUTPUT"
-          echo "run=$run" >> "$GITHUB_OUTPUT"
-          if [[ -n $run ]]; then
-            echo "Commit $sha: already built by run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run"
-          else
-            echo "Commit $sha: CI has no test package for it, building one (slow path)"
-          fi
-      - if: steps.find.outputs.run != ''
-        uses: actions/download-artifact@v8
-        with:
-          name: ${{ steps.find.outputs.name }}
-          run-id: ${{ steps.find.outputs.run }}
-          github-token: ${{ github.token }}
-          path: rustpy-test
-      - if: steps.find.outputs.run != ''
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ steps.find.outputs.name }}
-          path: rustpy-test
-          retention-days: 14
-          if-no-files-found: error
-      - name: Summary
-        if: steps.find.outputs.run != ''
-        run: |
-          {
-            echo "### RustPy test build (prebuilt)"
-            echo
-            echo "Commit \`${{ steps.find.outputs.sha }}\`, built by run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/${{ steps.find.outputs.run }}."
-            echo "Download the artifact \`${{ steps.find.outputs.name }}\` below; it is the portable layout (see README.txt in it)."
-          } >> "$GITHUB_STEP_SUMMARY"
   build:
-    needs: prebuilt
-    if: needs.prebuilt.outputs.run == ''
+    if: inputs.bin_run == ''
     runs-on: windows-2025
-    timeout-minutes: 60
-    # The same environment as CI's build job, so the shared Rust cache key matches.
-    env:
-      CARGO_TERM_COLOR: always
-      CARGO_BUILD_JOBS: '4'
-      RUST_TEST_THREADS: '2'
-      CI: 'true'
+    timeout-minutes: 90
     steps:
+      - run: git config --global core.autocrlf false
       - uses: actions/checkout@v7
-        with:
-          ref: ${{ needs.prebuilt.outputs.sha }}
       - uses: dtolnay/rust-toolchain@stable
-      # The dependency cache CI saves from main, and CI's sccache namespace for the rest.
       - uses: Swatinem/rust-cache@v2
         with:
-          prefix-key: v0-test-package
-          shared-key: windows-test-package
-          key: build
-          save-if: false
-      - uses: mozilla-actions/sccache-action@v0.0.11
-        with:
-          version: v0.20.1
-      - shell: bash
+          key: idle-stress
+          cache-on-failure: true
+      - name: Build the rustpy-ui lib test binary
+        shell: bash
         run: |
-          echo "SCCACHE_GHA_ENABLED=true" >> "$GITHUB_ENV"
-          echo "SCCACHE_GHA_VERSION=test-package-x64" >> "$GITHUB_ENV"
-          echo "RUSTC_WRAPPER=sccache" >> "$GITHUB_ENV"
-      - name: Build and smoke-check the test package (slow path)
-        shell: pwsh
-        run: |
-          "### RustPy test build (built here: CI had no test package for this commit)" >> $env:GITHUB_STEP_SUMMARY
-          scripts/build-windows-test.ps1 -OutDir "$env:RUNNER_TEMP\rustpy-test" -Label '${{ needs.prebuilt.outputs.sha }}'
+          set -euo pipefail
+          cargo test --locked -p rustpy-ui --lib --no-run 2>&1 | tee build.log
+          exe=$(sed -n 's/.*Executable unittests src[\\/]lib.rs (\(.*\))/\1/p' build.log | tail -1)
+          echo "binary: $exe"
+          mkdir bin && cp "$exe" bin/rustpy_ui_tests.exe
       - uses: actions/upload-artifact@v7
         with:
-          name: ${{ needs.prebuilt.outputs.name }}
-          path: ${{ runner.temp }}/rustpy-test
-          retention-days: 14
-          if-no-files-found: error
+          name: stress-bin
+          path: bin
+          retention-days: 2
+  stress:
+    needs: build
+    if: always() && (needs.build.result == 'success' || needs.build.result == 'skipped')
+    strategy:
+      fail-fast: false
+      matrix:
+        leg: [1, 2, 3, 4, 5, 6, 7, 8]
+    runs-on: windows-2025
+    timeout-minutes: 300
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v7
+      - shell: pwsh
+        run: |
+          "TMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
+          "TEMP=$env:RUNNER_TEMP" >> $env:GITHUB_ENV
+      - uses: actions/download-artifact@v8
+        with:
+          name: stress-bin
+          path: bin
+          run-id: ${{ inputs.bin_run || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Stress
+        shell: bash
+        env:
+          FULL: ${{ inputs.full }}
+          MODULE: ${{ inputs.module }}
+        run: |
+          set +e -u
+          bin="$PWD/bin/rustpy_ui_tests.exe"
+          cd crates/rustpy-ui
+          skip=app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly
+          idle=app::idle_repaint_tests::an_idle_app_with_no_pending_work_waits_for_the_caret_blink
+          failures=0
+          idle_failures=0
+          run() { # label iteration timeout args...
+            local label=$1 i=$2 limit=$3; shift 3
+            local start=$SECONDS
+            timeout "$limit" "$bin" "$@" > "$RUNNER_TEMP/iter.log" 2>&1
+            local rc=$?
+            if [ $rc -ne 0 ]; then
+              failures=$((failures+1))
+              if grep -q "$idle .*FAILED\|'$idle'.*panicked" "$RUNNER_TEMP/iter.log"; then idle_failures=$((idle_failures+1)); fi
+              echo "::error::$label iteration $i failed with exit code $rc after $((SECONDS-start))s"
+              echo "===== last 200 lines of $label iteration $i ====="
+              tail -n 200 "$RUNNER_TEMP/iter.log"
+              echo "===== end of $label iteration $i ====="
+              mkdir -p "$GITHUB_WORKSPACE/failure" && cp "$RUNNER_TEMP/iter.log" "$GITHUB_WORKSPACE/failure/$label-$i.log"
+            else
+              echo "$label $i ok in $((SECONDS-start))s ($(grep -h '^test result' "$RUNNER_TEMP/iter.log" | tail -1))"
+            fi
+          }
+          for i in $(seq 1 "$MODULE"); do
+            run idle "$i" 180 --exact "$idle"
+          done
+          for i in $(seq 1 "$FULL"); do
+            run full "$i" 900 --test-threads=4 --skip "$skip"
+          done
+          echo "leg ${{ matrix.leg }}: $MODULE idle and $FULL full iterations, $failures failed ($idle_failures in the idle check)"
+          [ "$failures" -eq 0 ]
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: evidence-${{ matrix.leg }}
+          path: failure
+          if-no-files-found: ignore
