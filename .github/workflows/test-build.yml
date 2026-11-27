@@ -51,9 +51,13 @@ jobs:
           $dumps = Join-Path $env:RUNNER_TEMP 'dumps'
           New-Item -ItemType Directory -Force $dumps | Out-Null
           "DUMPS=$dumps" >> $env:GITHUB_ENV
-          Get-Service WerSvc | Format-List Name, Status, StartType
-          Set-Service WerSvc -StartupType Manual -ErrorAction SilentlyContinue
-          Start-Service WerSvc -ErrorAction SilentlyContinue
+          Write-Host '--- WER policy and settings'
+          foreach ($k in 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting', 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting', 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug') {
+            Write-Host $k; if (Test-Path $k) { Get-ItemProperty $k | Format-List | Out-String | Write-Host }
+          }
+          Set-Service WerSvc -StartupType Manual -ErrorAction Continue
+          Start-Service WerSvc -ErrorAction Continue
+          Get-Service WerSvc | Format-List Name, Status, StartType | Out-String | Write-Host
           $wer = 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting'
           New-ItemProperty -Path $wer -Name Disabled -Value 0 -PropertyType DWord -Force | Out-Null
           New-ItemProperty -Path $wer -Name DontShowUI -Value 1 -PropertyType DWord -Force | Out-Null
@@ -64,15 +68,44 @@ jobs:
             New-ItemProperty -Path $key -Name DumpType -Value 2 -PropertyType DWord -Force | Out-Null
             New-ItemProperty -Path $key -Name DumpCount -Value 50 -PropertyType DWord -Force | Out-Null
           }
+          # procdump attaches to each test process and writes a full dump on an unhandled
+          # exception, including the __fastfail behind Rust's abort.
+          $pdDir = Join-Path $env:RUNNER_TEMP 'procdump'
+          Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/Procdump.zip' -OutFile "$env:RUNNER_TEMP\procdump.zip"
+          Expand-Archive "$env:RUNNER_TEMP\procdump.zip" -DestinationPath $pdDir -Force
+          $procdump = Join-Path $pdDir 'procdump64.exe'
+          "PROCDUMP=$procdump" >> $env:GITHUB_ENV
           # A process that aborts the way Rust does (__fastfail), to show dumps are written.
-          Set-Content "$env:RUNNER_TEMP\abortprobe.rs" 'fn main() { std::process::abort() }'
+          Set-Content "$env:RUNNER_TEMP\abortprobe.rs" 'fn main() { std::thread::sleep(std::time::Duration::from_secs(8)); std::process::abort() }'
           rustc -o "$env:RUNNER_TEMP\abortprobe.exe" "$env:RUNNER_TEMP\abortprobe.rs"
-          $p = Start-Process -FilePath "$env:RUNNER_TEMP\abortprobe.exe" -NoNewWindow -PassThru -Wait
+          $p = Start-Process -FilePath "$env:RUNNER_TEMP\abortprobe.exe" -NoNewWindow -PassThru
+          $null = $p.Handle
+          $pd = Start-Process -FilePath $procdump -ArgumentList @('-accepteula', '-e', '-ma', "$($p.Id)", $dumps) -NoNewWindow -PassThru -RedirectStandardOutput "$env:RUNNER_TEMP\procdump-probe.txt"
+          $p.WaitForExit(); $null = $pd.WaitForExit(60000)
           Write-Host ("probe exit code 0x{0:X8}" -f $p.ExitCode)
-          Start-Sleep -Seconds 10
-          Get-ChildItem $dumps | Format-Table Name, Length
+          Get-Content "$env:RUNNER_TEMP\procdump-probe.txt"
+          Start-Sleep -Seconds 20
+          Get-ChildItem $dumps | Format-Table Name, Length | Out-String | Write-Host
           if (-not (Get-ChildItem $dumps -Filter 'abortprobe*')) { Write-Host '::warning::no crash dump for the probe' }
           Get-ChildItem $dumps -Filter 'abortprobe*' | Remove-Item
+      - name: Windows stack margin
+        if: matrix.leg == 'c1'
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $skip = 'app::analysis_jobs::typing_latency_tests::an_edit_cancels_the_obsolete_analysis_of_a_five_thousand_line_file_promptly'
+          Push-Location crates\rustpy-ui
+          $env:CARGO_MANIFEST_DIR = (Get-Location).Path
+          foreach ($stack in 1048576, 1310720, 1572864, 1835008) {
+            $env:RUST_MIN_STACK = "$stack"
+            $p = Start-Process -FilePath $env:TEST_EXE -ArgumentList @('--test-threads=4', '--skip', $skip) -NoNewWindow -PassThru -RedirectStandardOutput "$env:RUNNER_TEMP\stack-out.txt" -RedirectStandardError "$env:RUNNER_TEMP\stack-err.txt"
+            $null = $p.Handle; $p.WaitForExit()
+            Write-Host ("RUST_MIN_STACK={0}: exit 0x{1:X8}" -f $stack, $p.ExitCode)
+            Select-String -Path "$env:RUNNER_TEMP\stack-out.txt" -Pattern 'test result' | ForEach-Object Line
+            Get-Content "$env:RUNNER_TEMP\stack-err.txt" -Tail 10
+          }
+          Remove-Item Env:\RUST_MIN_STACK
+          Pop-Location
       - name: Stress
         shell: pwsh
         env:
@@ -103,6 +136,8 @@ jobs:
             $started = Get-Date
             $p = Start-Process -FilePath $exe -ArgumentList $argv -WorkingDirectory $env:CARGO_MANIFEST_DIR -NoNewWindow -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
             $null = $p.Handle
+            $pdOut = Join-Path $env:RUNNER_TEMP "procdump-$i.txt"
+            $pd = Start-Process -FilePath $env:PROCDUMP -ArgumentList @('-accepteula', '-e', '-ma', "$($p.Id)", $env:DUMPS) -NoNewWindow -PassThru -RedirectStandardOutput $pdOut
             if (-not $p.WaitForExit(900 * 1000)) {
               $hangs++
               Write-Host "::error::HANG in iteration $i (leg $($env:LEG))"
@@ -113,6 +148,7 @@ jobs:
               continue
             }
             $p.WaitForExit()
+            $null = $pd.WaitForExit(120000)
             $secs = [int]((Get-Date) - $started).TotalSeconds
             $code = $p.ExitCode
             if ($code -ne 0) {
@@ -134,7 +170,8 @@ jobs:
                 $aborts++
                 Start-Sleep -Seconds 15
                 Get-ChildItem $env:DUMPS | Format-Table Name, Length
-                $dump = Get-ChildItem $env:DUMPS -Filter "*.$($p.Id).dmp" | Select-Object -First 1
+                Write-Host '--- procdump'; Get-Content $pdOut
+                $dump = Get-ChildItem $env:DUMPS -Filter '*.dmp' | Sort-Object LastWriteTime -Descending | Select-Object -First 1
                 if ($dump) {
                   Write-Host "--- cdb analysis of $($dump.Name)"
                   & $cdb -z $dump.FullName -y $sym -c ".lines -e; .lastevent; .exr -1; !analyze -v; ~; ~*kn 100; q" | Tee-Object (Join-Path $keep "abort-$i-analysis.txt")
@@ -143,7 +180,7 @@ jobs:
               }
             } else { $passes++ }
             Write-Host "iteration $i exit $code in $secs s (passes $passes, failures $failures, aborts $aborts, hangs $hangs)"
-            Remove-Item $out, $err -ErrorAction SilentlyContinue
+            Remove-Item $out, $err, $pdOut -ErrorAction SilentlyContinue
           }
           "STRESS leg $($env:LEG) on $($env:GITHUB_SHA): $i iterations, $passes passing, $failures failing, $aborts aborts, $hangs hangs" | Tee-Object -Append $env:GITHUB_STEP_SUMMARY
       - if: always()
