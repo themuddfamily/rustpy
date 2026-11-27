@@ -1,5 +1,6 @@
 //! RustPy project structure, interpreter discovery and run configuration persistence.
 
+pub mod app_execution_alias;
 pub mod config;
 pub mod configuration_types;
 pub mod document_tools;
@@ -14,6 +15,8 @@ pub mod interpreter_remote;
 pub mod manager_layouts;
 pub mod native_skeleton;
 pub mod probe;
+#[cfg(windows)]
+mod probe_windows;
 pub mod project;
 pub mod project_templates;
 pub mod run_workflow;
