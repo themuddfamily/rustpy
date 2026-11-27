@@ -596,7 +596,7 @@ checksum = "6b1e7f9a428571be2dc5bc0505c13fb6bf936822b894ec87abf8a08a4e51742d"
 
 [[package]]
 name = "rustpy-core"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "blake3",
@@ -618,7 +618,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-format"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "libc",
  "rustpy-core",
@@ -644,7 +644,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-highlight"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "rustc-hash 2.1.3",
  "rustpy-core",
@@ -654,7 +654,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-index"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "flate2",
  "libc",
@@ -669,7 +669,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-semantic"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "dunce",
  "indexmap",
@@ -691,7 +691,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-settings"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "dirs",
@@ -707,7 +707,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-syntax"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "rowan",
  "rustc-hash 2.1.3",
@@ -722,7 +722,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-text"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "memchr",
  "ropey",

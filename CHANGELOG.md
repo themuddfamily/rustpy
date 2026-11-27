@@ -12,6 +12,8 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-27
+
 ### Changed
 
 - **Downloads:** the Windows portable ZIP, setup program and MSI are about 90% smaller

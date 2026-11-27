@@ -5628,7 +5628,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "log",
@@ -5644,7 +5644,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-ai"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -5658,7 +5658,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-analysis"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "dunce",
  "jsonschema",
@@ -5688,7 +5688,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-cli"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "blake3",
@@ -5728,7 +5728,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-console"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -5744,7 +5744,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-core"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "blake3",
@@ -5766,7 +5766,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-db"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "csv",
@@ -5788,7 +5788,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-debug"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -5808,7 +5808,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-deploy"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "dunce",
@@ -5823,7 +5823,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-docker"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "dunce",
@@ -5836,11 +5836,11 @@ dependencies = [
 
 [[package]]
 name = "rustpy-emmet"
-version = "1.0.0"
+version = "1.0.1"
 
 [[package]]
 name = "rustpy-format"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "libc",
  "pretty_assertions",
@@ -5861,7 +5861,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-gherkin"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "pretty_assertions",
  "regex",
@@ -5871,14 +5871,14 @@ dependencies = [
 
 [[package]]
 name = "rustpy-grammar"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "rustpy-syntax",
 ]
 
 [[package]]
 name = "rustpy-highlight"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "rustc-hash 2.1.3",
  "rustpy-core",
@@ -5888,7 +5888,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-http"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -5912,7 +5912,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-i18n"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "chrono",
  "dirs 6.0.0",
@@ -5928,7 +5928,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-index"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "flate2",
  "libc",
@@ -5945,7 +5945,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-lsp"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -5981,7 +5981,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-net"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "base64 0.22.1",
  "boa_engine",
@@ -5999,7 +5999,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-notebook"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -6019,7 +6019,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-packages"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "dirs 6.0.0",
@@ -6037,7 +6037,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-plugins"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "base64 0.22.1",
  "dunce",
@@ -6057,7 +6057,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-project"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -6082,7 +6082,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-refactor"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "pretty_assertions",
  "rustpy-core",
@@ -6095,7 +6095,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-regex"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "rustpy-core",
@@ -6107,7 +6107,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-run"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -6128,7 +6128,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-search"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "once_cell",
  "rayon",
@@ -6146,7 +6146,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-secrets"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "base64 0.22.1",
  "dunce",
@@ -6163,7 +6163,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-semantic"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "dunce",
  "indexmap",
@@ -6187,7 +6187,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-settings"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "dirs 6.0.0",
@@ -6204,7 +6204,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-spell"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "rustpy-core",
  "rustpy-syntax",
@@ -6214,7 +6214,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-syntax"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "insta",
  "pretty_assertions",
@@ -6233,7 +6233,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-templates"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "chrono",
  "once_cell",
@@ -6247,7 +6247,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-terminal"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "libc",
@@ -6260,7 +6260,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-test"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "dunce",
@@ -6280,7 +6280,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-text"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "memchr",
  "pretty_assertions",
@@ -6294,7 +6294,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-textmate"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "log",
  "regex",
@@ -6305,7 +6305,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-ui"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "arabic_reshaper",
@@ -6395,7 +6395,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-ui-base"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "arboard",
  "crossbeam-channel",
@@ -6418,7 +6418,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-ui-db"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "dunce",
@@ -6439,7 +6439,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-ui-panels"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -6481,7 +6481,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-updates"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "log",
  "rustpy-net",
@@ -6495,7 +6495,7 @@ dependencies = [
 
 [[package]]
 name = "rustpy-vcs"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "base64 0.22.1",

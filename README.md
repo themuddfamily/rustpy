@@ -6,7 +6,7 @@ and type inference, a debugger, test runners, Git integration, an embedded termi
 language server for other editors and an AI assistant, and it uses the Python interpreters
 and tools already installed on your machine.
 
-[Download RustPy 1.0.0](https://github.com/themuddfamily/rustpy/releases/tag/v1.0.0)
+[Download RustPy 1.0.1](https://github.com/themuddfamily/rustpy/releases/tag/v1.0.1)
 for Windows x64 and ARM64: setup executables, MSI installers and portable ZIPs.
 See [platform notes](#platform-notes) for build and validation coverage.
 
@@ -89,14 +89,14 @@ Useful options: `--open-file <file>` opens a file, `--verbose` enables debug log
 ### Platform notes
 
 - **Linux** is the primary development platform (X11 and Wayland). Builds, automated tests
-  and a headless startup smoke check passed for 1.0.0. AppImage, `.deb`, `.rpm`, Flatpak and
+  and a headless startup smoke check passed for 1.0.1. AppImage, `.deb`, `.rpm`, Flatpak and
   Snap recipes are in [packaging/README.md](packaging/README.md); Linux installers are not
-  included in the 1.0.0 release.
+  included in the 1.0.1 release.
 - **Windows** x64 and ARM64 packages passed native CLI, installation, reinstall, MSI repair
   and uninstall checks. Packages are unsigned; interactive GUI acceptance remains outstanding.
   See [WINDOWS.md](WINDOWS.md) for build instructions and the packaging guide for recipes.
 - **macOS** builds and automated tests pass on hosted Macs. No macOS installer is included
-  in 1.0.0; build from source or use the app bundle recipe in the packaging guide.
+  in 1.0.1; build from source or use the app bundle recipe in the packaging guide.
 - **Language:** the UI follows the locale environment variables (`LANGUAGE`, `LC_ALL`,
   `LC_MESSAGES`, `LANG`); Windows and macOS apps usually have none of them and start in
   English. Settings › Appearance › Language picks another of the nine languages. Chinese,
