@@ -9,7 +9,6 @@ the [issue tracker](https://github.com/themuddfamily/rustpy/issues).
 
 | Area | Symptom | State |
 |---|---|---|
-| Window lifecycle test on Windows | `window_lifecycle::tests::prepared_guard_rechecks_current_workspace_domains` failed its "prepared" assertion once in a four-thread stress loop on the Windows CI runner and passed in every other run. The assertion now reports the quit progress and status message it received. | Unexplained; seen once. |
 | Test process abort on Windows | One run of the `rustpy-ui` test binary in a four-thread stress loop on the Windows CI runner ended with exit code 0xC0000409 (process abort) without naming a test. | Unexplained; seen once. |
 
 ## Recently fixed
