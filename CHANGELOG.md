@@ -12,6 +12,12 @@ section above it (see [packaging/README.md](packaging/README.md#release-checklis
 
 ## [Unreleased]
 
+### Fixed
+
+- **Project (Windows):** saving settings could, in the instant the settings file was being
+  replaced, be mistaken for a change outside the configuration directory, which rescanned
+  the project and could queue the settings files for upload to deployment servers.
+
 ## [1.0.1] - 2026-11-27
 
 ### Changed
