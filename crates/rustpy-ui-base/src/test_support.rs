@@ -226,3 +226,52 @@ mod tests {
         assert!(super::is_unit_test());
     }
 }
+
+#[cfg(test)]
+mod failing_test_process {
+    const CHILD: &str =
+        "test_support::failing_test_process::fails_while_holding_unapplied_frame_output";
+
+    /// Run only by the test below, in a child process: fails while it holds a
+    /// frame's output whose texture deltas were not applied.
+    #[test]
+    #[ignore = "run in a child process by a_failing_test_holding_frame_output_is_reported"]
+    fn fails_while_holding_unapplied_frame_output() {
+        let ctx = egui::Context::default();
+        let output = ctx.run_ui(Default::default(), |_| {});
+        assert!(
+            !output.textures_delta.is_empty(),
+            "the first frame uploads the font atlas"
+        );
+        panic!("deliberate failure with unapplied texture deltas");
+    }
+
+    /// epaint's `TexturesDelta` asserts in its destructor that its deltas were
+    /// applied. With that assertion compiled in, a test that fails while a
+    /// frame's output is alive panics a second time during unwinding and
+    /// aborts the whole test process (exit code 0xC0000409 on Windows, SIGABRT
+    /// elsewhere) without naming the failed test. The workspace profile turns
+    /// epaint's debug assertions off so such a test is reported as failed.
+    #[test]
+    fn a_failing_test_holding_frame_output_is_reported() {
+        let output = std::process::Command::new(std::env::current_exe().unwrap())
+            .args(["--ignored", "--exact", CHILD])
+            .env_remove("RUST_TEST_THREADS")
+            .output()
+            .unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert_eq!(
+            output.status.code(),
+            Some(101),
+            "the failing child test must end as an ordinary test failure, not abort: {:?}\n{stdout}\n{stderr}",
+            output.status
+        );
+        assert!(stdout.contains(&format!("{CHILD} ... FAILED")), "{stdout}");
+        assert!(
+            stdout.contains("deliberate failure with unapplied texture deltas"),
+            "{stdout}"
+        );
+        assert!(!stderr.contains("unapplied deltas"), "{stderr}");
+    }
+}

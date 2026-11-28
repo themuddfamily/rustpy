@@ -117,6 +117,14 @@ debug = false
 # UI integration tests exercise behavior; avoid optimizing this large crate
 # and retaining full type debug information on every semantic change. The
 # crates split out of rustpy-ui keep the same settings.
+# epaint's `TexturesDelta` asserts in its destructor that a frame's texture deltas were
+# applied. A test that fails while a frame's output is alive would panic a second time
+# during unwinding, which aborts the whole test process without naming the failed test.
+# With epaint's debug assertions off, such a test is reported as an ordinary failure.
+[profile.dev.package.epaint]
+opt-level = 2
+debug = false
+debug-assertions = false
 [profile.test.package.rustpy-ui]
 opt-level = 0
 debug = "line-tables-only"
